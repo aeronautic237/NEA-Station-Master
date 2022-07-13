@@ -174,16 +174,47 @@ def game():
 
 def research():
 
-    
+    #This procedure will output an image (which is the format that the facts are in)
+    #It should also show an unlock button if the criteria to unlock the technology are met, so that the user can unlock it if they want to
+    def drawFact(item,i):
+        filename = str(item[i]) + ".jpg"
+        screen.fill(black)
+        pygame.draw.rect(screen, darkGrey, [0, 620, 1280, 100])
+        returnButton.drawButton()
+        fact = pygame.image.load(filename)
+        screen.blit(fact,(150,20))
+        pygame.display.update()#This is the fact drawn
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()#red X in the top right corner programmed
+                elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                    returnButton.changeButtonColour(pink)
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        running = False
+                        break#return button programmed
+                else:
+                    pass
+                    #if conditions are met
+                        #draw unlock button
+                        #make it functional
+                    #else
+                        #don't draw unlock button
+                    #pygame.display.update
+        research()
+        #I will add the above code later
 
+    #This will draw the tech tree for each category
     def drawTree(category):
         returnButton.changeButtonColour(darkGrey)
-        #This is where we will define the fact files
 
 
         
         #draws the tech tree based on which category has been selected
         #I have labelled the buttons based on what they will say, so it is pretty self- explanatory
+        #There are two lists, one called items and the other item. Items is a list of button, item is a list of files
         if category == "facility":
             pygame.draw.rect(screen, black, [250, 0, 1030, 600])
             helpPoint = technoButton(darkGrey, [300, 50, 150, 50], "Help Points", normal, white, 325, 65)
@@ -203,6 +234,7 @@ def research():
             toilet = technoButton(darkGrey, [300, 350, 150, 50], "toilets", normal, white, 347, 365)
             toilet.drawtechButton(100, -300)
             items = [helpPoint, helpPatrol, bicycle, pAndR, timeTable, DMI, LCD, toilet]
+            item = ["help_Point", "help_Patrol", "Bicycle", "p_And_R", "timetable", "dmi", "lcd", "toilets"]
             pygame.display.update()
         elif category == "signal":
             pygame.draw.rect(screen, black, [250, 0, 1030, 600])
@@ -222,6 +254,7 @@ def research():
             ETCS = technoButton(darkGrey, [1050, 150, 150, 50], "ETCS", normal, white, 1100, 165)
             ETCS.drawtechButton(50, 0)
             items = [semaphore, repeater, litSems, threeCols, fourCols, TVM, ETCS]
+            item = ["semaphores", "repeaters", "lit_Sems", "three_Cols", "four_Cols", "TVM-430", "etcs"]
             pygame.display.update()
         elif category == "safety":
             pygame.draw.rect(screen, black, [250, 0, 1030, 600])
@@ -234,7 +267,8 @@ def research():
             speedCamera.drawtechButton(100, 100)
             TPWS = technoButton(darkGrey, [550, 350, 150, 50], "TPWS", normal, white, 600, 365)
             TPWS.drawtechButton(100, -100)
-            items = [tripCock, AWS, speedCamera, TPWS,]
+            items = [tripCock, AWS, speedCamera, TPWS]
+            item = ["trip_Cock", "aws", "speed_Camera", "tpws"]
             pygame.display.update()
         elif category == "comms":
             pygame.draw.rect(screen, black, [250, 0, 1030, 600])
@@ -247,6 +281,7 @@ def research():
             GSMR = technoButton(darkGrey, [1050, 350, 150, 50], "GSM-R", normal, white, 1095, 365)
             GSMR.drawtechButton(100, 0)
             items = [sigBoxBell, trackSidePhone, inCabPhone, GSMR]
+            item = ["sig_Box_Bell", "track_Side_Phone", "cabPhone", "GSM-R"]
             pygame.display.update()
         else:#this one is for the track - just to save memory
             pygame.draw.rect(screen, black, [250, 0, 1030, 600])
@@ -269,7 +304,9 @@ def research():
             superElevate = technoButton(darkGrey, [1050, 250, 150, 50], "Super-elevation", normal, white, 1060, 265)
             superElevate.drawtechButton(100, 0)
             items = [threeRail, OHLE, OHLEspeed, fourRail, flangeGreaser, points, checkRail, welding, superElevate]
+            item = ["thirdRail", "ohle", "OHLEHS", "fourthRail", "flange_Greaser", "point", "check_Rail", "Welding", "super_Elevate"]
             pygame.display.update()
+        returnButton.drawButton()
         #this is where we check whether the items are clicked
         waiting = True
         while waiting == True:
@@ -277,20 +314,22 @@ def research():
                 i = 0
                 for i in range(len(items)):
                     if items[i].buttonCoords.collidepoint((pygame.mouse.get_pos())):
-                        items[i].changeButtonColour(pink)
-                        #if event.type == pygame.MOUSEBUTTONUP:
-                            #waiting = False
-                        #insert the fact files here
+                        items[i].changeButtonColour(pink)#giving each button hover functionality
+                        if event.type == pygame.MOUSEBUTTONUP:
+                            waiting = False
+                            drawFact(item,i)#call the drawFact function and break from the loop
+                    elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                        returnButton.changeButtonColour(pink)
+                        if event.type == pygame.MOUSEBUTTONUP:
+                            waiting = False
+                            research()#programmed return button
                     else:
                         items[i].changeButtonColour(darkGrey)
-                if event.type == pygame.KEYDOWN:
-                    if (event.key == pygame.K_BACKSPACE):
-                        waiting == False
-                        research()
-                elif event.type == pygame.QUIT:
+                        returnButton.changeButtonColour(menuScreenColour)
+                if event.type == pygame.QUIT:
                     waiting = False
                     pygame.quit()
-                    sys.exit()
+                    sys.exit()#This is the red X in the top right hand corner of the window
                 
     
     #draws the initial screen for the research tab, drawing the buttons
