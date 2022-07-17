@@ -4,6 +4,7 @@
 import pygame
 import sys
 import time
+import csv
 
 #initialise pygame
 pygame.font.init()
@@ -33,7 +34,7 @@ buttonFont = pygame.font.SysFont("Sans-serif", 100)
 clockTextFont = pygame.font.SysFont("Sans-serif",50)
 clockFont = pygame.font.SysFont("Sans-serif",100)
 normal = pygame.font.SysFont("Sans-serif", 25)
-
+criteriaFont = pygame.font.SysFont("Sans-serif", 40)
 
 #declaring the state of the game - may not be necessary
 gamestate = "menu"
@@ -174,16 +175,89 @@ def game():
 
 def research():
 
-    
+    #This procedure will output an image (which is the format that the facts are in)
+    #It should also show an unlock button if the criteria to unlock the technology are met, so that the user can unlock it if they want to
+    def drawFact(item,i):
+        filename = str(item[i]) + ".jpg"
+        filename = "TECHNOLOGY/" + filename
+        screen.fill(black)
+        pygame.draw.rect(screen, darkGrey, [0, 620, 1280, 100])
+        returnButton.drawButton()
+        fact = pygame.image.load(filename)
+        screen.blit(fact,(150,20))
+        pygame.display.update()#This is the fact drawn
+        unlockButton = button(darkGrey, [550,375,500,50], "Unlock now?", criteriaFont, white, 725, 388)
+        queryDrawButton = False
+        returnPrev = False
+        while returnPrev == False:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()#red X in the top right corner programmed
+                elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                    returnButton.changeButtonColour(pink)
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        returnPrev = True
+                        break#return button programmed
+                else:
+                    pass
+                    with open("criteria/research.txt", "r") as fileOut:#file containing every research, their critaria, and their effects
+                        reader=csv.reader(fileOut)
+                        for row in reader:
+                            if row[0]==str(item[i]):
+                                criterion1=row[2]
+                                criterion2=row[3]#takes down the criteria recquired for unlocking
+                    #The below code checks if the criterion have been met
+                    if criterion1 == criterion2:
+                        queryDrawButton = True
+                    else:
+                        with open("saveData/researched.txt", "r") as fileOut:#file that saves the user's game
+                            reader = csv.reader(fileOut)
+                            for row in reader:
+                                if row[0] == item[i]:#check if the item has already been unlocked
+                                    if row[1] == "0":
+                                        queryDrawButton == True
+                                    else:
+                                        queryDrawButton == False
+                                if row[0] == criterion1:#check if criterion 1 is fulfilled
+                                    if row[1] == "1":
+                                        queryDrawButton == True
+                                    else:
+                                        queryDrawButton == False
+                                        break
+                                if criterion2 != "0":#validate the existence of a second criterion
+                                    if row[0] == criterion2:#check if criterion 2 is fulfilled, if it exists
+                                        if row[1] == "1":
+                                            queryDrawButton == True
+                                        else:
+                                            queryDrawButton == False
+                                            break
+            #will draw the button if the criteria is met
+            if queryDrawButton:
+                unlockButton.drawButton()
+                pygame.display.update()
+                #Code below to be added later
 
+                #if the button is hovered over:
+                    #change button colour to pink
+                    #if the button is clicked:
+                        #set the sppropriate file field to 1
+                        #deduct money
+                        #apply effects
+                        #break
+                #else:
+                    #return to dark grey button colour
+        research()
+
+    #This will draw the tech tree for each category
     def drawTree(category):
         returnButton.changeButtonColour(darkGrey)
-        #This is where we will define the fact files
 
 
         
         #draws the tech tree based on which category has been selected
         #I have labelled the buttons based on what they will say, so it is pretty self- explanatory
+        #There are two lists, one called items and the other item. Items is a list of button, item is a list of files
         if category == "facility":
             pygame.draw.rect(screen, black, [250, 0, 1030, 600])
             helpPoint = technoButton(darkGrey, [300, 50, 150, 50], "Help Points", normal, white, 325, 65)
@@ -203,6 +277,7 @@ def research():
             toilet = technoButton(darkGrey, [300, 350, 150, 50], "toilets", normal, white, 347, 365)
             toilet.drawtechButton(100, -300)
             items = [helpPoint, helpPatrol, bicycle, pAndR, timeTable, DMI, LCD, toilet]
+            item = ["helpPoint", "helperPatrol", "bike", "parkRide", "timetable", "DMI", "LCD", "toilet"]
             pygame.display.update()
         elif category == "signal":
             pygame.draw.rect(screen, black, [250, 0, 1030, 600])
@@ -222,6 +297,7 @@ def research():
             ETCS = technoButton(darkGrey, [1050, 150, 150, 50], "ETCS", normal, white, 1100, 165)
             ETCS.drawtechButton(50, 0)
             items = [semaphore, repeater, litSems, threeCols, fourCols, TVM, ETCS]
+            item = ["semaphore", "repeater", "lit", "three", "four", "TVM", "ETCS"]
             pygame.display.update()
         elif category == "safety":
             pygame.draw.rect(screen, black, [250, 0, 1030, 600])
@@ -229,12 +305,13 @@ def research():
             tripCock.drawtechButton(100, 0)
             AWS = technoButton(darkGrey, [550, 250, 150, 50], "AWS", normal, white, 605, 265)
             AWS.drawtechButton(100, 0)
-            speedCamera = technoButton(darkGrey, [800, 250, 150, 50], "Speed Cameras", normal, white, 812, 265)
+            speedCamera = technoButton(darkGrey, [800, 250, 150, 50], "Speed Monitoring", normal, white, 803, 265)
             speedCamera.drawtechButton(100, 0)
             speedCamera.drawtechButton(100, 100)
             TPWS = technoButton(darkGrey, [550, 350, 150, 50], "TPWS", normal, white, 600, 365)
             TPWS.drawtechButton(100, -100)
-            items = [tripCock, AWS, speedCamera, TPWS,]
+            items = [tripCock, AWS, speedCamera, TPWS]
+            item = ["tripCock", "AWS", "OTMR", "TPWS"]
             pygame.display.update()
         elif category == "comms":
             pygame.draw.rect(screen, black, [250, 0, 1030, 600])
@@ -247,6 +324,7 @@ def research():
             GSMR = technoButton(darkGrey, [1050, 350, 150, 50], "GSM-R", normal, white, 1095, 365)
             GSMR.drawtechButton(100, 0)
             items = [sigBoxBell, trackSidePhone, inCabPhone, GSMR]
+            item = ["sigBoxBell", "trackPhone", "cabPhone", "GSMR"]
             pygame.display.update()
         else:#this one is for the track - just to save memory
             pygame.draw.rect(screen, black, [250, 0, 1030, 600])
@@ -269,7 +347,9 @@ def research():
             superElevate = technoButton(darkGrey, [1050, 250, 150, 50], "Super-elevation", normal, white, 1060, 265)
             superElevate.drawtechButton(100, 0)
             items = [threeRail, OHLE, OHLEspeed, fourRail, flangeGreaser, points, checkRail, welding, superElevate]
+            item = ["thirdRail", "OHLE", "OHLE HS", "fourthRail", "greaser", "points", "checkRail", "welding", "superElevate"]
             pygame.display.update()
+        returnButton.drawButton()
         #this is where we check whether the items are clicked
         waiting = True
         while waiting == True:
@@ -277,20 +357,22 @@ def research():
                 i = 0
                 for i in range(len(items)):
                     if items[i].buttonCoords.collidepoint((pygame.mouse.get_pos())):
-                        items[i].changeButtonColour(pink)
-                        #if event.type == pygame.MOUSEBUTTONUP:
-                            #waiting = False
-                        #insert the fact files here
+                        items[i].changeButtonColour(pink)#giving each button hover functionality
+                        if event.type == pygame.MOUSEBUTTONUP:
+                            waiting = False
+                            drawFact(item,i)#call the drawFact function and break from the loop
+                    elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                        returnButton.changeButtonColour(pink)
+                        if event.type == pygame.MOUSEBUTTONUP:
+                            waiting = False
+                            research()#programmed return button
                     else:
                         items[i].changeButtonColour(darkGrey)
-                if event.type == pygame.KEYDOWN:
-                    if (event.key == pygame.K_BACKSPACE):
-                        waiting == False
-                        research()
-                elif event.type == pygame.QUIT:
+                        returnButton.changeButtonColour(menuScreenColour)
+                if event.type == pygame.QUIT:
                     waiting = False
                     pygame.quit()
-                    sys.exit()
+                    sys.exit()#This is the red X in the top right hand corner of the window
                 
     
     #draws the initial screen for the research tab, drawing the buttons

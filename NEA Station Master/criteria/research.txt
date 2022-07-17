@@ -1,0 +1,33 @@
+tech, price, prev research1, prev research2, effect1, effect2
+sigBoxBell, 2000, 0, 0, IR, 0
+trackPhone, 4000, sigBoxBell, 0, IR, 0
+cabPhone, 6000, trackPhone, 0, IR, 0
+GSMR, 10000, cabPhone, 0, IR, 0
+tripCock, 3000, semaphore, 0, IR, SP
+AWS, 5000, tripCock, 0, 20, SP
+TPWS, 5000, tripCock, 0, 20, SP
+OTMR, 20000, AWS, TPWS, 2, 0
+semaphore, 2000, 0, 0, 0, 0
+repeater, 2000, semaphore, 0, 10, 0
+lit, 2000, semaphore, 0, 10, 0
+three, 5000, repeater, lit, 13, 0
+four, 7000, three, 0, 10, 0
+TVM, 15000, four, 0, C, 0
+ETCS, 15000, four, 0, C, 0
+points, 1000, 0, 0, 0, 0
+checkRail, 1500, point, 0, 0, 0
+welding, 2000, checkRail, 0, C, 0
+superElevate, 5000, welding, 0, C, 0
+greaser, 4000, 0, 0, C, 0
+thirdRail, 8000, 0, 0, C, 0
+OHLE, 8000, thirdRail, 0, C, 0
+OHLE HS, 10000, OHLE, 0, C, 0
+fourthRail, 10000, OHLE HS, 0, C, 0
+toilet, 2000, 0, 0, C, 0
+timetable, 4000, 0, 0, C, 0
+DMI, 6000, timetable, 0, C, 0
+LCD, 8000, DMI, 0, C, 0
+bike, 3000, 0, 0, C, 0
+parkRide, 10000, bike, 0, C, 0
+helpPoint, 3000, 0, 0, C, 0
+helperPatrol, 7000, helpPoint, 0, C, 0
