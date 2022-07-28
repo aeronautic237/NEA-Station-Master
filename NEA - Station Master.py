@@ -4,6 +4,7 @@
 import pygame
 import sys
 import time
+import csv
 
 #initialise pygame
 pygame.font.init()
@@ -33,7 +34,7 @@ buttonFont = pygame.font.SysFont("Sans-serif", 100)
 clockTextFont = pygame.font.SysFont("Sans-serif",50)
 clockFont = pygame.font.SysFont("Sans-serif",100)
 normal = pygame.font.SysFont("Sans-serif", 25)
-
+criteriaFont = pygame.font.SysFont("Sans-serif", 40)
 
 #declaring the state of the game - may not be necessary
 gamestate = "menu"
@@ -174,143 +175,184 @@ def game():
 
 def research():
 
-    
+    #This procedure will output an image (which is the format that the facts are in)
+    #It should also show an unlock button if the criteria to unlock the technology are met, so that the user can unlock it if they want to
+    def drawFact(item,i):
+        filename = str(item[i]) + ".jpg"
+        filename = "TECHNOLOGY/" + filename
+        screen.fill(black)
+        pygame.draw.rect(screen, darkGrey, [0, 620, 1280, 100])
+        returnButton.drawButton()
+        fact = pygame.image.load(filename)
+        screen.blit(fact,(150,20))
+        pygame.display.update()#This is the fact drawn
+        unlockButton = button(darkGrey, [550,375,500,50], "Unlock now?", criteriaFont, white, 725, 388)
+        queryDrawButton = False
+        returnPrev = False
+        while returnPrev == False:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()#red X in the top right corner programmed
+                elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                    returnButton.changeButtonColour(pink)
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        returnPrev = True
+                        break#return button programmed
+                else:
+                    returnButton.changeButtonColour(menuScreenColour)
+                    with open("criteria/research.txt", "r") as fileOut:#file containing every research, their critaria, and their effects
+                        reader=csv.reader(fileOut)
+                        for row in reader:
+                            if row[0]==str(item[i]):
+                                cost = int(row[1])
+                                criterion1=row[2]
+                                criterion2=row[3]#takes down the criteria recquired for unlocking
+                    #The below code checks if the criterion have been met
+                    if criterion1 == criterion2:
+                        queryDrawButton = True
+                    else:
+                        with open("saveData/researched.txt", "r") as fileOut:#file that saves the user's game
+                            reader = csv.reader(fileOut)
+                            for row in reader:
+                                if row[0] == item[i]:#check if the item has already been unlocked
+                                    if row[1] == "0":
+                                        queryDrawButton == True
+                                    else:
+                                        queryDrawButton == False
+                                if row[0] == criterion1:#check if criterion 1 is fulfilled
+                                    if row[1] == "1":
+                                        queryDrawButton == True
+                                    else:
+                                        queryDrawButton == False
+                                        break
+                                if criterion2 != "0":#validate the existence of a second criterion
+                                    if row[0] == criterion2:#check if criterion 2 is fulfilled, if it exists
+                                        if row[1] == "1":
+                                            queryDrawButton == True
+                                        else:
+                                            queryDrawButton == False
+                                            break
+                   
+            #will draw the button if the criteria is met
+            if queryDrawButton:
+                if money >= cost:
+                    unlockButton.drawButton()
+                    pygame.display.update()#draw the button if there is enough money
+                    if unlockButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                        unlockButton.changeButtonColour(menuScreenColour)#hover functionality
+                        if event.type == pygame.MOUSEBUTTONUP:
+                            for j in range (0,32):#updates the array which will be copied over to the list
+                                if researchProgress[j][0] == item[i]:
+                                    researchProgess[j][1] == "1"#sets the appropriate element to unlocked
+                                    money = money - cost#deducts the cost of the technology
+                                    #apply effects
+                    else:
+                        unlockButton.changeButtonColour(darkGrey)
 
+        research()
+
+    #This will draw the tech tree for each category
     def drawTree(category):
         returnButton.changeButtonColour(darkGrey)
-        #This is where we will define the fact files
 
 
         
-        #draws the tech tree based on which category has been selected.
+        #draws the tech tree based on which category has been selected
+        #I have labelled the buttons based on what they will say, so it is pretty self- explanatory
+        #There are two lists, one called items and the other item. Items is a list of button, item is a list of files
         if category == "facility":
             pygame.draw.rect(screen, black, [250, 0, 1030, 600])
-            helpPoint = button(darkGrey, [300, 50, 150, 50], "Help Points", normal, white, 325, 65)
-            helpPoint.drawButton()
-            helpPatrol = button(darkGrey, [550, 50, 150, 50], "Help patrol", normal, white, 575, 65)
-            helpPatrol.drawButton()
-            bicycle = button(darkGrey, [300, 150, 150, 50], "Bicycle racks", normal, white, 322, 165)
-            bicycle.drawButton()
-            pAndR = button(darkGrey, [550, 150, 150, 50], "Park and Ride", normal, white, 568, 165)
-            pAndR.drawButton()
-            timeTable = button(darkGrey, [300, 250, 150, 50], "TimeTables", normal, white, 327, 265)
-            timeTable.drawButton()
-            DMI = button(darkGrey, [550, 250, 150, 50], "DMIs", normal, white, 605, 265)
-            DMI.drawButton()
-            LCD = button(darkGrey, [800, 250, 150, 50], "LCDs", normal, white, 855, 265)
-            LCD.drawButton()
-            toilet = button(darkGrey, [300, 350, 150, 50], "toilets", normal, white, 347, 365)
-            toilet.drawButton()
+            helpPoint = technoButton(darkGrey, [300, 50, 150, 50], "Help Points", normal, white, 325, 65)
+            helpPoint.drawtechButton(100, 0)
+            helpPatrol = technoButton(darkGrey, [550, 50, 150, 50], "Help patrol", normal, white, 575, 65)
+            helpPatrol.drawtechButton(100, 0)
+            bicycle = technoButton(darkGrey, [300, 150, 150, 50], "Bicycle racks", normal, white, 322, 165)
+            bicycle.drawtechButton(100, -100)
+            pAndR = technoButton(darkGrey, [550, 150, 150, 50], "Park and Ride", normal, white, 568, 165)
+            pAndR.drawtechButton(100, 0)
+            timeTable = technoButton(darkGrey, [300, 250, 150, 50], "TimeTables", normal, white, 327, 265)
+            timeTable.drawtechButton(100, -200)
+            DMI = technoButton(darkGrey, [550, 250, 150, 50], "DMIs", normal, white, 605, 265)
+            DMI.drawtechButton(100, 0)
+            LCD = technoButton(darkGrey, [800, 250, 150, 50], "LCDs", normal, white, 855, 265)
+            LCD.drawtechButton(100, 0)
+            toilet = technoButton(darkGrey, [300, 350, 150, 50], "toilets", normal, white, 347, 365)
+            toilet.drawtechButton(100, -300)
             items = [helpPoint, helpPatrol, bicycle, pAndR, timeTable, DMI, LCD, toilet]
-            pygame.draw.line(screen, white, [200, 75], [300, 75])#line between facilities and help point
-            pygame.draw.line(screen, white, [450, 75], [550, 75])#line between help point and help patrol
-            pygame.draw.line(screen, white, [250, 75], [250, 375])#line between facilities and lower altitudes (the big one)
-            pygame.draw.line(screen, white, [250, 175], [300, 175])#line between facilities and bicycles
-            pygame.draw.line(screen, white, [450, 175], [550, 175])#line between bikes and park and ride
-            pygame.draw.line(screen, white, [250, 275], [300, 275])#line between facilities and timetables
-            pygame.draw.line(screen, white, [450, 275], [550, 275])#line between timetables and DMIs
-            pygame.draw.line(screen, white, [700, 275], [800, 275])#line between DMIs and LCDs
-            pygame.draw.line(screen, white, [250, 375], [300, 375])#line between facilities and toilets
+            item = ["helpPoint", "helperPatrol", "bike", "parkRide", "timetable", "DMI", "LCD", "toilet"]
             pygame.display.update()
         elif category == "signal":
             pygame.draw.rect(screen, black, [250, 0, 1030, 600])
-            semaphore = button(darkGrey, [250, 150, 150, 50], "semaphores", normal, white, 275, 165)
-            semaphore.drawButton()
-            repeater = button(darkGrey, [450, 150, 150, 50], "repeaters", normal, white, 485, 165)
-            repeater.drawButton()
-            litSems = button(darkGrey, [450, 250, 150, 50], "lit semaphores", normal, white, 465, 265)
-            litSems.drawButton()
-            threeCols = button(darkGrey, [650, 150, 150, 50], "3-aspect signals", normal, white, 658, 165)
-            threeCols.drawButton()
-            fourCols = button(darkGrey, [850, 150, 150, 50], "4-aspect signals", normal, white, 860, 165)
-            fourCols.drawButton()
-            TVM = button(darkGrey, [1050, 250, 150, 50], "TVM-430", normal, white, 1090, 265)
-            TVM.drawButton()
-            ETCS = button(darkGrey, [1050, 150, 150, 50], "ETCS", normal, white, 1100, 165)
-            ETCS.drawButton()
+            semaphore = technoButton(darkGrey, [250, 150, 150, 50], "semaphores", normal, white, 275, 165)
+            semaphore.drawtechButton(50, 0)
+            repeater = technoButton(darkGrey, [450, 150, 150, 50], "repeaters", normal, white, 485, 165)
+            repeater.drawtechButton(50, 0)
+            litSems = technoButton(darkGrey, [450, 250, 150, 50], "lit semaphores", normal, white, 465, 265)
+            litSems.drawtechButton(50, -100)
+            threeCols = technoButton(darkGrey, [650, 150, 150, 50], "3-aspect signals", normal, white, 658, 165)
+            threeCols.drawtechButton(50, 0)
+            threeCols.drawtechButton(50, 100)
+            fourCols = technoButton(darkGrey, [850, 150, 150, 50], "4-aspect signals", normal, white, 860, 165)
+            fourCols.drawtechButton(50, 0)
+            TVM = technoButton(darkGrey, [1050, 250, 150, 50], "TVM-430", normal, white, 1090, 265)
+            TVM.drawtechButton(50, -100)
+            ETCS = technoButton(darkGrey, [1050, 150, 150, 50], "ETCS", normal, white, 1100, 165)
+            ETCS.drawtechButton(50, 0)
             items = [semaphore, repeater, litSems, threeCols, fourCols, TVM, ETCS]
-            pygame.draw.line(screen, white, [200, 175], [250, 175])#line between signalling and semaphores
-            pygame.draw.line(screen, white, [400, 175], [450, 175])#line between semaphores and repeaters
-            pygame.draw.line(screen, white, [425, 175], [425, 275])#line to descend a level
-            pygame.draw.line(screen, white, [425, 275], [450, 275])#line between semaphores and lit sems
-            pygame.draw.line(screen, white, [600, 275], [625, 275])#line between lit sems and 3-aspects
-            pygame.draw.line(screen, white, [625, 275], [625, 175])#line to ascend a level
-            pygame.draw.line(screen, white, [600, 175], [650, 175])#line between repeaters and 3 aspects
-            pygame.draw.line(screen, white, [800, 175], [850, 175])#line between 3-aspect and 4-aspect
-            pygame.draw.line(screen, white, [1000, 175], [1050, 175])#line between 4-aspect and TVM-430
-            pygame.draw.line(screen, white, [1025, 175], [1025, 275])#line to descend a level
-            pygame.draw.line(screen, white, [1025, 275], [1050, 275])#line between 4-aspect and ETCS
+            item = ["semaphore", "repeater", "lit", "three", "four", "TVM", "ETCS"]
             pygame.display.update()
         elif category == "safety":
             pygame.draw.rect(screen, black, [250, 0, 1030, 600])
-            tripCock = button(darkGrey, [300, 250, 150, 50], "trip-cocks", normal, white, 335, 265)
-            tripCock.drawButton()
-            AWS = button(darkGrey, [550, 250, 150, 50], "AWS", normal, white, 605, 265)
-            AWS.drawButton()
-            speedCamera = button(darkGrey, [800, 250, 150, 50], "Speed Cameras", normal, white, 812, 265)
-            speedCamera.drawButton()
-            TPWS = button(darkGrey, [550, 350, 150, 50], "TPWS", normal, white, 600, 365)
-            TPWS.drawButton()
-            trackCircuit = button(darkGrey, [800, 350, 150, 50], "Track-Circuits", normal, white, 816, 365)
-            trackCircuit.drawButton()
-            items = [tripCock, AWS, speedCamera, TPWS, trackCircuit]
-            pygame.draw.line(screen, white, [200, 275], [300, 275])#line between safety systems and tripcocks
-            pygame.draw.line(screen, white, [450, 275], [550, 275])#line between tripcocks and AWS
-            pygame.draw.line(screen, white, [500, 275], [500, 375])#line to descend a level
-            pygame.draw.line(screen, white, [500, 375], [550, 375])#line between AWS and TPWS
-            pygame.draw.line(screen, white, [700, 375], [800, 375])#line between TPWS and Speed cameras and track circuits
-            pygame.draw.line(screen, white, [750, 375], [750, 275])#line to chenge 1 level
-            pygame.draw.line(screen, white, [700, 275], [800, 275])#line between AWS and Speed cameras and track circuits
+            tripCock = technoButton(darkGrey, [300, 250, 150, 50], "trip-cocks", normal, white, 335, 265)
+            tripCock.drawtechButton(100, 0)
+            AWS = technoButton(darkGrey, [550, 250, 150, 50], "AWS", normal, white, 605, 265)
+            AWS.drawtechButton(100, 0)
+            speedCamera = technoButton(darkGrey, [800, 250, 150, 50], "Speed Monitoring", normal, white, 803, 265)
+            speedCamera.drawtechButton(100, 0)
+            speedCamera.drawtechButton(100, 100)
+            TPWS = technoButton(darkGrey, [550, 350, 150, 50], "TPWS", normal, white, 600, 365)
+            TPWS.drawtechButton(100, -100)
+            items = [tripCock, AWS, speedCamera, TPWS]
+            item = ["tripCock", "AWS", "OTMR", "TPWS"]
             pygame.display.update()
         elif category == "comms":
             pygame.draw.rect(screen, black, [250, 0, 1030, 600])
-            sigBoxBell = button(darkGrey, [300, 350, 150, 50], "Signal box bell", normal, white, 315, 365)
-            sigBoxBell.drawButton()
-            trackSidePhone = button(darkGrey, [550, 350, 150, 50], "Track-side phones", normal, white, 552, 365)
-            trackSidePhone.drawButton()
-            inCabPhone = button(darkGrey, [800, 350, 150, 50], "In-Cab phones", normal, white, 815, 365)
-            inCabPhone.drawButton()
-            GSMR = button(darkGrey, [1050, 350, 150, 50], "GSM-R", normal, white, 1095, 365)
-            GSMR.drawButton()
+            sigBoxBell = technoButton(darkGrey, [300, 350, 150, 50], "Signal box bell", normal, white, 315, 365)
+            sigBoxBell.drawtechButton(100, 0)
+            trackSidePhone = technoButton(darkGrey, [550, 350, 150, 50], "Track-side phones", normal, white, 552, 365)
+            trackSidePhone.drawtechButton(100, 0)
+            inCabPhone = technoButton(darkGrey, [800, 350, 150, 50], "In-Cab phones", normal, white, 815, 365)
+            inCabPhone.drawtechButton(100, 0)
+            GSMR = technoButton(darkGrey, [1050, 350, 150, 50], "GSM-R", normal, white, 1095, 365)
+            GSMR.drawtechButton(100, 0)
             items = [sigBoxBell, trackSidePhone, inCabPhone, GSMR]
-            pygame.draw.line(screen, white, [200, 375], [300, 375])
-            pygame.draw.line(screen, white, [450, 375], [550, 375])
-            pygame.draw.line(screen, white, [700, 375], [800, 375])
-            pygame.draw.line(screen, white, [950, 375], [1050, 375])#The line is just straight here
+            item = ["sigBoxBell", "trackPhone", "cabPhone", "GSMR"]
             pygame.display.update()
         else:#this one is for the track - just to save memory
             pygame.draw.rect(screen, black, [250, 0, 1030, 600])
-            threeRail = button(darkGrey, [300, 450, 150, 50], "3rd Rail", normal, white, 342, 465)
-            threeRail.drawButton()
-            OHLE = button(darkGrey, [550, 450, 150, 50], "OHLE", normal, white, 600, 465)
-            OHLE.drawButton()
-            OHLEspeed = button(darkGrey, [800, 450, 150, 50], "High speed OHLE", normal, white, 804, 465)
-            OHLEspeed.drawButton()
-            fourRail = button(darkGrey, [800, 350, 150, 50], "4th Rail", normal, white, 842, 365)
-            fourRail.drawButton()
-            flangeGreaser = button(darkGrey, [300, 350, 150, 50], "flange-Greasers", normal, white, 311, 365)
-            flangeGreaser.drawButton()
-            points = button(darkGrey, [300, 250, 150, 50], "points", normal, white, 350, 265)
-            points.drawButton()
-            checkRail = button(darkGrey, [550, 250, 150, 50], "check-rails", normal, white, 580, 265)
-            checkRail.drawButton()
-            welding = button(darkGrey, [800, 250, 150, 50], "Welding", normal, white, 840, 265)
-            welding.drawButton()
-            superElevate = button(darkGrey, [1050, 250, 150, 50], "Super-elevation", normal, white, 1060, 265)
-            superElevate.drawButton()
+            threeRail = technoButton(darkGrey, [300, 450, 150, 50], "3rd Rail", normal, white, 342, 465)
+            threeRail.drawtechButton(100, 0)
+            OHLE = technoButton(darkGrey, [550, 450, 150, 50], "OHLE", normal, white, 600, 465)
+            OHLE.drawtechButton(100, 0)
+            OHLEspeed = technoButton(darkGrey, [800, 450, 150, 50], "High speed OHLE", normal, white, 804, 465)
+            OHLEspeed.drawtechButton(100, 0)
+            fourRail = technoButton(darkGrey, [800, 350, 150, 50], "4th Rail", normal, white, 842, 365)
+            fourRail.drawtechButton(100, 100)
+            flangeGreaser = technoButton(darkGrey, [300, 350, 150, 50], "flange-Greasers", normal, white, 311, 365)
+            flangeGreaser.drawtechButton(100, 100)
+            points = technoButton(darkGrey, [300, 250, 150, 50], "points", normal, white, 350, 265)
+            points.drawtechButton(100, 200)
+            checkRail = technoButton(darkGrey, [550, 250, 150, 50], "check-rails", normal, white, 580, 265)
+            checkRail.drawtechButton(100, 0)
+            welding = technoButton(darkGrey, [800, 250, 150, 50], "Welding", normal, white, 840, 265)
+            welding.drawtechButton(100, 0)
+            superElevate = technoButton(darkGrey, [1050, 250, 150, 50], "Super-elevation", normal, white, 1060, 265)
+            superElevate.drawtechButton(100, 0)
             items = [threeRail, OHLE, OHLEspeed, fourRail, flangeGreaser, points, checkRail, welding, superElevate]
-            pygame.draw.line(screen, white, [200, 475], [300, 475])#line between tracks and 3rd rail
-            pygame.draw.line(screen, white, [450, 475], [550, 475])#line between 3rd rail and OHLE
-            pygame.draw.line(screen, white, [700, 475], [800, 475])#line between OHLE and OHLE HS
-            pygame.draw.line(screen, white, [750, 475], [750, 375])#line to ascend a level
-            pygame.draw.line(screen, white, [750, 375], [800, 375])#line between OHLE and 4th rail
-            pygame.draw.line(screen, white, [250, 475], [250, 275])#line to scend up to 2 levels
-            pygame.draw.line(screen, white, [250, 375], [300, 375])#line between tracks and flange-greasers
-            pygame.draw.line(screen, white, [250, 275], [300, 275])#line between tracks and points
-            pygame.draw.line(screen, white, [450, 275], [550, 275])#line between points and check rails
-            pygame.draw.line(screen, white, [700, 275], [800, 275])#line between check rails and welded joints
-            pygame.draw.line(screen, white, [950, 275], [1050, 275])#line between welded joints and super-elevation
+            item = ["thirdRail", "OHLE", "OHLE HS", "fourthRail", "greaser", "points", "checkRail", "welding", "superElevate"]
             pygame.display.update()
+        returnButton.drawButton()
         #this is where we check whether the items are clicked
         waiting = True
         while waiting == True:
@@ -318,20 +360,22 @@ def research():
                 i = 0
                 for i in range(len(items)):
                     if items[i].buttonCoords.collidepoint((pygame.mouse.get_pos())):
-                        items[i].changeButtonColour(pink)
-                        #if event.type == pygame.MOUSEBUTTONUP:
-                            #waiting = False
-                        #insert the fact files here
+                        items[i].changeButtonColour(pink)#giving each button hover functionality
+                        if event.type == pygame.MOUSEBUTTONUP:
+                            waiting = False
+                            drawFact(item,i)#call the drawFact function and break from the loop
+                    elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                        returnButton.changeButtonColour(pink)
+                        if event.type == pygame.MOUSEBUTTONUP:
+                            waiting = False
+                            research()#programmed return button
                     else:
                         items[i].changeButtonColour(darkGrey)
-                if event.type == pygame.KEYDOWN:
-                    if (event.key == pygame.K_BACKSPACE):
-                        waiting == False
-                        research()
-                elif event.type == pygame.QUIT:
+                        returnButton.changeButtonColour(menuScreenColour)
+                if event.type == pygame.QUIT:
                     waiting = False
                     pygame.quit()
-                    sys.exit()
+                    sys.exit()#This is the red X in the top right hand corner of the window
                 
     
     #draws the initial screen for the research tab, drawing the buttons
@@ -486,7 +530,31 @@ class button:
         self.buttonColour = newColour
         self.drawButton()
         pygame.display.update()
+
+#This class is a subclass of button and acts in the research category of buttons
+class technoButton(button):
+
     
+    #define a new drawButton to draw a line with it, with potential extra parameters
+    def drawtechButton(self, xdisplacement, ydisplacement):
+        #draw a rectangle
+        pygame.draw.rect(screen, self.buttonColour, self.buttonPos)
+        #write the text
+        write(self.text, self.font, self.textColour, self.textx, self.texty)
+        #Here we will draw the lines - this is where the extra arameters can be helpful
+        if ydisplacement == 0:
+            #draw a straight line back to the previous button
+            pygame.draw.line(screen, white, [self.buttonPos[0] - xdisplacement, self.buttonPos[1] + ((self.buttonPos[3])/2)], [self.buttonPos[0], self.buttonPos[1] + ((self.buttonPos[3])/2)])
+        else:
+            #draw line from button to midway in the gap
+            pygame.draw.line(screen, white, [self.buttonPos[0] - xdisplacement, self.buttonPos[1] +(self.buttonPos[3]/2) + ydisplacement], [self.buttonPos[0] - (xdisplacement/2), (self.buttonPos[1] + (self.buttonPos[3]/2)) + ydisplacement])
+            #draw line from end of previous line to however far down the new button is
+            pygame.draw.line(screen, white, [(self.buttonPos[0] - (xdisplacement/2)), self.buttonPos[1] + (self.buttonPos[3]/2)], [self.buttonPos[0] - (xdisplacement/2), self.buttonPos[1] + (self.buttonPos[3]/2) + ydisplacement])
+            #draw line from end of previous line to new button
+            pygame.draw.line(screen, white, [(self.buttonPos[0] - (xdisplacement/2)), self.buttonPos[1] + (self.buttonPos[3]/2)], [self.buttonPos[0], self.buttonPos[1] + (self.buttonPos[3]/2)])
+        pygame.display.update()
+
+
 #will print text as the user wishes
 def write(text, font, colour, xpos, ypos):
     font = font
@@ -512,5 +580,7 @@ def gameLoop():
             if event.type == pygame.QUIT:
                 running = False
     pygame.quit()
+
+money = 3000
 
 gameLoop()
