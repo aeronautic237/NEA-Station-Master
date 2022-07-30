@@ -39,6 +39,8 @@ criteriaFont = pygame.font.SysFont("Sans-serif", 40)
 #declaring the state of the game - may not be necessary
 gamestate = "menu"
 
+#declare array
+researchProgress = [[0 for x in range(2)] for y in range(33)]#create an array in which to store the data
 
 #defing the various functions of the game here
 def mainMenu():
@@ -67,6 +69,14 @@ def mainMenu():
             if startButton.buttonCoords.collidepoint((mousePos)):
                 startButton.changeButtonColour(darkGrey)
                 if event.type == pygame.MOUSEBUTTONUP:#checks if the start button is pressed
+                    with open("saveData/researched.txt","r") as fileOut:
+                        reader = csv.reader(fileOut)
+                        z=0
+                        for row in reader:
+                            researchProgress[z][0] = row[0]
+                            researchProgress[z][1] = row[1]
+                            z += 1#the above will assign each element of the text file to an element in the array
+                        print(researchProgress)#debugging
                     game()
                     waiting = False
                     break
@@ -175,9 +185,11 @@ def game():
 
 def research():
 
+    global researchProgress
     #This procedure will output an image (which is the format that the facts are in)
     #It should also show an unlock button if the criteria to unlock the technology are met, so that the user can unlock it if they want to
     def drawFact(item,i):
+        global money
         filename = str(item[i]) + ".jpg"
         filename = "TECHNOLOGY/" + filename
         screen.fill(black)
@@ -200,11 +212,12 @@ def research():
                         returnPrev = True
                         break#return button programmed
                 else:
-                    pass
+                    returnButton.changeButtonColour(menuScreenColour)
                     with open("criteria/research.txt", "r") as fileOut:#file containing every research, their critaria, and their effects
                         reader=csv.reader(fileOut)
                         for row in reader:
                             if row[0]==str(item[i]):
+                                cost = int(row[1])
                                 criterion1=row[2]
                                 criterion2=row[3]#takes down the criteria recquired for unlocking
                     #The below code checks if the criterion have been met
@@ -232,21 +245,24 @@ def research():
                                         else:
                                             queryDrawButton == False
                                             break
+                   
             #will draw the button if the criteria is met
-            if queryDrawButton:
-                unlockButton.drawButton()
-                pygame.display.update()
-                #Code below to be added later
+                if queryDrawButton:
+                    if money >= cost:
+                        unlockButton.drawButton()
+                        pygame.display.update()#draw the button if there is enough money
+                        if unlockButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                            unlockButton.changeButtonColour(menuScreenColour)#hover functionality
+                            if event.type == pygame.MOUSEBUTTONUP:
+                                for j in range (0,33):#updates the array which will be copied over to the list
+                                    if researchProgress[j][0] == item[i]:
+                                       researchProgress[j][1] = "1"#sets the appropriate element to unlocked
+                                money = money - cost#deducts the cost of the technology
+                                print(money)#more debugging
+                                        #apply effects
+                        else:
+                            unlockButton.changeButtonColour(darkGrey)
 
-                #if the button is hovered over:
-                    #change button colour to pink
-                    #if the button is clicked:
-                        #set the sppropriate file field to 1
-                        #deduct money
-                        #apply effects
-                        #break
-                #else:
-                    #return to dark grey button colour
         research()
 
     #This will draw the tech tree for each category
@@ -424,7 +440,13 @@ def research():
                 returnButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting=False
-                    game()
+                    with open("saveData/researched.txt", "w", newline="") as fileOut:
+                        writer=csv.writer(fileOut)
+                        for a in range(1):
+                            for b in range(33):
+                                writer.writerow(researchProgress[b])
+                                
+                    game()#copies the contents of the array to the text, and then returns to the game
             elif event.type == pygame.QUIT:
                 waiting = False
                 pygame.quit()
@@ -577,5 +599,7 @@ def gameLoop():
             if event.type == pygame.QUIT:
                 running = False
     pygame.quit()
+
+money = 3000
 
 gameLoop()

@@ -1,33 +1,33 @@
-technology, researchedState
-sigBoxBell, 0
-trackPhone, 0
-cabPhone, 0
-GSMR, 0
-tripCock, 0
-AWS, 0
-TPWS, 0
-OTMR, 0
-semaphore, 0
-repeater, 0
-lit, 0
-three, 0
-four, 0
-TVM, 0
-ETCS, 0
-point, 0
-checkRail, 0
-welding, 0
-superElevate, 0
-flangeGreaser, 0
-thirdRail, 0
-OHLE, 0
-OHLE HS, 0
-fourthRail, 0
-toilet, 0
-timetable, 0
-DMI, 0
-LCD, 0
-bike, 0
-parkRide, 0
-helpPoint, 0
-helperPatrol, 0
+techonology, researchedState
+sigBoxBell,0
+trackPhone,0
+cabPhone,0
+GSMR,0
+tripCock,0
+AWS,0
+TPWS,0
+OTMR,0
+semaphore,0
+repeater,0
+lit,0
+three,0
+four,0
+TVM,0
+ETCS,0
+points,0
+checkRail,0
+welding,0
+superElevate,0
+greaser,0
+thirdRail,0
+OHLE,0
+OHLE HS,0
+fourthRail,0
+toilet,0
+timetable,0
+DMI,0
+LCD,0
+bike,0
+parkRide,0
+helpPoint,0
+helperPatrol,0
