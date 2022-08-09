@@ -39,6 +39,8 @@ criteriaFont = pygame.font.SysFont("Sans-serif", 40)
 #declaring the state of the game - may not be necessary
 gamestate = "menu"
 
+#declare array
+researchProgress = [[0 for x in range(2)] for y in range(33)]#create an array in which to store the data
 
 #defing the various functions of the game here
 def mainMenu():
@@ -67,6 +69,14 @@ def mainMenu():
             if startButton.buttonCoords.collidepoint((mousePos)):
                 startButton.changeButtonColour(darkGrey)
                 if event.type == pygame.MOUSEBUTTONUP:#checks if the start button is pressed
+                    with open("saveData/researched.txt","r") as fileOut:
+                        reader = csv.reader(fileOut)
+                        z=0
+                        for row in reader:
+                            researchProgress[z][0] = row[0]
+                            researchProgress[z][1] = row[1]
+                            z += 1#the above will assign each element of the text file to an element in the array
+                        print(researchProgress)#debugging
                     game()
                     waiting = False
                     break
@@ -175,9 +185,11 @@ def game():
 
 def research():
 
+    global researchProgress
     #This procedure will output an image (which is the format that the facts are in)
     #It should also show an unlock button if the criteria to unlock the technology are met, so that the user can unlock it if they want to
     def drawFact(item,i):
+        global money
         filename = str(item[i]) + ".jpg"
         filename = "TECHNOLOGY/" + filename
         screen.fill(black)
@@ -207,48 +219,69 @@ def research():
                             if row[0]==str(item[i]):
                                 cost = int(row[1])
                                 criterion1=row[2]
-                                criterion2=row[3]#takes down the criteria recquired for unlocking
+                                criterion2=row[3]
+                                effect1=row[4]
+                                effect2=row[5]#takes down the effects and criteria recquired for unlocking
                     #The below code checks if the criterion have been met
-                    if criterion1 == criterion2:
-                        queryDrawButton = True
-                    else:
-                        with open("saveData/researched.txt", "r") as fileOut:#file that saves the user's game
-                            reader = csv.reader(fileOut)
-                            for row in reader:
-                                if row[0] == item[i]:#check if the item has already been unlocked
-                                    if row[1] == "0":
-                                        queryDrawButton == True
-                                    else:
-                                        queryDrawButton == False
-                                if row[0] == criterion1:#check if criterion 1 is fulfilled
+                    with open("saveData/researched.txt", "r") as fileOut:#file that saves the user's game
+                        reader = csv.reader(fileOut)
+                        for row in reader:
+                            if row[0] == criterion1:#check if criterion 1 is fulfilled
+                                if row[1] == "1":
+                                    queryDrawButton = True
+                                else:
+                                    queryDrawButton = False
+                                    break
+                            if criterion2 != "0":#validate the existence of a second criterion
+                                if row[0] == criterion2:#check if criterion 2 is fulfilled, if it exists
                                     if row[1] == "1":
-                                        queryDrawButton == True
+                                        queryDrawButton = True
                                     else:
-                                        queryDrawButton == False
+                                        queryDrawButton = False
                                         break
-                                if criterion2 != "0":#validate the existence of a second criterion
-                                    if row[0] == criterion2:#check if criterion 2 is fulfilled, if it exists
-                                        if row[1] == "1":
-                                            queryDrawButton == True
-                                        else:
-                                            queryDrawButton == False
-                                            break
+                            if row[0] == item[i]:
+                                if row[1] == "0":#check if the item has already been unlocked
+                                    queryDrawButton = True
+                                    if criterion1 == criterion2:#checks if the item has no criteria for unlocking
+                                        queryDrawButton = True
+                                        break
+                                else:
+                                    queryDrawButton = False
+                                    break
                    
             #will draw the button if the criteria is met
-            if queryDrawButton:
-                if money >= cost:
-                    unlockButton.drawButton()
-                    pygame.display.update()#draw the button if there is enough money
-                    if unlockButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
-                        unlockButton.changeButtonColour(menuScreenColour)#hover functionality
-                        if event.type == pygame.MOUSEBUTTONUP:
-                            for j in range (0,32):#updates the array which will be copied over to the list
-                                if researchProgress[j][0] == item[i]:
-                                    researchProgess[j][1] == "1"#sets the appropriate element to unlocked
-                                    money = money - cost#deducts the cost of the technology
-                                    #apply effects
-                    else:
-                        unlockButton.changeButtonColour(darkGrey)
+                if queryDrawButton:
+                    if money >= cost:
+                        unlockButton.drawButton()
+                        pygame.display.update()#draw the button if there is enough money
+                        if unlockButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                            unlockButton.changeButtonColour(menuScreenColour)#hover functionality
+                            if event.type == pygame.MOUSEBUTTONUP:
+                                for j in range (0,33):#updates the array which will be copied over to the list
+                                    if researchProgress[j][0] == item[i]:
+                                        researchProgress[j][1] = "1"#sets the appropriate element to unlocked
+                                saveGame()
+                                money = money - cost#deducts the cost of the technology
+                                print(money)#more debugging
+                                #apply effects
+                                if effect1 == "IR":
+                                    global incidentRecoverySpeed
+                                    incidentRecoverySpeed = incidentRecoverySpeed/2 #increase the speed at which incidents are dealt with
+                                elif effect1 == "5IR":
+                                    global incidentRisk
+                                    incidentRisk = 15 #reduce risk of an incident occuring by 50%
+                                elif effect1 == "C":
+                                    pass #This effect will be applied on the contract screen
+                                else:
+                                    global SPADRisk
+                                    SPADRisk = SPADRisk - int(effect1) #decrease the risk of a SPAD
+                                if effect2 == "SP":
+                                    global signalPriceBoost
+                                    signalPriceBoost = signalPriceBoost + 10 #increase the price of a signal
+                                queryDrawButton = False
+                                pygame.draw.rect(screen, black, [550, 375, 500, 50])
+                        else:
+                            unlockButton.changeButtonColour(darkGrey)
 
         research()
 
@@ -427,7 +460,8 @@ def research():
                 returnButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting=False
-                    game()
+                    saveGame()                                
+                    game()#copies the contents of the array to the text, and then returns to the game
             elif event.type == pygame.QUIT:
                 waiting = False
                 pygame.quit()
@@ -563,6 +597,14 @@ def write(text, font, colour, xpos, ypos):
     #transfer it to the screen
     screen.blit(textSurface, (xpos, ypos))
 
+def saveGame():
+    global researchProgress
+    with open("saveData/researched.txt", "w", newline="") as fileOut:
+        writer=csv.writer(fileOut)
+        for a in range(1):
+            for b in range(33):
+                writer.writerow(researchProgress[b])
+
 
 #This is where the game is executed
 def gameLoop():
@@ -581,6 +623,10 @@ def gameLoop():
                 running = False
     pygame.quit()
 
-money = 3000
+money = 30000 #in pounds
+incidentRecoverySpeed = 1 #as a mutiplier
+SPADRisk = 85 #as a percentage
+signalPriceBoost = 0 #as a percentage
+incidentRisk = 65 #as a percentage
 
 gameLoop()
