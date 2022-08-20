@@ -140,13 +140,13 @@ def game():
     RDButton = button(darkGrey, [10, 635, 75, 75], "R&D", clockTextFont, white, 10, 655)
     RDButton.drawButton()
     #buy things button
-    constructButton = button(darkGrey, [110, 635, 75, 75], "", clockTextFont, white, 10, 10)
+    constructButton = button(darkGrey, [110, 635, 100, 75], "Shop", clockTextFont, white, 115, 655)
     constructButton.drawButton()
     #accepted and offered contracts
-    contractButton = button(darkGrey, [210, 635, 75, 75], "", clockTextFont, white, 10, 10)
+    contractButton = button(darkGrey, [235, 635, 75, 75], "", clockTextFont, white, 10, 10)
     contractButton.drawButton()
     #potential fact button
-    factButton = button(darkGrey, [310, 635, 75, 75], "", clockTextFont, white, 10, 10)
+    factButton = button(darkGrey, [335, 635, 75, 75], "", clockTextFont, white, 10, 10)
     factButton.drawButton()
     #return to main menu button
     menuButton = button(pink, [1200, 635, 75, 75], "", clockTextFont, white, 1210, 655)
@@ -167,6 +167,11 @@ def game():
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     research()
+            elif constructButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                constructButton.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    shop()
             elif event.type == pygame.QUIT:
                 waiting = False
                 pygame.quit()
@@ -174,6 +179,7 @@ def game():
             else:
                 menuButton.changeButtonColour(darkGrey)
                 RDButton.changeButtonColour(darkGrey)
+                constructButton.changeButtonColour(darkGrey)
     #train1 = train(white, 1230, 350, 50, 20, -1)
     #train1.drawTrain()
     #time.sleep(1)
@@ -474,6 +480,52 @@ def research():
                 track.changeButtonColour(darkGrey)
                 returnButton.changeButtonColour(menuScreenColour)
     
+def shop():
+    #re-draw the bottom bar
+    pygame.draw.rect(screen, menuScreenColour, [0, 620, 1280, 100])
+    #re-draw the return button
+    returnButton = button(darkGrey, [1200, 635, 75, 75], "", clockTextFont, white, 1210, 655)
+    returnButton.drawButton()
+    #construct new button objects
+    #build track
+    buyTrack = button(darkGrey, [10, 635, 100, 75], "Track", clockTextFont, white, 15, 655)
+    buyTrack.drawButton()
+    #build signals
+    buySignal = button(darkGrey, [135, 635, 140, 75], "Signals", clockTextFont, white, 140, 655)
+    buySignal.drawButton()
+    #buld platforms
+    buyPlatform = button(darkGrey, [300, 635, 175, 75], "Platforms", clockTextFont, white, 305, 655)
+    buyPlatform.drawButton()
+    #print it all on screen
+    pygame.display.update()
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if buyTrack.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                buyTrack.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+            elif buySignal.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                buySignal.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+            elif buyPlatform.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                buyPlatform.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+            elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                returnButton.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    game()
+            elif event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            else:
+                buyTrack.changeButtonColour(darkGrey)
+                buySignal.changeButtonColour(darkGrey)
+                buyPlatform.changeButtonColour(darkGrey)
+                returnButton.changeButtonColour(darkGrey)
 
 #new object for train
 class train:
