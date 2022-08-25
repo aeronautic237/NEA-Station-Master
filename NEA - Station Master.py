@@ -41,6 +41,7 @@ gamestate = "menu"
 
 #declare array
 researchProgress = [[0 for x in range(2)] for y in range(33)]#create an array in which to store the data
+trackLayout = [[0 for x in range(32)] for y in range(13)]
 
 #defing the various functions of the game here
 def mainMenu():
@@ -481,6 +482,7 @@ def research():
                 returnButton.changeButtonColour(menuScreenColour)
     
 def shop():
+    pygame.draw.rect(screen, white, [0, 100, 40, 40])#DEBUG PLEASE REMOVE
     #re-draw the bottom bar
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 1280, 100])
     #re-draw the return button
@@ -505,14 +507,17 @@ def shop():
                 buyTrack.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
+                    purchaseTrack(buyTrack, returnButton)
             elif buySignal.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 buySignal.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
+                    purchaseSignal()
             elif buyPlatform.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 buyPlatform.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
+                    purchasePlatform()
             elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 returnButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
@@ -526,6 +531,66 @@ def shop():
                 buySignal.changeButtonColour(darkGrey)
                 buyPlatform.changeButtonColour(darkGrey)
                 returnButton.changeButtonColour(darkGrey)
+
+def purchaseTrack(buyTrack, returnButton):
+    #The save grid will be 32x13 for track, with each square being 40x40
+    #The below will copy the contents of the file into the temporary storage
+    with open ("saveData/tracksPlatforms.txt", "r") as fileOut:
+        reader = csv.reader(fileOut)
+        j=-1
+        for row in reader:
+            j+=1
+            i=0
+            for i in range(32):
+                trackLayout[j][i] = row[i]
+                i += 1
+    #change the bottom bar with the relevant options
+    pygame.draw.rect(screen, menuScreenColour, [0, 620, 1280, 100])
+    buyTrack.drawButton()
+    returnButton.drawButton()
+    buyPoints = button(darkGrey, [135, 635, 120, 75], "Points", clockTextFont, white, 140, 655)
+    buyPoints.drawButton()
+    with open("saveData/tracksPlatforms.txt", "w") as fileOut:
+        writer = csv.writer(fileOut)
+        waiting = True
+        while waiting:
+            for event in pygame.event.get():
+                if buyTrack.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                    buyTrack.changeButtonColour(pink)
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        pass
+                        #code for building track goes here
+                elif buyPoints.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                    buyPoints.changeButtonColour(pink)
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        pass
+                        #code for building points goes here
+                elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                    returnButton.changeButtonColour(pink)
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        waiting = False
+                        shop()
+                elif event.type == pygame.QUIT:
+                    waiting = False
+                    pygame.quit()
+                    sys.exit()
+                else:
+                    buyTrack.changeButtonColour(darkGrey)
+                    buyPoints.changeButtonColour(darkGrey)
+                    returnButton.changeButtonColour(darkGrey)
+                    pygame.display.update()
+
+def purchasePlatform():
+    if money < platPrice:
+        print()#nothing will happen if you try and buy without enough funds
+    else:
+        platCount = platCount + 1#records the number of platforms in possesion
+        platPrice = platPrice + 5000##increase price of a new platform by £5000
+    shop()
+
+def purchaseSignal():
+    pass
+
 
 #new object for train
 class train:
@@ -680,5 +745,6 @@ incidentRecoverySpeed = 1 #as a mutiplier
 SPADRisk = 85 #as a percentage
 signalPriceBoost = 0 #as a percentage
 incidentRisk = 65 #as a percentage
+platPrice = 5000 #price of a new platform at the start of the game
 
 gameLoop()
