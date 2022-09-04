@@ -482,7 +482,6 @@ def research():
                 returnButton.changeButtonColour(menuScreenColour)
     
 def shop():
-    pygame.draw.rect(screen, white, [0, 100, 40, 40])#DEBUG PLEASE REMOVE
     #re-draw the bottom bar
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 1280, 100])
     #re-draw the return button
@@ -558,8 +557,8 @@ def purchaseTrack(buyTrack, returnButton):
                 if buyTrack.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                     buyTrack.changeButtonColour(pink)
                     if event.type == pygame.MOUSEBUTTONUP:
-                        pass
                         #code for building track goes here
+                        buildTrack()
                 elif buyPoints.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                     buyPoints.changeButtonColour(pink)
                     if event.type == pygame.MOUSEBUTTONUP:
@@ -578,6 +577,23 @@ def purchaseTrack(buyTrack, returnButton):
                     buyTrack.changeButtonColour(darkGrey)
                     buyPoints.changeButtonColour(darkGrey)
                     returnButton.changeButtonColour(darkGrey)
+                    pygame.display.update()
+
+def buildTrack():
+    positionCoord = pygame.mouse.get_pos()
+    position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
+    notFinished = True
+    while notFinished:
+        #pygame.draw.rect(screen, white, position)
+        #pygame.draw.rect(screen, white, [position[0]-(position[0]%40),position[1]-(position[1]%40),40,40])
+        for event in pygame.event.get():
+            positionCoord = pygame.mouse.get_pos()
+            if positionCoord[1] > 139 and positionCoord[1] < 580:
+                if position.collidepoint((pygame.mouse.get_pos())) == False:
+                    pygame.draw.rect(screen, black, position)
+                    #position.move_ip(position[0]-(position[0]%40),position[1]-(position[1]%40))
+                    position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
+                    pygame.draw.rect(screen, white, position)
                     pygame.display.update()
 
 def purchasePlatform():
