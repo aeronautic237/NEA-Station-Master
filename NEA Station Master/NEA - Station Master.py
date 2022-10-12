@@ -41,6 +41,7 @@ gamestate = "menu"
 
 #declare array
 researchProgress = [[0 for x in range(2)] for y in range(33)]#create an array in which to store the data
+trackLayout = [[0 for x in range(32)] for y in range(13)]
 
 #defing the various functions of the game here
 def mainMenu():
@@ -140,13 +141,13 @@ def game():
     RDButton = button(darkGrey, [10, 635, 75, 75], "R&D", clockTextFont, white, 10, 655)
     RDButton.drawButton()
     #buy things button
-    constructButton = button(darkGrey, [110, 635, 75, 75], "", clockTextFont, white, 10, 10)
+    constructButton = button(darkGrey, [110, 635, 100, 75], "Shop", clockTextFont, white, 115, 655)
     constructButton.drawButton()
     #accepted and offered contracts
-    contractButton = button(darkGrey, [210, 635, 75, 75], "", clockTextFont, white, 10, 10)
+    contractButton = button(darkGrey, [235, 635, 75, 75], "", clockTextFont, white, 10, 10)
     contractButton.drawButton()
     #potential fact button
-    factButton = button(darkGrey, [310, 635, 75, 75], "", clockTextFont, white, 10, 10)
+    factButton = button(darkGrey, [335, 635, 75, 75], "", clockTextFont, white, 10, 10)
     factButton.drawButton()
     #return to main menu button
     menuButton = button(pink, [1200, 635, 75, 75], "", clockTextFont, white, 1210, 655)
@@ -167,6 +168,11 @@ def game():
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     research()
+            elif constructButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                constructButton.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    shop()
             elif event.type == pygame.QUIT:
                 waiting = False
                 pygame.quit()
@@ -174,6 +180,7 @@ def game():
             else:
                 menuButton.changeButtonColour(darkGrey)
                 RDButton.changeButtonColour(darkGrey)
+                constructButton.changeButtonColour(darkGrey)
     #train1 = train(white, 1230, 350, 50, 20, -1)
     #train1.drawTrain()
     #time.sleep(1)
@@ -219,32 +226,35 @@ def research():
                             if row[0]==str(item[i]):
                                 cost = int(row[1])
                                 criterion1=row[2]
-                                criterion2=row[3]#takes down the criteria recquired for unlocking
+                                criterion2=row[3]
+                                effect1=row[4]
+                                effect2=row[5]#takes down the effects and criteria recquired for unlocking
                     #The below code checks if the criterion have been met
-                    if criterion1 == criterion2:
-                        queryDrawButton = True
-                    else:
-                        with open("saveData/researched.txt", "r") as fileOut:#file that saves the user's game
-                            reader = csv.reader(fileOut)
-                            for row in reader:
-                                if row[0] == item[i]:#check if the item has already been unlocked
-                                    if row[1] == "0":
-                                        queryDrawButton == True
-                                    else:
-                                        queryDrawButton == False
-                                if row[0] == criterion1:#check if criterion 1 is fulfilled
+                    with open("saveData/researched.txt", "r") as fileOut:#file that saves the user's game
+                        reader = csv.reader(fileOut)
+                        for row in reader:
+                            if row[0] == criterion1:#check if criterion 1 is fulfilled
+                                if row[1] == "1":
+                                    queryDrawButton = True
+                                else:
+                                    queryDrawButton = False
+                                    break
+                            if criterion2 != "0":#validate the existence of a second criterion
+                                if row[0] == criterion2:#check if criterion 2 is fulfilled, if it exists
                                     if row[1] == "1":
-                                        queryDrawButton == True
+                                        queryDrawButton = True
                                     else:
-                                        queryDrawButton == False
+                                        queryDrawButton = False
                                         break
-                                if criterion2 != "0":#validate the existence of a second criterion
-                                    if row[0] == criterion2:#check if criterion 2 is fulfilled, if it exists
-                                        if row[1] == "1":
-                                            queryDrawButton == True
-                                        else:
-                                            queryDrawButton == False
-                                            break
+                            if row[0] == item[i]:
+                                if row[1] == "0":#check if the item has already been unlocked
+                                    queryDrawButton = True
+                                    if criterion1 == criterion2:#checks if the item has no criteria for unlocking
+                                        queryDrawButton = True
+                                        break
+                                else:
+                                    queryDrawButton = False
+                                    break
                    
             #will draw the button if the criteria is met
                 if queryDrawButton:
@@ -256,10 +266,27 @@ def research():
                             if event.type == pygame.MOUSEBUTTONUP:
                                 for j in range (0,33):#updates the array which will be copied over to the list
                                     if researchProgress[j][0] == item[i]:
-                                       researchProgress[j][1] = "1"#sets the appropriate element to unlocked
+                                        researchProgress[j][1] = "1"#sets the appropriate element to unlocked
+                                saveGame()
                                 money = money - cost#deducts the cost of the technology
                                 print(money)#more debugging
-                                        #apply effects
+                                #apply effects
+                                if effect1 == "IR":
+                                    global incidentRecoverySpeed
+                                    incidentRecoverySpeed = incidentRecoverySpeed/2 #increase the speed at which incidents are dealt with
+                                elif effect1 == "5IR":
+                                    global incidentRisk
+                                    incidentRisk = 15 #reduce risk of an incident occuring by 50%
+                                elif effect1 == "C":
+                                    pass #This effect will be applied on the contract screen
+                                else:
+                                    global SPADRisk
+                                    SPADRisk = SPADRisk - int(effect1) #decrease the risk of a SPAD
+                                if effect2 == "SP":
+                                    global signalPriceBoost
+                                    signalPriceBoost = signalPriceBoost + 10 #increase the price of a signal
+                                queryDrawButton = False
+                                pygame.draw.rect(screen, black, [550, 375, 500, 50])
                         else:
                             unlockButton.changeButtonColour(darkGrey)
 
@@ -440,12 +467,7 @@ def research():
                 returnButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting=False
-                    with open("saveData/researched.txt", "w", newline="") as fileOut:
-                        writer=csv.writer(fileOut)
-                        for a in range(1):
-                            for b in range(33):
-                                writer.writerow(researchProgress[b])
-                                
+                    saveGame()                                
                     game()#copies the contents of the array to the text, and then returns to the game
             elif event.type == pygame.QUIT:
                 waiting = False
@@ -459,6 +481,172 @@ def research():
                 track.changeButtonColour(darkGrey)
                 returnButton.changeButtonColour(menuScreenColour)
     
+def shop():
+    #re-draw the bottom bar
+    pygame.draw.rect(screen, menuScreenColour, [0, 620, 1280, 100])
+    #re-draw the return button
+    returnButton = button(darkGrey, [1200, 635, 75, 75], "", clockTextFont, white, 1210, 655)
+    returnButton.drawButton()
+    #construct new button objects
+    #build track
+    buyTrack = button(darkGrey, [10, 635, 100, 75], "Track", clockTextFont, white, 15, 655)
+    buyTrack.drawButton()
+    #build signals
+    buySignal = button(darkGrey, [135, 635, 140, 75], "Signals", clockTextFont, white, 140, 655)
+    buySignal.drawButton()
+    #buld platforms
+    buyPlatform = button(darkGrey, [300, 635, 175, 75], "Platforms", clockTextFont, white, 305, 655)
+    buyPlatform.drawButton()
+    #print it all on screen
+    pygame.display.update()
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if buyTrack.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                buyTrack.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    purchaseTrack(buyTrack, returnButton)
+            elif buySignal.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                buySignal.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    purchaseSignal()
+            elif buyPlatform.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                buyPlatform.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    purchasePlatform()
+            elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                returnButton.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    game()
+            elif event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            else:
+                buyTrack.changeButtonColour(darkGrey)
+                buySignal.changeButtonColour(darkGrey)
+                buyPlatform.changeButtonColour(darkGrey)
+                returnButton.changeButtonColour(darkGrey)
+
+def purchaseTrack(buyTrack, returnButton):
+    #The save grid will be 32x13 for track, with each square being 40x40
+    #The below will copy the contents of the file into the temporary storage
+    trackLayout = [[0 for x in range(32)]for y in range(13)]
+    with open ("saveData/tracksPlatforms.txt", "r") as fileOut:
+        reader = csv.reader(fileOut)
+        j=-1
+        for row in reader:
+            j+=1
+            i=0
+            for i in range(32):
+                trackLayout[j][i] = row[i]
+                i += 1
+    #change the bottom bar with the relevant options
+    pygame.draw.rect(screen, menuScreenColour, [0, 620, 1280, 100])
+    buyTrack.drawButton()
+    returnButton.drawButton()
+    buyPoints = button(darkGrey, [135, 635, 120, 75], "Points", clockTextFont, white, 140, 655)
+    buyPoints.drawButton()
+    buyEntry = button(darkGrey, [275, 635, 130, 75],  "Entries", clockTextFont, white, 280, 655)
+    buyEntry.drawButton()
+    with open("saveData/tracksPlatforms.txt", "r", newline="") as fileOut:
+        writer = csv.reader(fileOut)
+        waiting = True
+        while waiting:
+            for event in pygame.event.get():
+                if buyTrack.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                    buyTrack.changeButtonColour(pink)
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        #code for building track goes here
+                        buildTrack()
+                elif buyPoints.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                    buyPoints.changeButtonColour(pink)
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        pass
+                        #code for building points goes here
+                elif buyEntry.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                    buyEntry.changeButtonColour(pink)
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        pass
+                        #code for buying entry points
+                elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                    returnButton.changeButtonColour(pink)
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        waiting = False
+                        shop()
+                elif event.type == pygame.QUIT:
+                    waiting = False
+                    pygame.quit()
+                    sys.exit()
+                else:
+                    buyTrack.changeButtonColour(darkGrey)
+                    buyPoints.changeButtonColour(darkGrey)
+                    buyEntry.changeButtonColour(darkGrey)
+                    returnButton.changeButtonColour(darkGrey)
+                    pygame.display.update()
+
+def buildTrack():
+    positionCoord = pygame.mouse.get_pos()# position of the mouse
+    position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
+    notFinished = True
+    with open ("saveData/tracksPlatforms.txt", "r") as fileOut:
+        reader = csv.reader(fileOut)
+        j=-1
+        for row in reader:
+            j+=1
+            i=0
+            for i in range(32):
+                trackLayout[j][i] = row[i]
+                i += 1
+    while notFinished:
+        pygame.draw.rect(screen, white, position)
+        #pygame.draw.rect(screen, white, [position[0]-(position[0]%40),position[1]-(position[1]%40),40,40])
+        for event in pygame.event.get():
+            positionCoord = pygame.mouse.get_pos()
+            if positionCoord[1] > 139 and positionCoord[1] < 580 and positionCoord[0] > 39 and positionCoord[0] < 1240 and (positionCoord[0] < 540 or positionCoord[0] > 740):
+                #the above line will check if the cursor is in a buildable area before moving the rectangle.
+                oldPosition = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
+                positionCoord = pygame.mouse.get_pos()
+                storeCoordx, storeCoordy = int(oldPosition[0]/40), int(oldPosition[1]/40)# stores the coordinates of the mouse against the .txt grid (idexed from 1 
+                if position.collidepoint((pygame.mouse.get_pos())) == False:#checks if the mouse has left the box
+                    if trackLayout[storeCoordy-2][storeCoordx-1] == "1":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, white, (position[0],position[1]+20),(position[0] + 40 , position[1] + 20))
+                        pygame.display.update()
+                    elif trackLayout[storeCoordy-2][storeCoordx-1] == "0":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.display.update()
+                    position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
+                    storeCoordx, storeCoordy = int(position[0]/40), int(position[1]/40)# stores the coordinates of the mouse against the .txt grid (idexed from 1 
+                    #position.move_ip(position[0]-(position[0]%40),position[1]-(position[1]%40))
+                    pygame.draw.rect(screen, white, oldPosition)
+                    pygame.display.update()
+                    if event.type == pygame.MOUSEBUTTONUP:#checks for a click
+                        #condition if the square has a track in it already
+                        if trackLayout[storeCoordx][storeCoordy] == 1:
+                            trackLayout[storeCoordx][storeCoordy] = 0
+                            money = money + 700 #You will not get a full refund for destroying track
+                        #condition if the selected quare has no track in it already.
+                        elif trackLayout[storeCoordx][storeCoordy] == 0:
+                            trackLayout[storeCoordx][storeCoordy] = 1
+                            print(trackLayout) #DEBUG
+                            money = money - 800 #costs 800 to build track
+                        
+
+def purchasePlatform():
+    if money < platPrice:
+        print()#nothing will happen if you try and buy without enough funds
+    else:
+        platCount = platCount + 1#records the number of platforms in possesion
+        platPrice = platPrice + 5000##increase price of a new platform by £5000
+    shop()
+
+def purchaseSignal():
+    pass
+
 
 #new object for train
 class train:
@@ -582,6 +770,14 @@ def write(text, font, colour, xpos, ypos):
     #transfer it to the screen
     screen.blit(textSurface, (xpos, ypos))
 
+def saveGame():
+    global researchProgress
+    with open("saveData/researched.txt", "w", newline="") as fileOut:
+        writer=csv.writer(fileOut)
+        for a in range(1):
+            for b in range(33):
+                writer.writerow(researchProgress[b])
+
 
 #This is where the game is executed
 def gameLoop():
@@ -600,6 +796,11 @@ def gameLoop():
                 running = False
     pygame.quit()
 
-money = 3000
+money = 30000 #in pounds
+incidentRecoverySpeed = 1 #as a mutiplier
+SPADRisk = 85 #as a percentage
+signalPriceBoost = 0 #as a percentage
+incidentRisk = 65 #as a percentage
+platPrice = 5000 #price of a new platform at the start of the game
 
 gameLoop()
