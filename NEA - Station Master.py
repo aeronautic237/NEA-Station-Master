@@ -552,8 +552,8 @@ def purchaseTrack(buyTrack, returnButton):
     buyPoints.drawButton()
     buyEntry = button(darkGrey, [275, 635, 130, 75],  "Entries", clockTextFont, white, 280, 655)
     buyEntry.drawButton()
-    with open("saveData/tracksPlatforms.txt", "w", newline="") as fileOut:
-        writer = csv.writer(fileOut)
+    with open("saveData/tracksPlatforms.txt", "r", newline="") as fileOut:
+        writer = csv.reader(fileOut)
         waiting = True
         while waiting:
             for event in pygame.event.get():
@@ -589,71 +589,55 @@ def purchaseTrack(buyTrack, returnButton):
                     pygame.display.update()
 
 def buildTrack():
-    positionCoord = pygame.mouse.get_pos()
-    position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
+    positionCoord = pygame.mouse.get_pos()# position of the mouse
+    position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
     notFinished = True
+    with open ("saveData/tracksPlatforms.txt", "r") as fileOut:
+        reader = csv.reader(fileOut)
+        j=-1
+        for row in reader:
+            j+=1
+            i=0
+            for i in range(32):
+                trackLayout[j][i] = row[i]
+                i += 1
     while notFinished:
-        #pygame.draw.rect(screen, white, position)
+        pygame.draw.rect(screen, white, position)
         #pygame.draw.rect(screen, white, [position[0]-(position[0]%40),position[1]-(position[1]%40),40,40])
         for event in pygame.event.get():
             positionCoord = pygame.mouse.get_pos()
             if positionCoord[1] > 139 and positionCoord[1] < 580 and positionCoord[0] > 39 and positionCoord[0] < 1240 and (positionCoord[0] < 540 or positionCoord[0] > 740):
                 #the above line will check if the cursor is in a buildable area before moving the rectangle.
-                if position.collidepoint((pygame.mouse.get_pos())) == False:
-                    pygame.draw.rect(screen, black, position)
-                    #position.move_ip(position[0]-(position[0]%40),position[1]-(position[1]%40))
+                oldPosition = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
+                positionCoord = pygame.mouse.get_pos()
+                storeCoordx, storeCoordy = int(position[0]/40), int(position[1]/40)# stores the coordinates of the mouse against the .txt grid (idexed from 1
+                print(storeCoordx)
+                print(storeCoordy)
+                pygame.draw.rect(screen, white, position)
+                pygame.display.update()
+                if position.collidepoint((pygame.mouse.get_pos())) == False:#checks if the mouse has left the box
+                    if trackLayout[storeCoordy-5][storeCoordx-1] == "1":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, white, (position[0],position[1]+20),(position[0] + 40 , position[1] + 20))
+                        pygame.display.update()
+                    elif trackLayout[storeCoordy-5][storeCoordx-1] == "0":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.display.update()
                     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
-                    pygame.draw.rect(screen, white, position)
-                    pygame.display.update()
-                    if event.type == pygame.MOUSEBUTTONUP:
-                        storeCoordx, storeCoordy = position[0]/40, position[1]/40
+                    storeCoordx, storeCoordy = int(position[0]/40), int(position[1]/40)# stores the coordinates of the mouse against the .txt grid (idexed from 1 
+                    #position.move_ip(position[0]-(position[0]%40),position[1]-(position[1]%40))
+                    if event.type == pygame.MOUSEBUTTONUP:#checks for a click
+                        #condition if the square has a track in it already
                         if trackLayout[storeCoordx][storeCoordy] == 1:
                             trackLayout[storeCoordx][storeCoordy] = 0
-                            money = money + 700
+                            money = money + 700 #You will not get a full refund for destroying track
+                        #condition if the selected quare has no track in it already.
                         elif trackLayout[storeCoordx][storeCoordy] == 0:
                             trackLayout[storeCoordx][storeCoordy] = 1
-                            print(trackLayout)
-                            checkConnectors = neighbours(trackLayout, storeCoordx, storeCoordy, 32, 13)
-                            print(str(checkConnectors))
-                            money = money - 800
+                            print(trackLayout) #DEBUG
+                            money = money - 800 #costs 800 to build track
                         
-#This function should return the position and values of the neighbouring cells in a 2D array                    
-def neighbours(array, x, y, maxx, maxy):# The parameters denote the array, the point you want the neighbours of, and the max size of the array
-    #All these if statements will check whether there are neighbours, and if there are, they will note down their values
-    if x > 0:
-        left = array[x-1][y]
-        if y > 0:
-            topLeft = array[x-1][y-1]
-        else:
-            topLeft = -1
-    else:
-        left = -1
-    if x < maxx:
-        right = array[x+1][y]
-        if y < maxy:
-            bottomRight = array[x+1][y+1]
-        else:
-            bottomRight = -1
-    else:
-        right = -1
-    if y > 0:
-        top = array[x][y-1]
-        if x < maxx:
-            topRight = array[x+1][y-1]
-        else:
-            topRight = -1
-    else:
-        top = -1
-    if y < maxy:
-        bottom = array[x][y+1]
-        if x > 0:
-            bottomLeft = [x-1][y+1]
-        else:
-            bottomLeft = -1
-    else:
-        bottom = -1
-    #this will return all the values, from the top, going clockwise
-    return top, topRight, right, bottomRight, bottom, bottomLeft, Left, topLeft
+
 def purchasePlatform():
     if money < platPrice:
         print()#nothing will happen if you try and buy without enough funds
