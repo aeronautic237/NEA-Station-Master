@@ -561,7 +561,7 @@ def purchaseTrack(buyTrack, returnButton):
                     buyTrack.changeButtonColour(pink)
                     if event.type == pygame.MOUSEBUTTONUP:
                         #code for building track goes here
-                        buildTrack()
+                        buildTrack(returnButton)
                 elif buyPoints.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                     buyPoints.changeButtonColour(pink)
                     if event.type == pygame.MOUSEBUTTONUP:
@@ -588,7 +588,7 @@ def purchaseTrack(buyTrack, returnButton):
                     returnButton.changeButtonColour(darkGrey)
                     pygame.display.update()
 
-def buildTrack():
+def buildTrack(returnButton):
     global money # "money referenced before assignment"
     positionCoord = pygame.mouse.get_pos()# position of the mouse
     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
@@ -636,7 +636,16 @@ def buildTrack():
                         trackLayout[storeCoordy-5][storeCoordx-1] = "1"
                         print(trackLayout) #DEBUG
                         money = money - 800 #costs 800 to build track
-                        
+            elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                returnButton.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    with open("saveData/tracksPlatforms.txt", "w") as file:
+                        writer = csv.writer(file)
+                        for i in range(len(trackLayout)):
+                            writer.writerow(trackLayout[i])
+                    shop()
+            else:
+                returnButton.changeButtonColour(darkGrey)
 
 def purchasePlatform():
     if money < platPrice:
