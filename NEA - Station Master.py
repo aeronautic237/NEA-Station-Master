@@ -589,6 +589,7 @@ def purchaseTrack(buyTrack, returnButton):
                     pygame.display.update()
 
 def buildTrack():
+    global money # "money referenced before assignment"
     positionCoord = pygame.mouse.get_pos()# position of the mouse
     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
     notFinished = True
@@ -611,8 +612,6 @@ def buildTrack():
                 oldPosition = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
                 positionCoord = pygame.mouse.get_pos()
                 storeCoordx, storeCoordy = int(position[0]/40), int(position[1]/40)# stores the coordinates of the mouse against the .txt grid (idexed from 1
-                print(storeCoordx)
-                print(storeCoordy)
                 pygame.draw.rect(screen, white, position)
                 pygame.display.update()
                 if position.collidepoint((pygame.mouse.get_pos())) == False:#checks if the mouse has left the box
@@ -624,18 +623,19 @@ def buildTrack():
                         pygame.draw.rect(screen, black, position)
                         pygame.display.update()
                     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
-                    storeCoordx, storeCoordy = int(position[0]/40), int(position[1]/40)# stores the coordinates of the mouse against the .txt grid (idexed from 1 
-                    #position.move_ip(position[0]-(position[0]%40),position[1]-(position[1]%40))
-                    if event.type == pygame.MOUSEBUTTONUP:#checks for a click
-                        #condition if the square has a track in it already
-                        if trackLayout[storeCoordx][storeCoordy] == 1:
-                            trackLayout[storeCoordx][storeCoordy] = 0
-                            money = money + 700 #You will not get a full refund for destroying track
-                        #condition if the selected quare has no track in it already.
-                        elif trackLayout[storeCoordx][storeCoordy] == 0:
-                            trackLayout[storeCoordx][storeCoordy] = 1
-                            print(trackLayout) #DEBUG
-                            money = money - 800 #costs 800 to build track
+                print(storeCoordy)
+                print(storeCoordx)
+                if event.type == pygame.MOUSEBUTTONUP:#checks for a click
+                    #condition if the square has a track in it already
+                    if trackLayout[storeCoordy-5][storeCoordx-1] == "1":
+                        trackLayout[storeCoordy-5][storeCoordx-1] = "0"
+                        print(trackLayout) #DEBUG
+                        money = money + 700 #You will not get a full refund for destroying track
+                    #condition if the selected quare has no track in it already.
+                    elif trackLayout[storeCoordy-5][storeCoordx-1] == "0":
+                        trackLayout[storeCoordy-5][storeCoordx-1] = "1"
+                        print(trackLayout) #DEBUG
+                        money = money - 800 #costs 800 to build track
                         
 
 def purchasePlatform():
