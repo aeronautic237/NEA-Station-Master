@@ -638,6 +638,7 @@ def buildTrack(returnButton):
                     shop()
             else:
                 returnButton.changeButtonColour(darkGrey)
+
 #This will do the same thing as the buildTrack procedure, but is adapted for points
 def buildPoints(returnButton):
     global money
@@ -664,21 +665,22 @@ def buildPoints(returnButton):
                 oldPosition = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
                 positionCoord = pygame.mouse.get_pos()#new position of the mouse
                 storeCoordx, storeCoordy = int(position[0]/40), int(position[1]/40)# stores the coordinates of the mouse against the .txt grid (idexed from 1
-                pygame.draw.rect(screen, gold, position) # draw a white box to show where the mouse is.
+                pygame.draw.rect(screen, gold, position) # draw a gold box to show where the mouse is.
                 pygame.display.update()
                 if position.collidepoint((pygame.mouse.get_pos())) == False:#checks if the mouse has left the box
-                    #replaces the white square with a track piece if there is meant to be one there
+                    #replaces the gold square with a track piece if there is meant to be one there
                     if trackLayout[storeCoordy-5][storeCoordx-1] == "1":
                         pygame.draw.rect(screen, black, position)
                         pygame.draw.line(screen, white, (position[0],position[1]+20),(position[0] + 40 , position[1] + 20))
                         pygame.display.update()
-                    #replaces the white square with a blank piece if no track is meant to be there
+                    #replaces the gold square with a blank piece if no track is meant to be there
                     elif trackLayout[storeCoordy-5][storeCoordx-1] == "0":
                         pygame.draw.rect(screen, black, position)
                         pygame.display.update()
-                    #replaces the white square with an upward pointing set of points if it is meant to be there
-                    elif trackLayout[storeCoordy - 5][storeCorrdx - 1] == "2":
+                    #replaces the gold square with an upward pointing set of points if it is meant to be there
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "2":
                         pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, gold, (position[0],position[1]+20),(position[0] + 40 , position[1] + 20))
                         pygame.display.update()
                     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
                 print(storeCoordy) # DEBUG
