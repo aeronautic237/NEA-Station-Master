@@ -681,21 +681,29 @@ def buildPoints(returnButton):
                     elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "2":
                         pygame.draw.rect(screen, black, position)
                         pygame.draw.line(screen, gold, (position[0],position[1]+20),(position[0] + 40 , position[1] + 20))
+                        pygame.draw.line(screen, gold, (position[0] + 20 , position[1]+20),(position[0] + 20 , position[1] - 0))
+                        pygame.display.update()
+                    #replaces the gold square with a downward pointing set of points if it is meant to be there
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "3":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, gold, (position[0],position[1] + 20),(position[0] + 40 , position[1] + 20))
+                        pygame.draw.line(screen, gold, (position[0] + 20,position[1] + 20),(position[0] + 20 , position[1] + 40))
                         pygame.display.update()
                     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
+                    
                 print(storeCoordy) # DEBUG
                 print(storeCoordx) # DEBUG
                 if event.type == pygame.MOUSEBUTTONUP:#checks for a click
                     #condition if the square has a track in it already
                     if trackLayout[storeCoordy-5][storeCoordx-1] == "1":
-                        trackLayout[storeCoordy-5][storeCoordx-1] = "0"
+                        trackLayout[storeCoordy-5][storeCoordx-1] = "2"
                         print(trackLayout) #DEBUG
-                        money = money + 700 #You will not get a full refund for destroying track
+                        money = money + 900 #You will not get a full refund for destroying track
                     #condition if the selected quare has no track in it already.
-                    elif trackLayout[storeCoordy-5][storeCoordx-1] == "0":
+                    elif trackLayout[storeCoordy-5][storeCoordx-1] == "2":
                         trackLayout[storeCoordy-5][storeCoordx-1] = "1"
                         print(trackLayout) #DEBUG
-                        money = money - 800 #costs 800 to build track
+                        money = money - 1000 #costs 1000 to build points
             #check for whether the return button was hovered over/clicked
             elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 returnButton.changeButtonColour(pink)
