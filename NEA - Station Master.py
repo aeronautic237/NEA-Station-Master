@@ -693,17 +693,28 @@ def buildPoints(returnButton):
                     
                 print(storeCoordy) # DEBUG
                 print(storeCoordx) # DEBUG
-                if event.type == pygame.MOUSEBUTTONUP:#checks for a click
+                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:#checks for a left click
                     #condition if the square has a track in it already
-                    if trackLayout[storeCoordy-5][storeCoordx-1] == "1":
+                    if trackLayout[storeCoordy-5][storeCoordx-1] == "1" or trackLayout[storeCoordy-5][storeCoordx-1] == "3":
                         trackLayout[storeCoordy-5][storeCoordx-1] = "2"
                         print(trackLayout) #DEBUG
                         money = money + 900 #You will not get a full refund for destroying track
-                    #condition if the selected quare has no track in it already.
+                    #condition if the selected quare has a set of points in it already
                     elif trackLayout[storeCoordy-5][storeCoordx-1] == "2":
                         trackLayout[storeCoordy-5][storeCoordx-1] = "1"
                         print(trackLayout) #DEBUG
                         money = money - 1000 #costs 1000 to build points
+                elif event.type == pygame.MOUSEBUTTONUP and event.button == 3: #checks for a right click
+                    #condition if the square has a track in it already
+                    if trackLayout[storeCoordy-5][storeCoordx-1] == "1" or trackLayout[storeCoordy-5][storeCoordx-1] == "2":
+                        trackLayout[storeCoordy-5][storeCoordx-1] = "3"
+                        print(trackLayout) # DEBUG
+                        money = money - 1000
+                    #condition if the square has a set of points in it already
+                    elif trackLayout[storeCoordy-5][storeCorrdx-1] == "3":
+                        trackLayout[storeCoordy-5][storeCoordx-1] = "1"
+                        print(trackLayout) # DeBUG
+                        money = money + 900
             #check for whether the return button was hovered over/clicked
             elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 returnButton.changeButtonColour(pink)
@@ -714,6 +725,8 @@ def buildPoints(returnButton):
                     shop()
             else:
                 returnButton.changeButtonColour(darkGrey)
+
+def buildEntry(returnButton):
 
 def purchasePlatform():
     if money < platPrice:
