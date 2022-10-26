@@ -559,8 +559,8 @@ def purchaseTrack(buyTrack, returnButton):
             elif buyEntry.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 buyEntry.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
-                    pass
                     #code for buying entry points
+                    buildEntry(returnButton)
             elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 returnButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
@@ -727,6 +727,14 @@ def buildPoints(returnButton):
                 returnButton.changeButtonColour(darkGrey)
 
 def buildEntry(returnButton):
+    global money
+    #cover up the other buttons
+    pygame.draw.rect(screen, menuScreenColour, [0, 620, 275, 100])
+    positionCoord = pygame.mouse.get_pos()# position of the mouse
+    position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
+    notFinished = True
+    #need to chec whether the cursor is in the edges.
+    if positionCoord[1] > 219 and positionCoord[1] < 500 and (positionCoord[0] < 39 or positionCoord[0] > 1240):
 
 def purchasePlatform():
     if money < platPrice:
