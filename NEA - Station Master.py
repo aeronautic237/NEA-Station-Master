@@ -733,8 +733,56 @@ def buildEntry(returnButton):
     positionCoord = pygame.mouse.get_pos()# position of the mouse
     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
     notFinished = True
+    #need to open the file for entry points
+    entryLayout = [["" in range(0)] in range(3)]
+    with open("saveData/entryPoints.txt", "r", newline="") as file:
+        reader = csv.reader(file)
+        i = -1
+        for row in reader:
+            i += 1
+            entryLayout[i] = row
     #need to chec whether the cursor is in the edges.
-    if positionCoord[1] > 219 and positionCoord[1] < 500 and (positionCoord[0] < 39 or positionCoord[0] > 1240):
+    for event in pygame.event.get():
+        positionCoord = pygame.mouse.get_pos()
+        if positionCoord[1] > 219 and positionCoord[1] < 500 and (positionCoord[0] < 39 or positionCoord[0] > 1240):
+            #the above line will check if the cursor is in a buildable area before moving the rectangle.
+            oldPosition = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
+            positionCoord = pygame.mouse.get_pos()#new position of the mouse
+            storeCoordx, storeCoordy = int(position[0]/1240), int((position[1]/40)-80)# stores the coordinates of the mouse against the .txt grid (idexed from 1
+            pygame.draw.rect(screen, lightgreen, position) # draw a gold box to show where the mouse is.
+            pygame.display.update()
+            if position.collidepoint((pygame.mouse.get_pos())) == False:
+                if entryLayout[storeCoordy-5][storeCoordx] == "0":
+                    #need to draw a dashed line here
+                    #length is 40, so 3 white lines and two black lines should do the trick
+                    pygame.draw.rect(screen, black, position)
+                    pygame.draw.line(screen, white, (position[0], position[1] + 20), (position[0] + 40, position[1] + 20))
+                    pygame.draw.line(screen, black, (position[0] + 8, position[1] + 20), (position[0] + 16, position[1] + 20))
+                    pygame.draw.line(screen, black, (position[0] + 24, position[1] + 20), (position[0] + 32, position[1] + 20))
+                    pygame.display.update()
+                elif entryLayout[storeCoordy-5][storeCoordx] == "1":
+                    #symbolise that an entry point is bought
+                    pygame.draw.rect(screen, black, position)
+                    pygame.draw.line(screen, white, (position[0], position[1] + 20), (position[0] + 40, position[1] + 20))
+                    pygame.display.update()
+                position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
+
+            print(storeCoordy)# DEBUG
+            print(storeCoordx)# DEBUG
+            if event.type == pygame.MOUSEBUTTONUP:
+                entryLayout[storeCoordy-5][storeCoordx] = "1"
+                money = money - 2500
+            #check for whether the return button was hovered over/clicked
+            elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                returnButton.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    with open("saveData/tracksPlatforms.txt", "w", newline="") as file:
+                        writer = csv.writer(file)
+                        writer.writerows(trackLayout)
+                    shop()
+            else:
+                returnButton.changeButtonColour(darkGrey)
+                
 
 def purchasePlatform():
     if money < platPrice:
