@@ -615,6 +615,18 @@ def buildTrack(returnButton):
                     elif trackLayout[storeCoordy-5][storeCoordx-1] == "0":
                         pygame.draw.rect(screen, black, position)
                         pygame.display.update()
+                    #replaces the gold square with an upward pointing set of points if it is meant to be there
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "2":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, gold, (position[0],position[1]+20),(position[0] + 40 , position[1] + 20))
+                        pygame.draw.line(screen, gold, (position[0] + 20 , position[1]+20),(position[0] + 20 , position[1] - 0))
+                        pygame.display.update()
+                    #replaces the gold square with a downward pointing set of points if it is meant to be there
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "3":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, gold, (position[0],position[1] + 20),(position[0] + 40 , position[1] + 20))
+                        pygame.draw.line(screen, gold, (position[0] + 20,position[1] + 20),(position[0] + 20 , position[1] + 40))
+                        pygame.display.update()
                     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
                 print(storeCoordy) # DEBUG
                 print(storeCoordx) # DEBUG
