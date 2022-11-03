@@ -755,35 +755,35 @@ def buildEntry(returnButton):
                 #the above line will check if the cursor is in a buildable area before moving the rectangle.
                 oldPosition = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
                 positionCoord = pygame.mouse.get_pos()#new position of the mouse
-                storeCoordx, storeCoordy = int(positionCoord[0]//1240), int((position[1]/40)-3) # stores the coordinates of the mouse against the .txt grid (idexed from 1
-                pygame.draw.rect(screen, lightGreen, position) # draw a green box to show where the mouse is.
+                storeCoordx, storeCoordy = int(positionCoord[0]//1240), (int(positionCoord[1]/40)-3) # stores the coordinates of the mouse against the .txt grid (idexed from 1
+                pygame.draw.rect(screen, lightGreen, oldPosition) # draw a green box to show where the mouse is.
                 pygame.display.update()
                 if position.collidepoint((pygame.mouse.get_pos())) == False:
                     print(str(storeCoordy))
                     print(str(storeCoordx))
                     print("DEBUG005")
                     if entryLayout[storeCoordy-4][storeCoordx] == "0":
-                        #need to draw a dashed line here
-                        #length is 40, so 3 white lines and two black lines should do the trick
+                        # need to draw a dashed line here
+                        # length is 40, so 3 white lines and two black lines should do the trick
                         pygame.draw.rect(screen, black, position)
                         pygame.draw.line(screen, white, (position[0], position[1] + 20), (position[0] + 40, position[1] + 20))
                         pygame.draw.line(screen, black, (position[0] + 8, position[1] + 20), (position[0] + 16, position[1] + 20))
                         pygame.draw.line(screen, black, (position[0] + 24, position[1] + 20), (position[0] + 32, position[1] + 20))
                         pygame.display.update()
-                    elif entryLayout[storeCoordy-14][storeCoordx] == "1":
+                    elif entryLayout[storeCoordy-4][storeCoordx] == "1":
                         #symbolise that an entry point is bought
                         pygame.draw.rect(screen, black, position)
                         pygame.draw.line(screen, white, (position[0], position[1] + 20), (position[0] + 40, position[1] + 20))
                         pygame.display.update()
+                position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
                 print("DEBUG004")
                 print(str(storeCoordy-4))# DEBUG
                 print(str(storeCoordx))# DEBUG
                 if event.type == pygame.MOUSEBUTTONUP:
-                    entryLayout[storeCoordy-14][storeCoordx] = "1"
+                    entryLayout[storeCoordy-4][storeCoordx] = "1"
                     money = money - 2500
                 #check for whether the return button was hovered over/clicked
-            position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
-            if returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 returnButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     with open("saveData/entryPoints.txt", "w", newline="") as file:
@@ -792,6 +792,7 @@ def buildEntry(returnButton):
                     shop()
             else:
                 returnButton.changeButtonColour(darkGrey)
+                
                 
 
 def purchasePlatform():
