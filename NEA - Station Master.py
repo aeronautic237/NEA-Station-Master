@@ -758,22 +758,18 @@ def buildEntry(returnButton):
             print(entryLayout)
     #need to chec whether the cursor is in the edges.
     while notFinished:
+        pygame.draw.rect(screen, lightGreen, position)
         for event in pygame.event.get():
-            print("DEBUG002")
             positionCoord = pygame.mouse.get_pos()
-            print("DEBUG001")
             if positionCoord[1] > 299 and positionCoord[1] < 419 and (positionCoord[0] < 39 or positionCoord[0] > 1240):
-                print("DEBUG003")
                 #the above line will check if the cursor is in a buildable area before moving the rectangle.
                 oldPosition = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
                 positionCoord = pygame.mouse.get_pos()#new position of the mouse
                 storeCoordx, storeCoordy = int(positionCoord[0]//1240), (int(positionCoord[1]/40)-3) # stores the coordinates of the mouse against the .txt grid (idexed from 1
-                pygame.draw.rect(screen, lightGreen, oldPosition) # draw a green box to show where the mouse is.
+                pygame.draw.rect(screen, lightGreen, position) # draw a green box to show where the mouse is.
                 pygame.display.update()
                 if position.collidepoint((pygame.mouse.get_pos())) == False:
-                    print(str(storeCoordy))
-                    print(str(storeCoordx))
-                    print("DEBUG005")
+                    #draws a dotted line to show where entry has yet to be bought, and a solid one where they have been bought.
                     if entryLayout[storeCoordy-4][storeCoordx] == "0":
                         # need to draw a dashed line here
                         # length is 40, so 3 white lines and two black lines should do the trick
@@ -787,12 +783,9 @@ def buildEntry(returnButton):
                         pygame.draw.rect(screen, black, position)
                         pygame.draw.line(screen, white, (position[0], position[1] + 20), (position[0] + 40, position[1] + 20))
                         pygame.display.update()
-                position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
-                print("DEBUG004")
-                print(str(storeCoordy-4))# DEBUG
-                print(str(storeCoordx))# DEBUG
+                    position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
                 if event.type == pygame.MOUSEBUTTONUP:
-                    entryLayout[storeCoordy-4][storeCoordx] = "1"
+                    entryLayout[storeCoordy-5][storeCoordx] = "1"
                     money = money - 2500
                 #check for whether the return button was hovered over/clicked
             elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
