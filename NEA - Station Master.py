@@ -744,7 +744,6 @@ def buildEntry(returnButton):
     #cover up the other buttons
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 275, 100])
     positionCoord = pygame.mouse.get_pos()# position of the mouse
-    position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
     notFinished = True
     #need to open the file for entry points
     with open("saveData/entryPoints.txt", "r", newline="") as file:
@@ -758,14 +757,14 @@ def buildEntry(returnButton):
             print(entryLayout)
     #need to chec whether the cursor is in the edges.
     while notFinished:
-        pygame.draw.rect(screen, lightGreen, position)
         for event in pygame.event.get():
             positionCoord = pygame.mouse.get_pos()
+            position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
             if positionCoord[1] > 299 and positionCoord[1] < 419 and (positionCoord[0] < 39 or positionCoord[0] > 1240):
                 #the above line will check if the cursor is in a buildable area before moving the rectangle.
                 oldPosition = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
                 positionCoord = pygame.mouse.get_pos()#new position of the mouse
-                storeCoordx, storeCoordy = int(positionCoord[0]//1240), (int(positionCoord[1]/40)-3) # stores the coordinates of the mouse against the .txt grid (idexed from 1
+                storeCoordx, storeCoordy = int((position[0]//40)//30), (int(position[1]//40)-3) # stores the coordinates of the mouse against the .txt grid (idexed from 1
                 pygame.draw.rect(screen, lightGreen, position) # draw a green box to show where the mouse is.
                 pygame.display.update()
                 if position.collidepoint((pygame.mouse.get_pos())) == False:
@@ -783,7 +782,7 @@ def buildEntry(returnButton):
                         pygame.draw.rect(screen, black, position)
                         pygame.draw.line(screen, white, (position[0], position[1] + 20), (position[0] + 40, position[1] + 20))
                         pygame.display.update()
-                    position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
+                position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
                 if event.type == pygame.MOUSEBUTTONUP:
                     entryLayout[storeCoordy-5][storeCoordx] = "1"
                     money = money - 2500
