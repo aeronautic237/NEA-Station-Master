@@ -743,7 +743,6 @@ def buildEntry(returnButton):
     global money
     #cover up the other buttons
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 275, 100])
-    positionCoord = pygame.mouse.get_pos()# position of the mouse
     notFinished = True
     #need to open the file for entry points
     with open("saveData/entryPoints.txt", "r", newline="") as file:
@@ -755,36 +754,18 @@ def buildEntry(returnButton):
             print(entryLayout)
             entryLayout[i] = row
             print(entryLayout)
-    #need to chec whether the cursor is in the edges.
+    #need to create the buttons that will act as the buildable areas - for this, a subclass is needed.
+    entryButton1 = entryButton(black, (0, 640, 40, 40), "", clockTextFont, black, 0, 0, 0, 0, entryLayout[0][0])
+    entryButton1.drawButton()
+    pygame.display.update()
+    #need to chec whether the cursor is in the buildable area.
     while notFinished:
         for event in pygame.event.get():
-            positionCoord = pygame.mouse.get_pos()
-            position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
-            if positionCoord[1] > 299 and positionCoord[1] < 419 and (positionCoord[0] < 39 or positionCoord[0] > 1240):
-                #the above line will check if the cursor is in a buildable area before moving the rectangle.
-                oldPosition = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
-                positionCoord = pygame.mouse.get_pos()#new position of the mouse
-                storeCoordx, storeCoordy = int((position[0]//40)//30), (int(position[1]//40)-3) # stores the coordinates of the mouse against the .txt grid (idexed from 1
-                pygame.draw.rect(screen, lightGreen, position) # draw a green box to show where the mouse is.
-                pygame.display.update()
-                if position.collidepoint((pygame.mouse.get_pos())) == False:
-                    #draws a dotted line to show where entry has yet to be bought, and a solid one where they have been bought.
-                    if entryLayout[storeCoordy-4][storeCoordx] == "0":
-                        # need to draw a dashed line here
-                        # length is 40, so 3 white lines and two black lines should do the trick
-                        pygame.draw.rect(screen, black, position)
-                        pygame.draw.line(screen, white, (position[0], position[1] + 20), (position[0] + 40, position[1] + 20))
-                        pygame.draw.line(screen, black, (position[0] + 8, position[1] + 20), (position[0] + 16, position[1] + 20))
-                        pygame.draw.line(screen, black, (position[0] + 24, position[1] + 20), (position[0] + 32, position[1] + 20))
-                        pygame.display.update()
-                    elif entryLayout[storeCoordy-4][storeCoordx] == "1":
-                        #symbolise that an entry point is bought
-                        pygame.draw.rect(screen, black, position)
-                        pygame.draw.line(screen, white, (position[0], position[1] + 20), (position[0] + 40, position[1] + 20))
-                        pygame.display.update()
-                position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
+            if entryButton1.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                entryButton1.changeButtonColour(menuScreenColour)
                 if event.type == pygame.MOUSEBUTTONUP:
                     entryLayout[storeCoordy-5][storeCoordx] = "1"
+                    #need to toggle state here
                     money = money - 2500
                 #check for whether the return button was hovered over/clicked
             elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
@@ -924,6 +905,29 @@ class technoButton(button):
             pygame.draw.line(screen, white, [(self.buttonPos[0] - (xdisplacement/2)), self.buttonPos[1] + (self.buttonPos[3]/2)], [self.buttonPos[0], self.buttonPos[1] + (self.buttonPos[3]/2)])
         pygame.display.update()
 
+#subclass of button and acts in the buildEntry subroutine, and represents the entry points 
+class entryButton(button):
+    #constructor
+    def __init__(self, saveLocationx, saveLocationy, state):
+        super().__init__()
+        salf.saveLocationx = saveLocationx # this is the x-coordinate of the save location
+        self.saveLocationy = saveLocationy # this is the y-coordinate of the save location
+        self.state = state # Boolean stores whether this has been unlocked or not.
+    #we need to remove the text and replace it with lines. This will be done in a drawButton method
+    def drawButton(self):
+        #draw the rectangle
+        pygame.draw.rect(screen, self.buttonColour, self.buttonPos)
+        #draw the lines - we will need to add some attributes for the location of the button in the file. For this, we will need to make a new initialiser
+        if state = "0":
+            pygame.draw.line(screen, white, ((1240*saveLocationx),(60 + (300*saveLocationy))), (((1240*saveLocationx)+40),(60 + (300*saveLocationy))))
+            pygame.draw.line(screen, black, (((1240*saveLocationx)+8),(60 + (300*saveLocationy))), (((1240*saveLocationx)+16),(60 + (300*saveLocationy))))
+            pygame.draw.line(screen, black, (((1240*saveLocationx)+24),(60 + (300*saveLocationy))), (((1240*saveLocationx)+32),(60 + (300*saveLocationy))))
+        else:
+            pygame.draw.line(screen, white, ((1240*saveLocationx),(60 + (300*saveLocationy))), (((1240*saveLocationx)+40),(60 + (300*saveLocationy))))
+    #we need to change changeButtonColour so that hovering is more intuitive - this will be done in a new changeButtonColour method
+    #actually I don't think we do, we'll see.
+
+    #we need to add a toggle state method, so we can change the state of the button
 
 #will print text as the user wishes
 def write(text, font, colour, xpos, ypos):
