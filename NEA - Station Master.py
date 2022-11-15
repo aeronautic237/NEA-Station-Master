@@ -757,6 +757,20 @@ def buildEntry(returnButton):
     #need to create the buttons that will act as the buildable areas - for this, a subclass is needed.
     entryButton1 = entryButton(black, (0, 640, 40, 40), "", clockTextFont, black, 0, 0, 0, 0, entryLayout[0][0])
     entryButton1.drawButton()
+    entryButton2 = entryButton(black, (0, 680, 40, 40), "", clockTextFont, black, 0, 0, 0, 1, entryLayout[0][1])
+    entryButton2.drawButton()
+    entryButton3 = entryButton(black, (0, 720, 40, 40), "", clockTextFont, black, 0, 0, 0, 2, entryLayout[0][2])
+    entryButton3.drawButton()
+    entryButton4 = entryButton(black, (0, 760, 40, 40), "", clockTextFont, black, 0, 0, 0, 3, entryLayout[0][3])
+    entryButton4.drawButton()
+    entryButton5 = entryButton(black, (1240, 640, 40, 40), "", clockTextFont, black, 0, 0, 1, 0, entryLayout[1][0])
+    entryButton5.drawButton()
+    entryButton6 = entryButton(black, (1240, 680, 40, 40), "", clockTextFont, black, 0, 0, 1, 1, entryLayout[1][1])
+    entryButton6.drawButton()
+    entryButton7 = entryButton(black, (1240, 720, 40, 40), "", clockTextFont, black, 0, 0, 1, 2, entryLayout[1][2])
+    entryButton7.drawButton()
+    entryButton8 = entryButton(black, (1240, 760, 40, 40), "", clockTextFont, black, 0, 0, 1, 3, entryLayout[1][3])
+    entryButton8.drawButton()
     pygame.display.update()
     #need to chec whether the cursor is in the buildable area.
     while notFinished:
@@ -764,8 +778,42 @@ def buildEntry(returnButton):
             if entryButton1.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 entryButton1.changeButtonColour(menuScreenColour)
                 if event.type == pygame.MOUSEBUTTONUP:
-                    entryLayout[storeCoordy-5][storeCoordx] = "1"
-                    #need to toggle state here
+                    entryButton1.setState()
+                    money = money - 2500
+            elif entryButton2.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                entryButton2.changeButtonColour(menuScreenColour)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    entryButton2.setState()
+                    money = money - 2500
+            elif entryButton3.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                entryButton3.changeButtonColour(menuScreenColour)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    entryButton3.setState()
+                    money = money - 2500
+            elif entryButton4.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                entryButton4.changeButtonColour(menuScreenColour)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    entryButton4.setState()
+                    money = money - 2500
+            elif entryButton5.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                entryButton5.changeButtonColour(menuScreenColour)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    entryButton5.setState()
+                    money = money - 2500
+            elif entryButton6.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                entryButton6.changeButtonColour(menuScreenColour)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    entryButton6.setState()
+                    money = money - 2500
+            elif entryButton7.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                entryButton7.changeButtonColour(menuScreenColour)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    entryButton7.setState()
+                    money = money - 2500
+            elif entryButton8.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                entryButton8.changeButtonColour(menuScreenColour)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    entryButton8.setState()
                     money = money - 2500
                 #check for whether the return button was hovered over/clicked
             elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
@@ -777,6 +825,14 @@ def buildEntry(returnButton):
                     shop()
             else:
                 returnButton.changeButtonColour(darkGrey)
+                entryButton1.changeButtonColour(black)
+                entryButton2.changeButtonColour(black)
+                entryButton3.changeButtonColour(black)
+                entryButton4.changeButtonColour(black)
+                entryButton5.changeButtonColour(black)
+                entryButton6.changeButtonColour(black)
+                entryButton7.changeButtonColour(black)
+                entryButton8.changeButtonColour(black)
                 
                 
 
@@ -918,7 +974,7 @@ class entryButton(button):
         #draw the rectangle
         pygame.draw.rect(screen, self.buttonColour, self.buttonPos)
         #draw the lines - we will need to add some attributes for the location of the button in the file. For this, we will need to make a new initialiser
-        if state = "0":
+        if state == "0":
             pygame.draw.line(screen, white, ((1240*saveLocationx),(60 + (300*saveLocationy))), (((1240*saveLocationx)+40),(60 + (300*saveLocationy))))
             pygame.draw.line(screen, black, (((1240*saveLocationx)+8),(60 + (300*saveLocationy))), (((1240*saveLocationx)+16),(60 + (300*saveLocationy))))
             pygame.draw.line(screen, black, (((1240*saveLocationx)+24),(60 + (300*saveLocationy))), (((1240*saveLocationx)+32),(60 + (300*saveLocationy))))
@@ -927,8 +983,11 @@ class entryButton(button):
     #we need to change changeButtonColour so that hovering is more intuitive - this will be done in a new changeButtonColour method
     #actually I don't think we do, we'll see.
 
-    #we need to add a toggle state method, so we can change the state of the button
-
+    #we need to add a toggle state method, so we can change the state of the button. Actually no we don't because we needn't change it back to unbought
+    def setState(self):
+        state = "1"
+        entryLayout[saveLocationy][saveLocationx] = state
+        
 #will print text as the user wishes
 def write(text, font, colour, xpos, ypos):
     font = font
