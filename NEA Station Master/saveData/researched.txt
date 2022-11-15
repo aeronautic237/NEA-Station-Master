@@ -1,5 +1,5 @@
 techonology, researchedState
-sigBoxBell,0
+sigBoxBell,1
 trackPhone,0
 cabPhone,0
 GSMR,0

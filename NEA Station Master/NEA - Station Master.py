@@ -41,7 +41,8 @@ gamestate = "menu"
 
 #declare array
 researchProgress = [[0 for x in range(2)] for y in range(33)]#create an array in which to store the data
-trackLayout = [[0 for x in range(32)] for y in range(13)]
+trackLayout = [[0 for x in range(32)] for y in range(13)]#create an array in which the trackLayout is stored
+entryLayout = [[0 for x in range(2)] for y in range(4)]#create an array in which the entry points are stored
 
 #defing the various functions of the game here
 def mainMenu():
@@ -500,6 +501,7 @@ def shop():
     #print it all on screen
     pygame.display.update()
     waiting = True
+    #the rest of the function will wait for an input as to what the user wishes to buy
     while waiting:
         for event in pygame.event.get():
             if buyTrack.buttonCoords.collidepoint((pygame.mouse.get_pos())):
@@ -533,17 +535,6 @@ def shop():
 
 def purchaseTrack(buyTrack, returnButton):
     #The save grid will be 32x13 for track, with each square being 40x40
-    #The below will copy the contents of the file into the temporary storage
-    trackLayout = [[0 for x in range(32)]for y in range(13)]
-    with open ("saveData/tracksPlatforms.txt", "r") as fileOut:
-        reader = csv.reader(fileOut)
-        j=-1
-        for row in reader:
-            j+=1
-            i=0
-            for i in range(32):
-                trackLayout[j][i] = row[i]
-                i += 1
     #change the bottom bar with the relevant options
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 1280, 100])
     buyTrack.drawButton()
@@ -552,89 +543,298 @@ def purchaseTrack(buyTrack, returnButton):
     buyPoints.drawButton()
     buyEntry = button(darkGrey, [275, 635, 130, 75],  "Entries", clockTextFont, white, 280, 655)
     buyEntry.drawButton()
-    with open("saveData/tracksPlatforms.txt", "r", newline="") as fileOut:
-        writer = csv.reader(fileOut)
-        waiting = True
-        while waiting:
-            for event in pygame.event.get():
-                if buyTrack.buttonCoords.collidepoint((pygame.mouse.get_pos())):
-                    buyTrack.changeButtonColour(pink)
-                    if event.type == pygame.MOUSEBUTTONUP:
-                        #code for building track goes here
-                        buildTrack()
-                elif buyPoints.buttonCoords.collidepoint((pygame.mouse.get_pos())):
-                    buyPoints.changeButtonColour(pink)
-                    if event.type == pygame.MOUSEBUTTONUP:
-                        pass
-                        #code for building points goes here
-                elif buyEntry.buttonCoords.collidepoint((pygame.mouse.get_pos())):
-                    buyEntry.changeButtonColour(pink)
-                    if event.type == pygame.MOUSEBUTTONUP:
-                        pass
-                        #code for buying entry points
-                elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
-                    returnButton.changeButtonColour(pink)
-                    if event.type == pygame.MOUSEBUTTONUP:
-                        waiting = False
-                        shop()
-                elif event.type == pygame.QUIT:
+    waiting = True
+    #Again, the following will wait for the user to select an option form the bottom of the screen
+    while waiting:
+        for event in pygame.event.get():
+            if buyTrack.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                buyTrack.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    #code for building track goes here
+                    buildTrack(returnButton)
+            elif buyPoints.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                buyPoints.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    #code for building points goes here
+                    buildPoints(returnButton)
+            elif buyEntry.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                buyEntry.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    #code for buying entry points
+                    buildEntry(returnButton)
+            elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                returnButton.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
-                    pygame.quit()
-                    sys.exit()
-                else:
-                    buyTrack.changeButtonColour(darkGrey)
-                    buyPoints.changeButtonColour(darkGrey)
-                    buyEntry.changeButtonColour(darkGrey)
-                    returnButton.changeButtonColour(darkGrey)
-                    pygame.display.update()
+                    shop()
+            elif event.type == pygame.QUIT:
+                waiting = False
+                pygame.quit()
+                sys.exit()
+            else:
+                buyTrack.changeButtonColour(darkGrey)
+                buyPoints.changeButtonColour(darkGrey)
+                buyEntry.changeButtonColour(darkGrey)
+                returnButton.changeButtonColour(darkGrey)
+                pygame.display.update()
 
-def buildTrack():
+def buildTrack(returnButton):
+    global money # "money referenced before assignment"
+    #cover up the other buttons
+    pygame.draw.rect(screen, menuScreenColour, [135, 635, 300, 75])
     positionCoord = pygame.mouse.get_pos()# position of the mouse
     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
     notFinished = True
+    #copy the contents of the TrackLayout file into an array for easier handling.
     with open ("saveData/tracksPlatforms.txt", "r") as fileOut:
         reader = csv.reader(fileOut)
         j=-1
         for row in reader:
-            j+=1
-            i=0
-            for i in range(32):
-                trackLayout[j][i] = row[i]
-                i += 1
+            j += 1
+            if j < 14:
+                trackLayout[j] = row
     while notFinished:
         pygame.draw.rect(screen, white, position)
         #pygame.draw.rect(screen, white, [position[0]-(position[0]%40),position[1]-(position[1]%40),40,40])
         for event in pygame.event.get():
-            positionCoord = pygame.mouse.get_pos()
+            positionCoord = pygame.mouse.get_pos() # variable stores the position of the mouse
             if positionCoord[1] > 139 and positionCoord[1] < 580 and positionCoord[0] > 39 and positionCoord[0] < 1240 and (positionCoord[0] < 540 or positionCoord[0] > 740):
                 #the above line will check if the cursor is in a buildable area before moving the rectangle.
                 oldPosition = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
-                positionCoord = pygame.mouse.get_pos()
-                storeCoordx, storeCoordy = int(oldPosition[0]/40), int(oldPosition[1]/40)# stores the coordinates of the mouse against the .txt grid (idexed from 1 
+                positionCoord = pygame.mouse.get_pos()#new position of the mouse
+                storeCoordx, storeCoordy = int(position[0]/40), int(position[1]/40)# stores the coordinates of the mouse against the .txt grid (idexed from 1
+                pygame.draw.rect(screen, white, position) # draw a white box to show where the mouse is.
+                pygame.display.update()
                 if position.collidepoint((pygame.mouse.get_pos())) == False:#checks if the mouse has left the box
-                    if trackLayout[storeCoordy-2][storeCoordx-1] == "1":
+                    #replaces the white square with a track piece if there is meant to be one there
+                    if trackLayout[storeCoordy-5][storeCoordx-1] == "1":
                         pygame.draw.rect(screen, black, position)
                         pygame.draw.line(screen, white, (position[0],position[1]+20),(position[0] + 40 , position[1] + 20))
                         pygame.display.update()
-                    elif trackLayout[storeCoordy-2][storeCoordx-1] == "0":
+                    #replaces the white square with a blank piece if no track is meant to be there
+                    elif trackLayout[storeCoordy-5][storeCoordx-1] == "0":
                         pygame.draw.rect(screen, black, position)
                         pygame.display.update()
+                    #replaces the gold square with an upward pointing set of points if it is meant to be there
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "2":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, gold, (position[0],position[1]+20),(position[0] + 40 , position[1] + 20))
+                        pygame.draw.line(screen, gold, (position[0] + 20 , position[1]+20),(position[0] + 20 , position[1] - 0))
+                        pygame.display.update()
+                    #replaces the gold square with a downward pointing set of points if it is meant to be there
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "3":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, gold, (position[0],position[1] + 20),(position[0] + 40 , position[1] + 20))
+                        pygame.draw.line(screen, gold, (position[0] + 20,position[1] + 20),(position[0] + 20 , position[1] + 40))
+                        pygame.display.update()
                     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
-                    storeCoordx, storeCoordy = int(position[0]/40), int(position[1]/40)# stores the coordinates of the mouse against the .txt grid (idexed from 1 
-                    #position.move_ip(position[0]-(position[0]%40),position[1]-(position[1]%40))
-                    pygame.draw.rect(screen, white, oldPosition)
-                    pygame.display.update()
-                    if event.type == pygame.MOUSEBUTTONUP:#checks for a click
-                        #condition if the square has a track in it already
-                        if trackLayout[storeCoordx][storeCoordy] == 1:
-                            trackLayout[storeCoordx][storeCoordy] = 0
-                            money = money + 700 #You will not get a full refund for destroying track
-                        #condition if the selected quare has no track in it already.
-                        elif trackLayout[storeCoordx][storeCoordy] == 0:
-                            trackLayout[storeCoordx][storeCoordy] = 1
-                            print(trackLayout) #DEBUG
-                            money = money - 800 #costs 800 to build track
-                        
+                print(storeCoordy) # DEBUG
+                print(storeCoordx) # DEBUG
+                if event.type == pygame.MOUSEBUTTONUP:#checks for a click
+                    #condition if the square has a track in it already
+                    if trackLayout[storeCoordy-5][storeCoordx-1] == "1":
+                        trackLayout[storeCoordy-5][storeCoordx-1] = "0"
+                        print(trackLayout) #DEBUG
+                        money = money + 700 #You will not get a full refund for destroying track
+                    #condition if the selected quare has no track in it already.
+                    elif trackLayout[storeCoordy-5][storeCoordx-1] == "0":
+                        trackLayout[storeCoordy-5][storeCoordx-1] = "1"
+                        print(trackLayout) #DEBUG
+                        money = money - 800 #costs 800 to build track
+            #check for whether the return button was hovered over/clicked
+            elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                returnButton.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    with open("saveData/tracksPlatforms.txt", "w", newline="") as file:
+                        writer = csv.writer(file)
+                        writer.writerows(trackLayout)
+                    shop()
+            else:
+                returnButton.changeButtonColour(darkGrey)
+
+#This will do the same thing as the buildTrack procedure, but is adapted for points
+def buildPoints(returnButton):
+    global money
+    #cover up the other buttons
+    pygame.draw.rect(screen, menuScreenColour, [0, 620, 125, 100])
+    pygame.draw.rect(screen, menuScreenColour, [275, 635, 150, 75])
+    positionCoord = pygame.mouse.get_pos()# position of the mouse
+    position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
+    notFinished = True
+    #copy the contents of the TrackLayout file into an array for easier handling.
+    with open ("saveData/tracksPlatforms.txt", "r") as fileOut:
+        reader = csv.reader(fileOut)
+        j=-1
+        for row in reader:
+            j += 1
+            if j < 14:
+                trackLayout[j] = row
+    while notFinished:
+        pygame.draw.rect(screen, gold, position)
+        for event in pygame.event.get():
+            positionCoord = pygame.mouse.get_pos() # variable stores the position of the mouse
+            if positionCoord[1] > 139 and positionCoord[1] < 580 and positionCoord[0] > 39 and positionCoord[0] < 1240 and (positionCoord[0] < 540 or positionCoord[0] > 740):
+                #the above line will check if the cursor is in a buildable area before moving the rectangle.
+                oldPosition = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
+                positionCoord = pygame.mouse.get_pos()#new position of the mouse
+                storeCoordx, storeCoordy = int(position[0]/40), int(position[1]/40)# stores the coordinates of the mouse against the .txt grid (idexed from 1
+                pygame.draw.rect(screen, gold, position) # draw a gold box to show where the mouse is.
+                pygame.display.update()
+                if position.collidepoint((pygame.mouse.get_pos())) == False:#checks if the mouse has left the box
+                    #replaces the gold square with a track piece if there is meant to be one there
+                    if trackLayout[storeCoordy-5][storeCoordx-1] == "1":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, white, (position[0],position[1]+20),(position[0] + 40 , position[1] + 20))
+                        pygame.display.update()
+                    #replaces the gold square with a blank piece if no track is meant to be there
+                    elif trackLayout[storeCoordy-5][storeCoordx-1] == "0":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.display.update()
+                    #replaces the gold square with an upward pointing set of points if it is meant to be there
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "2":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, gold, (position[0],position[1]+20),(position[0] + 40 , position[1] + 20))
+                        pygame.draw.line(screen, gold, (position[0] + 20 , position[1]+20),(position[0] + 20 , position[1] - 0))
+                        pygame.display.update()
+                    #replaces the gold square with a downward pointing set of points if it is meant to be there
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "3":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, gold, (position[0],position[1] + 20),(position[0] + 40 , position[1] + 20))
+                        pygame.draw.line(screen, gold, (position[0] + 20,position[1] + 20),(position[0] + 20 , position[1] + 40))
+                        pygame.display.update()
+                    position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
+                    
+                print(storeCoordy) # DEBUG
+                print(storeCoordx) # DEBUG
+                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:#checks for a left click
+                    #condition if the square has a track in it already
+                    if trackLayout[storeCoordy-5][storeCoordx-1] == "1" or trackLayout[storeCoordy-5][storeCoordx-1] == "3":
+                        trackLayout[storeCoordy-5][storeCoordx-1] = "2"
+                        print(trackLayout) #DEBUG
+                        money = money + 900 #You will not get a full refund for destroying track
+                    #condition if the selected quare has a set of points in it already
+                    elif trackLayout[storeCoordy-5][storeCoordx-1] == "2":
+                        trackLayout[storeCoordy-5][storeCoordx-1] = "1"
+                        print(trackLayout) #DEBUG
+                        money = money - 1000 #costs 1000 to build points
+                elif event.type == pygame.MOUSEBUTTONUP and event.button == 3: #checks for a right click
+                    #condition if the square has a track in it already
+                    if trackLayout[storeCoordy-5][storeCoordx-1] == "1" or trackLayout[storeCoordy-5][storeCoordx-1] == "2":
+                        trackLayout[storeCoordy-5][storeCoordx-1] = "3"
+                        print(trackLayout) # DEBUG
+                        money = money - 1000
+                    #condition if the square has a set of points in it already
+                    elif trackLayout[storeCoordy-5][storeCorrdx-1] == "3":
+                        trackLayout[storeCoordy-5][storeCoordx-1] = "1"
+                        print(trackLayout) # DeBUG
+                        money = money + 900
+            #check for whether the return button was hovered over/clicked
+            elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                returnButton.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    with open("saveData/tracksPlatforms.txt", "w", newline="") as file:
+                        writer = csv.writer(file)
+                        writer.writerows(trackLayout)
+                    shop()
+            else:
+                returnButton.changeButtonColour(darkGrey)
+
+def buildEntry(returnButton):
+    global money
+    #cover up the other buttons
+    pygame.draw.rect(screen, menuScreenColour, [0, 620, 275, 100])
+    notFinished = True
+    #need to open the file for entry points
+    with open("saveData/entryPoints.txt", "r", newline="") as file:
+        reader = csv.reader(file)
+        i = -1
+        for row in reader:
+            i += 1
+            print(i)
+            print(entryLayout)
+            entryLayout[i] = row
+            print(entryLayout)
+    #need to create the buttons that will act as the buildable areas - for this, a subclass is needed.
+    entryButton1 = entryButton(black, (0, 280, 40, 40), "", clockTextFont, black, 0, 0, 0, 0, entryLayout[0][0])
+    entryButton1.drawButton()
+    entryButton2 = entryButton(black, (0, 320, 40, 40), "", clockTextFont, black, 0, 0, 0, 1, entryLayout[1][0])
+    entryButton2.drawButton()
+    entryButton3 = entryButton(black, (0, 360, 40, 40), "", clockTextFont, black, 0, 0, 0, 2, entryLayout[2][0])
+    entryButton3.drawButton()
+    entryButton4 = entryButton(black, (0, 400, 40, 40), "", clockTextFont, black, 0, 0, 0, 3, entryLayout[3][0])
+    entryButton4.drawButton()
+    entryButton5 = entryButton(black, (1240, 280, 40, 40), "", clockTextFont, black, 0, 0, 1, 0, entryLayout[0][1])
+    entryButton5.drawButton()
+    entryButton6 = entryButton(black, (1240, 320, 40, 40), "", clockTextFont, black, 0, 0, 1, 1, entryLayout[1][1])
+    entryButton6.drawButton()
+    entryButton7 = entryButton(black, (1240, 360, 40, 40), "", clockTextFont, black, 0, 0, 1, 2, entryLayout[2][1])
+    entryButton7.drawButton()
+    entryButton8 = entryButton(black, (1240, 400, 40, 40), "", clockTextFont, black, 0, 0, 1, 3, entryLayout[3][1])
+    entryButton8.drawButton()
+    pygame.display.update()
+    #need to chec whether the cursor is in the buildable area.
+    while notFinished:
+        for event in pygame.event.get():
+            if entryButton1.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                entryButton1.changeButtonColour(menuScreenColour)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    entryButton1.setState()
+                    money = money - 2500
+            elif entryButton2.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                entryButton2.changeButtonColour(menuScreenColour)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    entryButton2.setState()
+                    money = money - 2500
+            elif entryButton3.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                entryButton3.changeButtonColour(menuScreenColour)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    entryButton3.setState()
+                    money = money - 2500
+            elif entryButton4.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                entryButton4.changeButtonColour(menuScreenColour)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    entryButton4.setState()
+                    money = money - 2500
+            elif entryButton5.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                entryButton5.changeButtonColour(menuScreenColour)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    entryButton5.setState()
+                    money = money - 2500
+            elif entryButton6.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                entryButton6.changeButtonColour(menuScreenColour)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    entryButton6.setState()
+                    money = money - 2500
+            elif entryButton7.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                entryButton7.changeButtonColour(menuScreenColour)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    entryButton7.setState()
+                    money = money - 2500
+            elif entryButton8.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                entryButton8.changeButtonColour(menuScreenColour)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    entryButton8.setState()
+                    money = money - 2500
+                #check for whether the return button was hovered over/clicked
+            elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                returnButton.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    with open("saveData/entryPoints.txt", "w", newline="") as file:
+                        writer = csv.writer(file)
+                        writer.writerows(entryLayout)
+                    shop()
+            else:
+                returnButton.changeButtonColour(darkGrey)
+                entryButton1.changeButtonColour(black)
+                entryButton2.changeButtonColour(black)
+                entryButton3.changeButtonColour(black)
+                entryButton4.changeButtonColour(black)
+                entryButton5.changeButtonColour(black)
+                entryButton6.changeButtonColour(black)
+                entryButton7.changeButtonColour(black)
+                entryButton8.changeButtonColour(black)
+                
+                
 
 def purchasePlatform():
     if money < platPrice:
@@ -761,7 +961,33 @@ class technoButton(button):
             pygame.draw.line(screen, white, [(self.buttonPos[0] - (xdisplacement/2)), self.buttonPos[1] + (self.buttonPos[3]/2)], [self.buttonPos[0], self.buttonPos[1] + (self.buttonPos[3]/2)])
         pygame.display.update()
 
+#subclass of button and acts in the buildEntry subroutine, and represents the entry points 
+class entryButton(button):
+    #constructor
+    def __init__(self, buttonColour, buttonPos, text, font, textColour, textx, texty, saveLocationx, saveLocationy, state):
+        super().__init__(buttonColour, buttonPos, text, font, textColour, textx, texty)
+        self.saveLocationx = saveLocationx # this is the x-coordinate of the save location
+        self.saveLocationy = saveLocationy # this is the y-coordinate of the save location
+        self.state = state # Boolean stores whether this has been unlocked or not.
+    #we need to remove the text and replace it with lines. This will be done in a drawButton method
+    def drawButton(self):
+        #draw the rectangle
+        pygame.draw.rect(screen, self.buttonColour, self.buttonPos)
+        #draw the lines - we will need to add some attributes for the location of the button in the file. For this, we will need to make a new initialiser
+        if self.state == "0":
+            pygame.draw.line(screen, white, ((1240*self.saveLocationx),((300+(40*self.saveLocationy)))), (((1240*self.saveLocationx)+40),((300+(40*self.saveLocationy)))))
+            pygame.draw.line(screen, black, (((1240*self.saveLocationx)+8),((300+(40*self.saveLocationy)))), (((1240*self.saveLocationx)+16),((300+(40*self.saveLocationy)))))
+            pygame.draw.line(screen, black, (((1240*self.saveLocationx)+24),((300+(40*self.saveLocationy)))), (((1240*self.saveLocationx)+32),((300+(40*self.saveLocationy)))))
+        else:
+            pygame.draw.line(screen, white, ((1240*self.saveLocationx),((300+(40*self.saveLocationy)))), (((1240*self.saveLocationx)+40),((300+(40*self.saveLocationy)))))
+    #we need to change changeButtonColour so that hovering is more intuitive - this will be done in a new changeButtonColour method
+    #actually I don't think we do, we'll see.
 
+    #we need to add a toggle state method, so we can change the state of the button. Actually no we don't because we needn't change it back to unbought
+    def setState(self):
+        self.state = "1"
+        entryLayout[self.saveLocationy][self.saveLocationx] = self.state
+        
 #will print text as the user wishes
 def write(text, font, colour, xpos, ypos):
     font = font
