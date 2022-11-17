@@ -104,7 +104,7 @@ def game():
     #this is where we draw the first part of the game
     #drawing the tracks, stations, signals, and points
     screen.fill(black)
-    with open("saveData/entryLayout.txt", "r") as file:
+    with open("saveData/tracksPlatforms.txt", "r") as file:
         reader = csv.reader(file)
         i = 0
         for row in reader:
@@ -114,13 +114,13 @@ def game():
         for i in range(len(trackLayout)):
             for j in range(len(trackLayout[i])):
                 if trackLayout[i][j] == "1": # normal track
-                    pygame.draw.line(screen, white, ((40 * j) + 40, (140 + i)),((40 * j) + 80, (140 + i)))
+                    pygame.draw.line(screen, white, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
                 elif trackLayout[i][j] == "2": # upwards points
-                    pygame.draw.line(screen, gold, ((40 * j) + 40, (140 + i)),((40 * j) + 60, (140 + i)))
-                    pygame.draw.line(screen, gold, ((40 * j) + 60, (140 + i)),((40 * j) + 60, (120 + i)))
+                    pygame.draw.line(screen, gold, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 60, (140 + (40 * i))))
+                    pygame.draw.line(screen, gold, ((40 * j) + 60, (140 + (40 * i))),((40 * j) + 60, (120 + (40 * i))))
                 elif trackLayout[i][j] == "3":#downwards points
-                    pygame.draw.line(screen, gold, ((40 * j) + 40, (140 + i)),((40 * j) + 60, (140 + i)))
-                    pygame.draw.line(screen, gold, ((40 * j) + 60, (140 + i)),((40 * j) + 60, (160 + i)))
+                    pygame.draw.line(screen, gold, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 60, (140 + (40 * i))))
+                    pygame.draw.line(screen, gold, ((40 * j) + 60, (140 + (40 * i))),((40 * j) + 60, (160 + (40 * i))))
     #draw the top and bottom bar
     pygame.draw.rect(screen, menuScreenColour, [0, 0, 1280, 100])
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 1280, 100])
