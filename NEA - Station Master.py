@@ -133,7 +133,7 @@ def game():
                 if entryLayout[i][j] == "1":
                     pygame.draw.line(screen, white, ((1240*j),(40 * i) + 300),((1240*j) + 40,(40 * i) + 300))
                     
-        
+    drawPlatform()
     #draw the top and bottom bar
     pygame.draw.rect(screen, menuScreenColour, [0, 0, 1280, 100])
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 1280, 100])
@@ -862,7 +862,6 @@ def buildEntry(returnButton):
                 entryButton7.changeButtonColour(black)
                 entryButton8.changeButtonColour(black)
                 
-                
 
 def purchasePlatform():
     if money < platPrice:
@@ -870,7 +869,22 @@ def purchasePlatform():
     else:
         platCount = platCount + 1#records the number of platforms in possesion
         platPrice = platPrice + 5000##increase price of a new platform by £5000
+    drawPlatform()
     shop()
+
+def drawPlatform(): #I will need to preset the location of platforms, and then show them when the user buys a platform. This will need to be done in several screens so it is best to do this in a function
+    with open("saveData/tracksPlatforms.txt", "r") as file:
+        reader = csv.reader(file)
+        i = 0
+        for row in reader:
+            trackLayout[i] = row
+            i += 1
+        i = 0
+        for i in range(len(trackLayout)):
+            print("DEBUG001")
+            #column 16 of the array will hold where the platforms are.
+            if trackLayout[i][15] == "4":# denotes platforms because 1, 2, 3, and 0 are taken by tracks, points, and gaps
+                pygame.draw.rect(screen, darkGrey, [560, 190 + (40 * i), 160, 20])        
 
 def purchaseSignal():
     pass
