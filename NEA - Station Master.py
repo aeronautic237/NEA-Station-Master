@@ -121,6 +121,19 @@ def game():
                 elif trackLayout[i][j] == "3":#downwards points
                     pygame.draw.line(screen, gold, ((40 * j) + 40, (180 + (40 * i))),((40 * j) + 80, (180 + (40 * i))))
                     pygame.draw.line(screen, gold, ((40 * j) + 60, (180 + (40 * i))),((40 * j) + 60, (200 + (40 * i))))
+    with open("saveData/entryPoints.txt", "r") as file:
+        reader = csv.reader(file)
+        i = 0
+        for row in reader:
+            entryLayout[i] = row
+            i += 1
+        i = 0
+        for i in range(4):
+            for j in range(2):
+                if entryLayout[i][j] == "1":
+                    pygame.draw.line(screen, white, ((1240*j),(40 * i) + 300),((1240*j) + 40,(40 * i) + 300))
+                    
+        
     #draw the top and bottom bar
     pygame.draw.rect(screen, menuScreenColour, [0, 0, 1280, 100])
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 1280, 100])
