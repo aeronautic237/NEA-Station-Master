@@ -102,10 +102,25 @@ def game():
     gameState = "game"
     timestate = "paused"
     #this is where we draw the first part of the game
-    #drawing the track and station to begin with
+    #drawing the tracks, stations, signals, and points
     screen.fill(black)
-    pygame.draw.line(screen, white, [0,360],[1280,360])
-    pygame.draw.rect(screen, darkGrey, [540, 300, 200, 50])
+    with open("saveData/entryLayout.txt", "r") as file:
+        reader = csv.reader(file)
+        i = 0
+        for row in reader:
+            trackLayout[i] = row
+            i+=1
+        i = 0
+        for i in range(len(trackLayout)):
+            for j in range(len(trackLayout[i])):
+                if trackLayout[i][j] == "1": # normal track
+                    pygame.draw.line(screen, white, ((40 * j) + 40, (140 + i)),((40 * j) + 80, (140 + i)))
+                elif trackLayout[i][j] == "2": # upwards points
+                    pygame.draw.line(screen, gold, ((40 * j) + 40, (140 + i)),((40 * j) + 60, (140 + i)))
+                    pygame.draw.line(screen, gold, ((40 * j) + 60, (140 + i)),((40 * j) + 60, (120 + i)))
+                elif trackLayout[i][j] == "3":#downwards points
+                    pygame.draw.line(screen, gold, ((40 * j) + 40, (140 + i)),((40 * j) + 60, (140 + i)))
+                    pygame.draw.line(screen, gold, ((40 * j) + 60, (140 + i)),((40 * j) + 60, (160 + i)))
     #draw the top and bottom bar
     pygame.draw.rect(screen, menuScreenColour, [0, 0, 1280, 100])
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 1280, 100])
@@ -755,21 +770,21 @@ def buildEntry(returnButton):
             entryLayout[i] = row
             print(entryLayout)
     #need to create the buttons that will act as the buildable areas - for this, a subclass is needed.
-    entryButton1 = entryButton(black, (0, 640, 40, 40), "", clockTextFont, black, 0, 0, 0, 0, entryLayout[0][0])
+    entryButton1 = entryButton(black, (0, 280, 40, 40), "", clockTextFont, black, 0, 0, 0, 0, entryLayout[0][0])
     entryButton1.drawButton()
-    entryButton2 = entryButton(black, (0, 680, 40, 40), "", clockTextFont, black, 0, 0, 0, 1, entryLayout[0][1])
+    entryButton2 = entryButton(black, (0, 320, 40, 40), "", clockTextFont, black, 0, 0, 0, 1, entryLayout[1][0])
     entryButton2.drawButton()
-    entryButton3 = entryButton(black, (0, 720, 40, 40), "", clockTextFont, black, 0, 0, 0, 2, entryLayout[0][2])
+    entryButton3 = entryButton(black, (0, 360, 40, 40), "", clockTextFont, black, 0, 0, 0, 2, entryLayout[2][0])
     entryButton3.drawButton()
-    entryButton4 = entryButton(black, (0, 760, 40, 40), "", clockTextFont, black, 0, 0, 0, 3, entryLayout[0][3])
+    entryButton4 = entryButton(black, (0, 400, 40, 40), "", clockTextFont, black, 0, 0, 0, 3, entryLayout[3][0])
     entryButton4.drawButton()
-    entryButton5 = entryButton(black, (1240, 640, 40, 40), "", clockTextFont, black, 0, 0, 1, 0, entryLayout[1][0])
+    entryButton5 = entryButton(black, (1240, 280, 40, 40), "", clockTextFont, black, 0, 0, 1, 0, entryLayout[0][1])
     entryButton5.drawButton()
-    entryButton6 = entryButton(black, (1240, 680, 40, 40), "", clockTextFont, black, 0, 0, 1, 1, entryLayout[1][1])
+    entryButton6 = entryButton(black, (1240, 320, 40, 40), "", clockTextFont, black, 0, 0, 1, 1, entryLayout[1][1])
     entryButton6.drawButton()
-    entryButton7 = entryButton(black, (1240, 720, 40, 40), "", clockTextFont, black, 0, 0, 1, 2, entryLayout[1][2])
+    entryButton7 = entryButton(black, (1240, 360, 40, 40), "", clockTextFont, black, 0, 0, 1, 2, entryLayout[2][1])
     entryButton7.drawButton()
-    entryButton8 = entryButton(black, (1240, 760, 40, 40), "", clockTextFont, black, 0, 0, 1, 3, entryLayout[1][3])
+    entryButton8 = entryButton(black, (1240, 400, 40, 40), "", clockTextFont, black, 0, 0, 1, 3, entryLayout[3][1])
     entryButton8.drawButton()
     pygame.display.update()
     #need to chec whether the cursor is in the buildable area.
@@ -964,9 +979,9 @@ class technoButton(button):
 #subclass of button and acts in the buildEntry subroutine, and represents the entry points 
 class entryButton(button):
     #constructor
-    def __init__(self, saveLocationx, saveLocationy, state):
-        super().__init__()
-        salf.saveLocationx = saveLocationx # this is the x-coordinate of the save location
+    def __init__(self, buttonColour, buttonPos, text, font, textColour, textx, texty, saveLocationx, saveLocationy, state):
+        super().__init__(buttonColour, buttonPos, text, font, textColour, textx, texty)
+        self.saveLocationx = saveLocationx # this is the x-coordinate of the save location
         self.saveLocationy = saveLocationy # this is the y-coordinate of the save location
         self.state = state # Boolean stores whether this has been unlocked or not.
     #we need to remove the text and replace it with lines. This will be done in a drawButton method
@@ -974,19 +989,19 @@ class entryButton(button):
         #draw the rectangle
         pygame.draw.rect(screen, self.buttonColour, self.buttonPos)
         #draw the lines - we will need to add some attributes for the location of the button in the file. For this, we will need to make a new initialiser
-        if state == "0":
-            pygame.draw.line(screen, white, ((1240*saveLocationx),(60 + (300*saveLocationy))), (((1240*saveLocationx)+40),(60 + (300*saveLocationy))))
-            pygame.draw.line(screen, black, (((1240*saveLocationx)+8),(60 + (300*saveLocationy))), (((1240*saveLocationx)+16),(60 + (300*saveLocationy))))
-            pygame.draw.line(screen, black, (((1240*saveLocationx)+24),(60 + (300*saveLocationy))), (((1240*saveLocationx)+32),(60 + (300*saveLocationy))))
+        if self.state == "0":
+            pygame.draw.line(screen, white, ((1240*self.saveLocationx),((300+(40*self.saveLocationy)))), (((1240*self.saveLocationx)+40),((300+(40*self.saveLocationy)))))
+            pygame.draw.line(screen, black, (((1240*self.saveLocationx)+8),((300+(40*self.saveLocationy)))), (((1240*self.saveLocationx)+16),((300+(40*self.saveLocationy)))))
+            pygame.draw.line(screen, black, (((1240*self.saveLocationx)+24),((300+(40*self.saveLocationy)))), (((1240*self.saveLocationx)+32),((300+(40*self.saveLocationy)))))
         else:
-            pygame.draw.line(screen, white, ((1240*saveLocationx),(60 + (300*saveLocationy))), (((1240*saveLocationx)+40),(60 + (300*saveLocationy))))
+            pygame.draw.line(screen, white, ((1240*self.saveLocationx),((300+(40*self.saveLocationy)))), (((1240*self.saveLocationx)+40),((300+(40*self.saveLocationy)))))
     #we need to change changeButtonColour so that hovering is more intuitive - this will be done in a new changeButtonColour method
     #actually I don't think we do, we'll see.
 
     #we need to add a toggle state method, so we can change the state of the button. Actually no we don't because we needn't change it back to unbought
     def setState(self):
-        state = "1"
-        entryLayout[saveLocationy][saveLocationx] = state
+        self.state = "1"
+        entryLayout[self.saveLocationy][self.saveLocationx] = self.state
         
 #will print text as the user wishes
 def write(text, font, colour, xpos, ypos):
