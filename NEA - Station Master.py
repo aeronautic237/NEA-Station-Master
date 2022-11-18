@@ -114,13 +114,13 @@ def game():
         for i in range(len(trackLayout)):
             for j in range(len(trackLayout[i])):
                 if trackLayout[i][j] == "1": # normal track
-                    pygame.draw.line(screen, white, ((40 * j) + 40, (180 + (40 * i))),((40 * j) + 80, (180 + (40 * i))))
+                    pygame.draw.line(screen, white, ((40 * j) + 40, (220 + (40 * i))),((40 * j) + 80, (220 + (40 * i))))
                 elif trackLayout[i][j] == "2": # upwards points
-                    pygame.draw.line(screen, gold, ((40 * j) + 40, (180 + (40 * i))),((40 * j) + 80, (180 + (40 * i))))
-                    pygame.draw.line(screen, gold, ((40 * j) + 60, (180 + (40 * i))),((40 * j) + 60, (160 + (40 * i))))
+                    pygame.draw.line(screen, gold, ((40 * j) + 40, (220 + (40 * i))),((40 * j) + 80, (220 + (40 * i))))
+                    pygame.draw.line(screen, gold, ((40 * j) + 60, (220 + (40 * i))),((40 * j) + 60, (200 + (40 * i))))
                 elif trackLayout[i][j] == "3":#downwards points
-                    pygame.draw.line(screen, gold, ((40 * j) + 40, (180 + (40 * i))),((40 * j) + 80, (180 + (40 * i))))
-                    pygame.draw.line(screen, gold, ((40 * j) + 60, (180 + (40 * i))),((40 * j) + 60, (200 + (40 * i))))
+                    pygame.draw.line(screen, gold, ((40 * j) + 40, (220 + (40 * i))),((40 * j) + 80, (220 + (40 * i))))
+                    pygame.draw.line(screen, gold, ((40 * j) + 60, (220 + (40 * i))),((40 * j) + 60, (240 + (40 * i))))
     with open("saveData/entryPoints.txt", "r") as file:
         reader = csv.reader(file)
         i = 0
@@ -881,7 +881,6 @@ def drawPlatform(): #I will need to preset the location of platforms, and then s
             i += 1
         i = 0
         for i in range(len(trackLayout)):
-            print("DEBUG001")
             #column 16 of the array will hold where the platforms are.
             if trackLayout[i][15] == "4":# denotes platforms because 1, 2, 3, and 0 are taken by tracks, points, and gaps
                 pygame.draw.rect(screen, darkGrey, [560, 190 + (40 * i), 160, 20])        
