@@ -869,14 +869,21 @@ def purchasePlatform():
     else:
         platCount = platCount + 1#records the number of platforms in possesion
         platPrice = platPrice + 5000##increase price of a new platform by £5000
+        #platforms will only be bought once there is track on wither side.
+        for i in range(len(trackLayout)):
+            if trackLayout[i-2][17] != "0":
+                if trackLayout[i-2][12] != "0":
+                    trackLayout[i-2][15] = "4"
+                    money = money - platPrice
     drawPlatform()
     shop()
 
 def drawPlatform(): #I will need to preset the location of platforms, and then show them when the user buys a platform. This will need to be done in several screens so it is best to do this in a function
         for i in range(len(trackLayout)):
             #column 16 of the array will hold where the platforms are.
-            if trackLayout[i][15] == "4":# denotes platforms because 1, 2, 3, and 0 are taken by tracks, points, and gaps
-                pygame.draw.rect(screen, darkGrey, [560, 190 + (40 * i), 160, 20])        
+            if trackLayout[i-2][15] == "4":# denotes platforms because 1, 2, 3, and 0 are taken by tracks, points, and gaps
+                pygame.draw.rect(screen, darkGrey, [560, 110 + (40 * i), 160, 20])
+                pygame.draw.line(screen, darkGrey, (560, 140 + (40 * i)),(720, 140 + (40 * i)))
 
 def purchaseSignal():
     pass
