@@ -864,6 +864,9 @@ def buildEntry(returnButton):
                 
 
 def purchasePlatform():
+    global money
+    global platPrice
+    global platCount
     if money < platPrice:
         print()#nothing will happen if you try and buy without enough funds
     else:
@@ -875,6 +878,10 @@ def purchasePlatform():
                 if trackLayout[i-2][12] != "0":
                     trackLayout[i-2][15] = "4"
                     money = money - platPrice
+                    break
+    with open("saveData/tracksPlatforms.txt", "w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerows(trackLayout)
     drawPlatform()
     shop()
 
@@ -883,7 +890,7 @@ def drawPlatform(): #I will need to preset the location of platforms, and then s
             #column 16 of the array will hold where the platforms are.
             if trackLayout[i-2][15] == "4":# denotes platforms because 1, 2, 3, and 0 are taken by tracks, points, and gaps
                 pygame.draw.rect(screen, darkGrey, [560, 110 + (40 * i), 160, 20])
-                pygame.draw.line(screen, darkGrey, (560, 140 + (40 * i)),(720, 140 + (40 * i)))
+                pygame.draw.line(screen, white, (560, 140 + (40 * i)),(720, 140 + (40 * i)))
 
 def purchaseSignal():
     pass
@@ -1069,5 +1076,6 @@ SPADRisk = 85 #as a percentage
 signalPriceBoost = 0 #as a percentage
 incidentRisk = 65 #as a percentage
 platPrice = 5000 #price of a new platform at the start of the game
+platCount = 0
 
 gameLoop()
