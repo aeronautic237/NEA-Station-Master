@@ -870,18 +870,27 @@ def purchasePlatform():
     if money < platPrice:
         print()#nothing will happen if you try and buy without enough funds
     else:
-        platCount = platCount + 1#records the number of platforms in possesion
-        platPrice = platPrice + 5000##increase price of a new platform by £5000
         #platforms will only be bought once there is track on wither side.
+        #with open ("saveData/tracksPlatforms.txt", "r") as fileOut:
+         #   reader = csv.reader(fileOut)
+          #  j=-1
+           # for row in reader:
+            #    j += 1
+             #   if j < 14:
+              #      trackLayout[j] = row
+        i = 0
         for i in range(len(trackLayout)):
-            if trackLayout[i-2][17] != "0":
-                if trackLayout[i-2][12] != "0":
-                    trackLayout[i-2][15] = "4"
-                    money = money - platPrice
-                    break
-    with open("saveData/tracksPlatforms.txt", "w", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerows(trackLayout)
+            if trackLayout[i-2][17] != "0" and trackLayout[i-2][12] != "0" and trackLayout[i-2][15] == "0":
+                trackLayout[i-2][15] = "4"
+                print(platPrice)
+                print(money)
+                money = money - platPrice
+                platCount = platCount + 1#records the number of platforms in possesion
+                platPrice = platPrice + 5000##increase price of a new platform by £5000
+                break
+        with open("saveData/tracksPlatforms.txt", "w", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerows(trackLayout)
     drawPlatform()
     shop()
 
