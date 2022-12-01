@@ -547,7 +547,6 @@ def shop():
             elif buyPlatform.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 buyPlatform.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
-                    waiting = False
                     purchasePlatform()
             elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 returnButton.changeButtonColour(pink)
@@ -902,6 +901,7 @@ def drawPlatform(): #I will need to preset the location of platforms, and then s
                 pygame.draw.line(screen, white, (560, 140 + (40 * i)),(720, 140 + (40 * i)))
 
 def purchaseSignal(returnButton):
+    global money
     #These will be 1-way signals - left and right click (for direction to point in)
     i = 0
     for i in range(len(trackLayout)):
@@ -956,7 +956,12 @@ def purchaseSignal(returnButton):
                         #signals will be triangles
                         pygame.draw.rect(screen, black, position)
                         pygame.draw.line(screen, white, (position[0],position[1]+20),(position[0] + 40 , position[1] + 20))
-                        pygame.draw.polygon(screen, red, #need to make this a triangle that fits.
+                        pygame.draw.polygon(screen, red, ((position[0] + 13, position[1]),(position[0] + 40 , position[1] + 20),(position[0] + 13,position[1] + 40)))#This is a signal
+                        pygame.display.update()
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "6":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, white, (position[0], position[1] + 20), (position[0] + 40 , position[1] + 20))
+                        pygame.draw.polygon(screen, red, ((position[0] + 27, position[1]),(position[0], position[1] + 20), (position[0] + 27,position[1] + 40)))
                         pygame.display.update()
                     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
                 print(storeCoordy) # DEBUG
