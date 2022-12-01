@@ -27,6 +27,8 @@ darkGrey=[75,75,75]
 gold=[225,215,0]
 lightBlue=[0,128,225]
 pink = [255, 124, 200]
+red = [255, 0, 0]
+green = [0, 255, 0]
 
 #Our repository of fonts
 title = pygame.font.SysFont("Sans-serif", 200)
@@ -948,6 +950,13 @@ def purchaseSignal(returnButton):
                         pygame.draw.rect(screen, black, position)
                         pygame.draw.line(screen, gold, (position[0],position[1] + 20),(position[0] + 40 , position[1] + 20))
                         pygame.draw.line(screen, gold, (position[0] + 20,position[1] + 20),(position[0] + 20 , position[1] + 40))
+                        pygame.display.update()
+                    #replaces the square with a leftward set of signals
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "5":
+                        #signals will be triangles
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, white, (position[0],position[1]+20),(position[0] + 40 , position[1] + 20))
+                        pygame.draw.polygon(screen, red, #need to make this a triangle that fits.
                         pygame.display.update()
                     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
                 print(storeCoordy) # DEBUG
