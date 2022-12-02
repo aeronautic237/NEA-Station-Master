@@ -1045,9 +1045,10 @@ def purchaseSignal(returnButton):
 
 #this function will be where the contracts can be bought.
 def contracts():
-    northern = button(darkGrey, [40, 120, 220, 60], "North Trains", clockTextFont, white, 50, 130)
+    pygame.draw.rect(screen, black, [0, 100, 1280, 520])  # fill screen
+    northern = button(darkGrey, [40, 120, 220, 60], "North Trains", clockTextFont, white, 50, 130) # draw North Trains TOC
     northern.drawButton()
-    pygame.display.update()
+    pygame.display.update()#update screens.
     #first make a bunch'o munchy crunchy buttons
     #then focus on 1 TOC at a time.
 
