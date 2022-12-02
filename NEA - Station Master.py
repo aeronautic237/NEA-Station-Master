@@ -123,6 +123,17 @@ def game():
                 elif trackLayout[i-2][j] == "3":#downwards points
                     pygame.draw.line(screen, gold, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
                     pygame.draw.line(screen, gold, ((40 * j) + 60, (140 + (40 * i))),((40 * j) + 60, (160 + (40 * i))))
+                #replaces the square with a leftward set of signals
+                elif trackLayout[i-2][j] == "5":
+                    #signals will be triangles
+                    pygame.draw.line(screen, white, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
+                    pygame.draw.polygon(screen, red, (((40*j) + 53, (120 + (40 * i))),((40 * j) + 80 , (40 * i) + 140),((40 * j) + 53, (40 * i) + 160)))#This is a signal
+                    pygame.display.update()
+                #replaces the train with a rightward set of signals
+                elif trackLayout[i-2][j] == "6":
+                    pygame.draw.line(screen, white, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
+                    pygame.draw.polygon(screen, red, (((40*j) + 67, (120 + (40 * i))),((40 * j) + 40 , (40 * i) + 140),((40 * j) + 67, (40 * i) + 160)))#This is a signal
+                    pygame.display.update()
     with open("saveData/entryPoints.txt", "r") as file:
         reader = csv.reader(file)
         i = 0
@@ -656,6 +667,19 @@ def buildTrack(returnButton):
                         pygame.draw.line(screen, gold, (position[0],position[1] + 20),(position[0] + 40 , position[1] + 20))
                         pygame.draw.line(screen, gold, (position[0] + 20,position[1] + 20),(position[0] + 20 , position[1] + 40))
                         pygame.display.update()
+                    #replaces the square with a leftward set of signals
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "5":
+                        #signals will be triangles
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, white, (position[0],position[1]+20),(position[0] + 40 , position[1] + 20))
+                        pygame.draw.polygon(screen, red, ((position[0] + 13, position[1]),(position[0] + 40 , position[1] + 20),(position[0] + 13,position[1] + 40)))#This is a signal
+                        pygame.display.update()
+                    #replaces the train with a rightward set of signals
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "6":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, white, (position[0], position[1] + 20), (position[0] + 40 , position[1] + 20))
+                        pygame.draw.polygon(screen, red, ((position[0] + 27, position[1]),(position[0], position[1] + 20), (position[0] + 27,position[1] + 40)))
+                        pygame.display.update()
                     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
                 print(storeCoordy) # DEBUG
                 print(storeCoordx) # DEBUG
@@ -730,6 +754,19 @@ def buildPoints(returnButton):
                         pygame.draw.rect(screen, black, position)
                         pygame.draw.line(screen, gold, (position[0],position[1] + 20),(position[0] + 40 , position[1] + 20))
                         pygame.draw.line(screen, gold, (position[0] + 20,position[1] + 20),(position[0] + 20 , position[1] + 40))
+                        pygame.display.update()
+                    #replaces the square with a leftward set of signals
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "5":
+                        #signals will be triangles
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, white, (position[0],position[1]+20),(position[0] + 40 , position[1] + 20))
+                        pygame.draw.polygon(screen, red, ((position[0] + 13, position[1]),(position[0] + 40 , position[1] + 20),(position[0] + 13,position[1] + 40)))#This is a signal
+                        pygame.display.update()
+                    #replaces the train with a rightward set of signals
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "6":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, white, (position[0], position[1] + 20), (position[0] + 40 , position[1] + 20))
+                        pygame.draw.polygon(screen, red, ((position[0] + 27, position[1]),(position[0], position[1] + 20), (position[0] + 27,position[1] + 40)))
                         pygame.display.update()
                     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
                     
@@ -958,6 +995,7 @@ def purchaseSignal(returnButton):
                         pygame.draw.line(screen, white, (position[0],position[1]+20),(position[0] + 40 , position[1] + 20))
                         pygame.draw.polygon(screen, red, ((position[0] + 13, position[1]),(position[0] + 40 , position[1] + 20),(position[0] + 13,position[1] + 40)))#This is a signal
                         pygame.display.update()
+                    #replaces the train with a rightward set of signals
                     elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "6":
                         pygame.draw.rect(screen, black, position)
                         pygame.draw.line(screen, white, (position[0], position[1] + 20), (position[0] + 40 , position[1] + 20))
