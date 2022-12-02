@@ -185,11 +185,11 @@ def game():
     #buy things button
     constructButton = button(darkGrey, [110, 635, 100, 75], "Shop", clockTextFont, white, 115, 655)
     constructButton.drawButton()
-    #accepted and offered contracts
-    contractButton = button(darkGrey, [235, 635, 75, 75], "", clockTextFont, white, 10, 10)
+    #accepted and offered contract
+    contractButton = button(darkGrey, [235, 635, 180, 75], "Contracts", clockTextFont, white, 240, 655)
     contractButton.drawButton()
     #potential fact button
-    factButton = button(darkGrey, [335, 635, 75, 75], "", clockTextFont, white, 10, 10)
+    factButton = button(darkGrey, [430, 635, 75, 75], "", clockTextFont, white, 10, 10)
     factButton.drawButton()
     #return to main menu button
     menuButton = button(pink, [1200, 635, 75, 75], "", clockTextFont, white, 1210, 655)
@@ -215,6 +215,11 @@ def game():
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     shop()
+            elif contractButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                contractButton.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    contracts()
             elif event.type == pygame.QUIT:
                 waiting = False
                 pygame.quit()
@@ -223,6 +228,7 @@ def game():
                 menuButton.changeButtonColour(darkGrey)
                 RDButton.changeButtonColour(darkGrey)
                 constructButton.changeButtonColour(darkGrey)
+                contractButton.changeButtonColour(darkGrey)
     #train1 = train(white, 1230, 350, 50, 20, -1)
     #train1.drawTrain()
     #time.sleep(1)
@@ -1036,6 +1042,14 @@ def purchaseSignal(returnButton):
                     shop()
             else:
                 returnButton.changeButtonColour(darkGrey)
+
+#this function will be where the contracts can be bought.
+def contracts():
+    northern = button(darkGrey, [40, 120, 220, 60], "North Trains", clockTextFont, white, 50, 130)
+    northern.drawButton()
+    pygame.display.update()
+    #first make a bunch'o munchy crunchy buttons
+    #then focus on 1 TOC at a time.
 
 
 #new object for train
