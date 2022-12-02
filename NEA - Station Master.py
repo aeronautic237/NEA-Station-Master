@@ -1006,7 +1006,7 @@ def purchaseSignal(returnButton):
                 print(storeCoordx) # DEBUG
                 if event.type == pygame.MOUSEBUTTONUP and event.button == 1:#checks for a left click
                     #condition if the square has a signal in it already
-                    if trackLayout[storeCoordy-5][storeCoordx-1] == "1" or trackLayout[storeCoordy-5][storeCoordx-1] == "3":
+                    if trackLayout[storeCoordy-5][storeCoordx-1] == "1" or trackLayout[storeCoordy-5][storeCoordx-1] == "6":
                         trackLayout[storeCoordy-5][storeCoordx-1] = "5"
                         print(trackLayout) #DEBUG
                         money = money + 600 #You will not get a full refund for destroying signal
@@ -1017,7 +1017,7 @@ def purchaseSignal(returnButton):
                         money = money - 700 #costs 700 to build signal
                 elif event.type == pygame.MOUSEBUTTONUP and event.button == 3: #checks for a right click
                     #condition if the square has a signal in it already
-                    if trackLayout[storeCoordy-5][storeCoordx-1] == "1" or trackLayout[storeCoordy-5][storeCoordx-1] == "2":
+                    if trackLayout[storeCoordy-5][storeCoordx-1] == "1" or trackLayout[storeCoordy-5][storeCoordx-1] == "5":
                         trackLayout[storeCoordy-5][storeCoordx-1] = "6"
                         print(trackLayout) # DEBUG
                         money = money - 700
