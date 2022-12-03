@@ -219,7 +219,7 @@ def game():
                 contractButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
-                    contracts()
+                    contracts(menuButton)
             elif event.type == pygame.QUIT:
                 waiting = False
                 pygame.quit()
@@ -1044,7 +1044,7 @@ def purchaseSignal(returnButton):
                 returnButton.changeButtonColour(darkGrey)
 
 #this function will be where the contracts can be bought.
-def contracts():
+def contracts(returnButton):
     pygame.draw.rect(screen, black, [0, 100, 1280, 520])  # fill screen
     northern = button(darkGrey, [40, 120, 390, 125], "North Trains", clockTextFont, white, 50, 130) # North Trains button
     southEastern = button(darkGrey, [440, 120, 390, 125], "East South Railway", clockTextFont, white, 450, 130) # East and South Railway button
@@ -1064,9 +1064,68 @@ def contracts():
     tube.drawButton()
     SEHS.drawButton()
     pygame.display.update()#update screens.
-    #first make a bunch'o munchy crunchy buttons
-    #then focus on 1 TOC at a time.
+    # list of all TOCs in game - just in case
+    TOClist = [northern, southEastern, scotRail, southern, thamesLink, crossRail, tube, SEHS]
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if northern.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                northern.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    drawContracts("northern")
+            elif southEastern.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                southEastern.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    drawContracts("southEastern")
+            elif scotRail.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                scotRail.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    drawContracts("scotRail")
+            elif southern.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                southern.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    drawContracts("southern")
+            elif thamesLink.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                thamesLink.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    drawContracts("thamesLink")
+            elif crossRail.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                crossRail.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    drawContracts("crossRail")
+            elif tube.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                tube.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    drawContracts("tube")
+            elif SEHS.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                SEHS.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    drawContracts("SEHS")
+            elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                returnButton.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    game()
+            elif event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            else:
+                i = 0
+                for i in range(len(TOClist)):
+                    TOClist[i].changeButtonColour(darkGrey)
+                    returnButton.changeButtonColour(darkGrey)
 
+#function to draw the contracts you can buy
+def drawContracts(TOC):
+    pass
 
 #new object for train
 class train:
