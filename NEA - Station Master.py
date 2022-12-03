@@ -1046,8 +1046,23 @@ def purchaseSignal(returnButton):
 #this function will be where the contracts can be bought.
 def contracts():
     pygame.draw.rect(screen, black, [0, 100, 1280, 520])  # fill screen
-    northern = button(darkGrey, [40, 120, 220, 60], "North Trains", clockTextFont, white, 50, 130) # draw North Trains TOC
+    northern = button(darkGrey, [40, 120, 390, 125], "North Trains", clockTextFont, white, 50, 130) # North Trains button
+    southEastern = button(darkGrey, [440, 120, 390, 125], "East South Railway", clockTextFont, white, 450, 130) # East and South Railway button
+    scotRail = button(darkGrey, [840, 120, 390, 125], "Country Rail", clockTextFont, white, 850, 130) # Country Rail button
+    southern = button(darkGrey, [40, 260, 390, 125], "South Side Railway", clockTextFont, white, 50, 270) # South Side Railway button
+    thamesLink = button(darkGrey, [440, 260, 390, 125], "RiverLink", clockTextFont, white, 450, 270) #  Riverlink button
+    crossRail = button(darkGrey, [840, 260, 390, 125], "PlusRail", clockTextFont, white, 850, 270) # PlusRail button
+    tube = button(darkGrey, [40, 400, 390, 125], "Underneath Line", clockTextFont, white, 50, 410) # underneath Line button
+    SEHS = button(darkGrey, [840, 400, 390, 125], "First High Speed", clockTextFont, white, 850, 410) # First High Speed button
+    #draw the buttons
     northern.drawButton()
+    southEastern.drawButton()
+    scotRail.drawButton()
+    southern.drawButton()
+    thamesLink.drawButton()
+    crossRail.drawButton()
+    tube.drawButton()
+    SEHS.drawButton()
     pygame.display.update()#update screens.
     #first make a bunch'o munchy crunchy buttons
     #then focus on 1 TOC at a time.
