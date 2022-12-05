@@ -1,0 +1,4 @@
+coaches, frequency
+8,24
+8,48
+12,96

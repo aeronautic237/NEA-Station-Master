@@ -1118,14 +1118,15 @@ def contracts(returnButton):
                 pygame.quit()
                 sys.exit()
             else:
-                i = 0
+                i = 0 # decided to try something new here.
                 for i in range(len(TOClist)):
                     TOClist[i].changeButtonColour(darkGrey)
                     returnButton.changeButtonColour(darkGrey)
 
 #function to draw the contracts you can buy
 def drawContracts(TOC):
-    pass
+    with open(TOC + ".txt","r",newline="") as file:
+        reader = csv.reader(file)
 
 #new object for train
 class train:
