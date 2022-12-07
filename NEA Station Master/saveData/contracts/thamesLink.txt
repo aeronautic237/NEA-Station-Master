@@ -1,0 +1,4 @@
+coaches, frequency, unlocked
+8,24,0
+8,48,0
+12,96,0

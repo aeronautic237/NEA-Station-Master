@@ -27,6 +27,8 @@ darkGrey=[75,75,75]
 gold=[225,215,0]
 lightBlue=[0,128,225]
 pink = [255, 124, 200]
+red = [255, 0, 0]
+green = [0, 255, 0]
 
 #Our repository of fonts
 title = pygame.font.SysFont("Sans-serif", 200)
@@ -102,10 +104,49 @@ def game():
     gameState = "game"
     timestate = "paused"
     #this is where we draw the first part of the game
-    #drawing the track and station to begin with
+    #drawing the tracks, stations, signals, and points
     screen.fill(black)
-    pygame.draw.line(screen, white, [0,360],[1280,360])
-    pygame.draw.rect(screen, darkGrey, [540, 300, 200, 50])
+    with open("saveData/tracksPlatforms.txt", "r") as file:
+        reader = csv.reader(file)
+        i = 0
+        for row in reader:
+            trackLayout[i] = row
+            i+=1
+        i = 0
+        for i in range(len(trackLayout)):
+            for j in range(len(trackLayout[i])):
+                if trackLayout[i-2][j] == "1": # normal track
+                    pygame.draw.line(screen, white, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
+                elif trackLayout[i-2][j] == "2": # upwards points
+                    pygame.draw.line(screen, gold, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
+                    pygame.draw.line(screen, gold, ((40 * j) + 60, (140 + (40 * i))),((40 * j) + 60, (120 + (40 * i))))
+                elif trackLayout[i-2][j] == "3":#downwards points
+                    pygame.draw.line(screen, gold, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
+                    pygame.draw.line(screen, gold, ((40 * j) + 60, (140 + (40 * i))),((40 * j) + 60, (160 + (40 * i))))
+                #replaces the square with a leftward set of signals
+                elif trackLayout[i-2][j] == "5":
+                    #signals will be triangles
+                    pygame.draw.line(screen, white, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
+                    pygame.draw.polygon(screen, red, (((40*j) + 53, (120 + (40 * i))),((40 * j) + 80 , (40 * i) + 140),((40 * j) + 53, (40 * i) + 160)))#This is a signal
+                    pygame.display.update()
+                #replaces the train with a rightward set of signals
+                elif trackLayout[i-2][j] == "6":
+                    pygame.draw.line(screen, white, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
+                    pygame.draw.polygon(screen, red, (((40*j) + 67, (120 + (40 * i))),((40 * j) + 40 , (40 * i) + 140),((40 * j) + 67, (40 * i) + 160)))#This is a signal
+                    pygame.display.update()
+    with open("saveData/entryPoints.txt", "r") as file:
+        reader = csv.reader(file)
+        i = 0
+        for row in reader:
+            entryLayout[i] = row
+            i += 1
+        i = 0
+        for i in range(4):
+            for j in range(2):
+                if entryLayout[i][j] == "1":
+                    pygame.draw.line(screen, white, ((1240*j),(40 * i) + 300),((1240*j) + 40,(40 * i) + 300))
+                    
+    drawPlatform()
     #draw the top and bottom bar
     pygame.draw.rect(screen, menuScreenColour, [0, 0, 1280, 100])
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 1280, 100])
@@ -144,11 +185,11 @@ def game():
     #buy things button
     constructButton = button(darkGrey, [110, 635, 100, 75], "Shop", clockTextFont, white, 115, 655)
     constructButton.drawButton()
-    #accepted and offered contracts
-    contractButton = button(darkGrey, [235, 635, 75, 75], "", clockTextFont, white, 10, 10)
+    #accepted and offered contract
+    contractButton = button(darkGrey, [235, 635, 180, 75], "Contracts", clockTextFont, white, 240, 655)
     contractButton.drawButton()
     #potential fact button
-    factButton = button(darkGrey, [335, 635, 75, 75], "", clockTextFont, white, 10, 10)
+    factButton = button(darkGrey, [430, 635, 75, 75], "", clockTextFont, white, 10, 10)
     factButton.drawButton()
     #return to main menu button
     menuButton = button(pink, [1200, 635, 75, 75], "", clockTextFont, white, 1210, 655)
@@ -174,6 +215,11 @@ def game():
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     shop()
+            elif contractButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                contractButton.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    contracts(menuButton)
             elif event.type == pygame.QUIT:
                 waiting = False
                 pygame.quit()
@@ -182,6 +228,7 @@ def game():
                 menuButton.changeButtonColour(darkGrey)
                 RDButton.changeButtonColour(darkGrey)
                 constructButton.changeButtonColour(darkGrey)
+                contractButton.changeButtonColour(darkGrey)
     #train1 = train(white, 1230, 350, 50, 20, -1)
     #train1.drawTrain()
     #time.sleep(1)
@@ -513,11 +560,10 @@ def shop():
                 buySignal.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
-                    purchaseSignal()
+                    purchaseSignal(returnButton)
             elif buyPlatform.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 buyPlatform.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
-                    waiting = False
                     purchasePlatform()
             elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 returnButton.changeButtonColour(pink)
@@ -627,6 +673,19 @@ def buildTrack(returnButton):
                         pygame.draw.line(screen, gold, (position[0],position[1] + 20),(position[0] + 40 , position[1] + 20))
                         pygame.draw.line(screen, gold, (position[0] + 20,position[1] + 20),(position[0] + 20 , position[1] + 40))
                         pygame.display.update()
+                    #replaces the square with a leftward set of signals
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "5":
+                        #signals will be triangles
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, white, (position[0],position[1]+20),(position[0] + 40 , position[1] + 20))
+                        pygame.draw.polygon(screen, red, ((position[0] + 13, position[1]),(position[0] + 40 , position[1] + 20),(position[0] + 13,position[1] + 40)))#This is a signal
+                        pygame.display.update()
+                    #replaces the train with a rightward set of signals
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "6":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, white, (position[0], position[1] + 20), (position[0] + 40 , position[1] + 20))
+                        pygame.draw.polygon(screen, red, ((position[0] + 27, position[1]),(position[0], position[1] + 20), (position[0] + 27,position[1] + 40)))
+                        pygame.display.update()
                     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
                 print(storeCoordy) # DEBUG
                 print(storeCoordx) # DEBUG
@@ -702,6 +761,19 @@ def buildPoints(returnButton):
                         pygame.draw.line(screen, gold, (position[0],position[1] + 20),(position[0] + 40 , position[1] + 20))
                         pygame.draw.line(screen, gold, (position[0] + 20,position[1] + 20),(position[0] + 20 , position[1] + 40))
                         pygame.display.update()
+                    #replaces the square with a leftward set of signals
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "5":
+                        #signals will be triangles
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, white, (position[0],position[1]+20),(position[0] + 40 , position[1] + 20))
+                        pygame.draw.polygon(screen, red, ((position[0] + 13, position[1]),(position[0] + 40 , position[1] + 20),(position[0] + 13,position[1] + 40)))#This is a signal
+                        pygame.display.update()
+                    #replaces the train with a rightward set of signals
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "6":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, white, (position[0], position[1] + 20), (position[0] + 40 , position[1] + 20))
+                        pygame.draw.polygon(screen, red, ((position[0] + 27, position[1]),(position[0], position[1] + 20), (position[0] + 27,position[1] + 40)))
+                        pygame.display.update()
                     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
                     
                 print(storeCoordy) # DEBUG
@@ -724,7 +796,7 @@ def buildPoints(returnButton):
                         print(trackLayout) # DEBUG
                         money = money - 1000
                     #condition if the square has a set of points in it already
-                    elif trackLayout[storeCoordy-5][storeCorrdx-1] == "3":
+                    elif trackLayout[storeCoordy-5][storeCoordx-1] == "3":
                         trackLayout[storeCoordy-5][storeCoordx-1] = "1"
                         print(trackLayout) # DeBUG
                         money = money + 900
@@ -834,19 +906,234 @@ def buildEntry(returnButton):
                 entryButton7.changeButtonColour(black)
                 entryButton8.changeButtonColour(black)
                 
-                
 
 def purchasePlatform():
+    global money
+    global platPrice
+    global platCount
     if money < platPrice:
         print()#nothing will happen if you try and buy without enough funds
     else:
-        platCount = platCount + 1#records the number of platforms in possesion
-        platPrice = platPrice + 5000##increase price of a new platform by £5000
+        #platforms will only be bought once there is track on wither side.
+        #with open ("saveData/tracksPlatforms.txt", "r") as fileOut:
+         #   reader = csv.reader(fileOut)
+          #  j=-1
+           # for row in reader:
+            #    j += 1
+             #   if j < 14:
+              #      trackLayout[j] = row
+        i = 0
+        for i in range(len(trackLayout)):
+            if trackLayout[i-2][17] != "0" and trackLayout[i-2][12] != "0" and trackLayout[i-2][15] == "0":
+                trackLayout[i-2][15] = "4"
+                money = money - platPrice
+                platCount = platCount + 1#records the number of platforms in possesion
+                platPrice = platPrice + 5000##increase price of a new platform by £5000
+                break
+        with open("saveData/tracksPlatforms.txt", "w", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerows(trackLayout)
+    drawPlatform()
     shop()
 
-def purchaseSignal():
-    pass
+def drawPlatform(): #I will need to preset the location of platforms, and then show them when the user buys a platform. This will need to be done in several screens so it is best to do this in a function
+        for i in range(len(trackLayout)):
+            #column 16 of the array will hold where the platforms are.
+            if trackLayout[i-2][15] == "4":# denotes platforms because 1, 2, 3, and 0 are taken by tracks, points, and gaps
+                pygame.draw.rect(screen, darkGrey, [560, 110 + (40 * i), 160, 20])
+                pygame.draw.line(screen, white, (560, 140 + (40 * i)),(720, 140 + (40 * i)))
 
+def purchaseSignal(returnButton):
+    global money
+    #These will be 1-way signals - left and right click (for direction to point in)
+    i = 0
+    for i in range(len(trackLayout)):
+        for j in range(len(trackLayout[i])):
+            if trackLayout[i-2][j] == "1": # normal track
+                pygame.draw.line(screen, white, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
+            elif trackLayout[i-2][j] == "2": # upwards points
+                pygame.draw.line(screen, gold, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
+                pygame.draw.line(screen, gold, ((40 * j) + 60, (140 + (40 * i))),((40 * j) + 60, (120 + (40 * i))))
+            elif trackLayout[i-2][j] == "3":#downwards points
+                pygame.draw.line(screen, gold, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
+                pygame.draw.line(screen, gold, ((40 * j) + 60, (140 + (40 * i))),((40 * j) + 60, (160 + (40 * i))))
+    positionCoord = pygame.mouse.get_pos()# position of the mouse
+    position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
+    notFinished = True
+    while notFinished:
+        pygame.draw.rect(screen, white, position)
+        #pygame.draw.rect(screen, white, [position[0]-(position[0]%40),position[1]-(position[1]%40),40,40])
+        for event in pygame.event.get():
+            positionCoord = pygame.mouse.get_pos() # variable stores the position of the mouse
+            if positionCoord[1] > 139 and positionCoord[1] < 580 and positionCoord[0] > 39 and positionCoord[0] < 1240 and (positionCoord[0] < 540 or positionCoord[0] > 740):
+                #the above line will check if the cursor is in a buildable area before moving the rectangle.
+                oldPosition = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
+                positionCoord = pygame.mouse.get_pos()#new position of the mouse
+                storeCoordx, storeCoordy = int(position[0]/40), int(position[1]/40)# stores the coordinates of the mouse against the .txt grid (idexed from 1
+                pygame.draw.rect(screen, white, position) # draw a white box to show where the mouse is.
+                pygame.display.update()
+                if position.collidepoint((pygame.mouse.get_pos())) == False:#checks if the mouse has left the box
+                    #replaces the white square with a track piece if there is meant to be one there
+                    if trackLayout[storeCoordy-5][storeCoordx-1] == "1":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, white, (position[0],position[1]+20),(position[0] + 40 , position[1] + 20))
+                        pygame.display.update()
+                    #replaces the white square with a blank piece if no track is meant to be there
+                    elif trackLayout[storeCoordy-5][storeCoordx-1] == "0":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.display.update()
+                    #replaces the gold square with an upward pointing set of points if it is meant to be there
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "2":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, gold, (position[0],position[1]+20),(position[0] + 40 , position[1] + 20))
+                        pygame.draw.line(screen, gold, (position[0] + 20 , position[1]+20),(position[0] + 20 , position[1] - 0))
+                        pygame.display.update()
+                    #replaces the gold square with a downward pointing set of points if it is meant to be there
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "3":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, gold, (position[0],position[1] + 20),(position[0] + 40 , position[1] + 20))
+                        pygame.draw.line(screen, gold, (position[0] + 20,position[1] + 20),(position[0] + 20 , position[1] + 40))
+                        pygame.display.update()
+                    #replaces the square with a leftward set of signals
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "5":
+                        #signals will be triangles
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, white, (position[0],position[1]+20),(position[0] + 40 , position[1] + 20))
+                        pygame.draw.polygon(screen, red, ((position[0] + 13, position[1]),(position[0] + 40 , position[1] + 20),(position[0] + 13,position[1] + 40)))#This is a signal
+                        pygame.display.update()
+                    #replaces the train with a rightward set of signals
+                    elif trackLayout[storeCoordy - 5][storeCoordx - 1] == "6":
+                        pygame.draw.rect(screen, black, position)
+                        pygame.draw.line(screen, white, (position[0], position[1] + 20), (position[0] + 40 , position[1] + 20))
+                        pygame.draw.polygon(screen, red, ((position[0] + 27, position[1]),(position[0], position[1] + 20), (position[0] + 27,position[1] + 40)))
+                        pygame.display.update()
+                    position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))
+                print(storeCoordy) # DEBUG
+                print(storeCoordx) # DEBUG
+                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:#checks for a left click
+                    #condition if the square has a signal in it already
+                    if trackLayout[storeCoordy-5][storeCoordx-1] == "1" or trackLayout[storeCoordy-5][storeCoordx-1] == "6":
+                        trackLayout[storeCoordy-5][storeCoordx-1] = "5"
+                        print(trackLayout) #DEBUG
+                        money = money + 600 #You will not get a full refund for destroying signal
+                    #condition if the selected quare has a signal in it already
+                    elif trackLayout[storeCoordy-5][storeCoordx-1] == "5":
+                        trackLayout[storeCoordy-5][storeCoordx-1] = "1"
+                        print(trackLayout) #DEBUG
+                        money = money - 700 #costs 700 to build signal
+                elif event.type == pygame.MOUSEBUTTONUP and event.button == 3: #checks for a right click
+                    #condition if the square has a signal in it already
+                    if trackLayout[storeCoordy-5][storeCoordx-1] == "1" or trackLayout[storeCoordy-5][storeCoordx-1] == "5":
+                        trackLayout[storeCoordy-5][storeCoordx-1] = "6"
+                        print(trackLayout) # DEBUG
+                        money = money - 700
+                    #condition if the square has a signal in it already
+                    elif trackLayout[storeCoordy-5][storeCoordx-1] == "6":
+                        trackLayout[storeCoordy-5][storeCoordx-1] = "1"
+                        print(trackLayout) # DeBUG
+                        money = money + 600
+            #check for whether the return button was hovered over/clicked
+            elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                returnButton.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    with open("saveData/tracksPlatforms.txt", "w", newline="") as file:
+                        writer = csv.writer(file)
+                        writer.writerows(trackLayout)
+                    shop()
+            else:
+                returnButton.changeButtonColour(darkGrey)
+
+#this function will be where the contracts can be bought.
+def contracts(returnButton):
+    pygame.draw.rect(screen, black, [0, 100, 1280, 520])  # fill screen
+    northern = button(darkGrey, [40, 120, 390, 125], "North Trains", clockTextFont, white, 50, 130) # North Trains button
+    southEastern = button(darkGrey, [440, 120, 390, 125], "East South Railway", clockTextFont, white, 450, 130) # East and South Railway button
+    scotRail = button(darkGrey, [840, 120, 390, 125], "Country Rail", clockTextFont, white, 850, 130) # Country Rail button
+    southern = button(darkGrey, [40, 260, 390, 125], "South Side Railway", clockTextFont, white, 50, 270) # South Side Railway button
+    thamesLink = button(darkGrey, [440, 260, 390, 125], "RiverLink", clockTextFont, white, 450, 270) #  Riverlink button
+    crossRail = button(darkGrey, [840, 260, 390, 125], "PlusRail", clockTextFont, white, 850, 270) # PlusRail button
+    tube = button(darkGrey, [40, 400, 390, 125], "Underneath Line", clockTextFont, white, 50, 410) # underneath Line button
+    SEHS = button(darkGrey, [840, 400, 390, 125], "First High Speed", clockTextFont, white, 850, 410) # First High Speed button
+    #draw the buttons
+    northern.drawButton()
+    southEastern.drawButton()
+    scotRail.drawButton()
+    southern.drawButton()
+    thamesLink.drawButton()
+    crossRail.drawButton()
+    tube.drawButton()
+    SEHS.drawButton()
+    pygame.display.update()#update screens.
+    # list of all TOCs in game - just in case
+    TOClist = [northern, southEastern, scotRail, southern, thamesLink, crossRail, tube, SEHS]
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if northern.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                northern.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    drawContracts("northern")
+            elif southEastern.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                southEastern.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    drawContracts("southEastern")
+            elif scotRail.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                scotRail.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    drawContracts("scotRail")
+            elif southern.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                southern.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    drawContracts("southern")
+            elif thamesLink.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                thamesLink.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    drawContracts("thamesLink")
+            elif crossRail.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                crossRail.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    drawContracts("crossRail")
+            elif tube.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                tube.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    drawContracts("tube")
+            elif SEHS.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                SEHS.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    drawContracts("SEHS")
+            elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                returnButton.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    game()
+            elif event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            else:
+                i = 0 # decided to try something new here.
+                for i in range(len(TOClist)):
+                    TOClist[i].changeButtonColour(darkGrey)
+                    returnButton.changeButtonColour(darkGrey)
+
+#function to draw the contracts you can buy
+def drawContracts(TOC):
+    contractsList = [] # the list that will contain the data
+    pygame.draw.rect(screen, black, [0, 100, 1280, 520]) # cover screen
+    with open("saveData/contracts/" + TOC + ".txt","r",newline="") as file:
+        reader = csv.reader(file)
+        for row in reader:
+            contractsList.append(row) # fill the list with the data
+    i = 1
+    for i in range(len(contractsList)):
+        
 
 #new object for train
 class train:
@@ -1028,5 +1315,6 @@ SPADRisk = 85 #as a percentage
 signalPriceBoost = 0 #as a percentage
 incidentRisk = 65 #as a percentage
 platPrice = 5000 #price of a new platform at the start of the game
+platCount = 0
 
 gameLoop()
