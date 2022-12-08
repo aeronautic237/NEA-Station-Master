@@ -1131,16 +1131,13 @@ def drawContracts(TOC):
         reader = csv.reader(file)
         for row in reader:
             contractsList.append(row) # fill the list with the data
-    i = 1
-    #need to create a dictionary and then I can call objects from that dictionary
-    contractsDict = {}
-    for i in range(len(contractsList) - 1):
-        contractsDict["contract" + str(i)] = technoButton(darkGrey, [40 + ((i * 100) + 20), 200, 100, 50], str(i), clockTextFont, white, 50 + ((i * 100) + 20), 200) # dictionary of buttons created?
-        [key for key in contractsDict.keys()][i].drawButton()
-    #testButton = technoButton(darkGrey, [40, 200, 100, 50], "1", clockTextFont, white, 50, 210)
-    #testButton.drawtechButton(2,2)
-    pygame.display.update()
-    
+    if TOC == "northern":
+            contract1 = button(darkGrey, [300, 50, 150, 50], "1 car, 2 tpd", normal, white, 325, 65)
+            contract1.drawButton()
+            contract2 = button(darkGrey, [550, 50, 150, 50], "2 cars, 4 tpd", normal, white, 575, 65)
+            contract2.drawButton()
+            contractsList = [contract1, contract2]
+            pygame.display.update()
 
 #new object for train
 class train:
