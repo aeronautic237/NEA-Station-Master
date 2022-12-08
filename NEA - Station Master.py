@@ -1125,8 +1125,19 @@ def contracts(returnButton):
 
 #function to draw the contracts you can buy
 def drawContracts(TOC):
-    with open(TOC + ".txt","r",newline="") as file:
+    contractsList = [] # the list that will contain the data
+    pygame.draw.rect(screen, black, [0, 100, 1280, 520]) # cover screen
+    with open("saveData/contracts/" + TOC + ".txt","r",newline="") as file:
         reader = csv.reader(file)
+        for row in reader:
+            contractsList.append(row) # fill the list with the data
+    i = 1
+    for i in range(len(contractsList)):
+        pass
+    testButton = technoButton(darkGrey, [40, 200, 100, 50], "1", clockTextFont, white, 50, 210)
+    testButton.drawtechButton(2,2)
+    pygame.display.update()
+    
 
 #new object for train
 class train:
