@@ -1073,42 +1073,42 @@ def contracts(returnButton):
                 northern.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
-                    drawContracts("northern")
+                    drawContracts("northern", returnButton)
             elif southEastern.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 southEastern.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
-                    drawContracts("southEastern")
+                    drawContracts("southEastern", returnButton)
             elif scotRail.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 scotRail.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
-                    drawContracts("scotRail")
+                    drawContracts("scotRail", returnButton)
             elif southern.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 southern.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
-                    drawContracts("southern")
+                    drawContracts("southern", returnButton)
             elif thamesLink.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 thamesLink.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
-                    drawContracts("thamesLink")
+                    drawContracts("thamesLink", returnButton)
             elif crossRail.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 crossRail.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
-                    drawContracts("crossRail")
+                    drawContracts("crossRail", returnButton)
             elif tube.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 tube.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
-                    drawContracts("tube")
+                    drawContracts("tube", returnButton)
             elif SEHS.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 SEHS.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
-                    drawContracts("SEHS")
+                    drawContracts("SEHS", returnButton)
             elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 returnButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
@@ -1124,13 +1124,14 @@ def contracts(returnButton):
                     returnButton.changeButtonColour(darkGrey)
 
 #function to draw the contracts you can buy
-def drawContracts(TOC):
+def drawContracts(TOC, returnButton):
     contractsList = [] # the list that will contain the data
     pygame.draw.rect(screen, black, [0, 100, 1280, 520]) # cover screen
     with open("saveData/contracts/" + TOC + ".txt","r",newline="") as file:
         reader = csv.reader(file)
         for row in reader:
             contractsList.append(row) # fill the list with the data
+    i = 0
     if TOC == "northern":
         contract1 = button(darkGrey, [400, 250, 150, 50], "1 car, 2 tpd", normal, white, 425, 265)
         contract2 = button(darkGrey, [650, 250, 150, 50], "2 cars, 4 tpd", normal, white, 675, 265)
@@ -1171,7 +1172,7 @@ def drawContracts(TOC):
         contract2 = button(darkGrey, [350, 250, 150, 50], "4 cars, 48, tpd", normal, white, 375, 265)
         contract3 = button(darkGrey, [550, 250, 150, 50], "8 cars, 36 tpd", normal, white, 575, 265)
         contract4 = button(darkGrey, [750, 250, 150, 50], "8 cars, 48 tpd", normal, white, 775, 265)
-        contract5= button(darkGrey, [950, 250, 150, 50], "12 cars, 48 tpd", normal, white, 975, 265)
+        contract5 = button(darkGrey, [950, 250, 150, 50], "12 cars, 48 tpd", normal, white, 975, 265)
         contracts = [contract1, contract2, contract3, contract4, contract5]
         for i in range ( len ( contracts ) ):
             contracts[i].drawButton()
@@ -1205,6 +1206,32 @@ def drawContracts(TOC):
         for i in range ( len ( contracts ) ):
             contracts[i].drawButton()
         pygame.display.update()
+    i = 0
+    returnButton.drawButton()
+    pygame.display.update()
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            for i in range(len(contracts)):
+                if contracts[i].buttonCoords.collidepoint((pygame.mouse.get_pos())) and contractsList[i + 1][2] == "1":
+                    contracts[i].changeButtonColour(pink)
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        numberTrains = contractsList[i+1][1]
+                if contractsList[i + 1][2] == "0":
+                    contracts[i].changeButtonColour(white)
+                    returnButton.changeButtonColour(darkGrey)
+                if contractsList[i+1][2] == "1":
+                    contracts[i].changeButtonColour(darkGrey)
+                    returnButton.changeButtonColour(darkGrey)
+                if returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                    returnButton.changeButtonColour(pink)
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        waiting = False
+                        contracts()
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                pygame.display.update()
     
         
 #new object for train
