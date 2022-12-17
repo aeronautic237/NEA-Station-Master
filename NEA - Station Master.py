@@ -819,6 +819,7 @@ def buildPoints(returnButton):
 
 def buildEntry(returnButton):
     global money
+    global numberEntry
     #cover up the other buttons
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 275, 100])
     notFinished = True
@@ -900,6 +901,7 @@ def buildEntry(returnButton):
                     with open("saveData/entryPoints.txt", "w", newline="") as file:
                         writer = csv.writer(file)
                         writer.writerows(entryLayout)
+                        numberEntry += 1
                     shop()
             else:
                 returnButton.changeButtonColour(darkGrey)
@@ -1246,6 +1248,7 @@ def timetableScreen(returnButton):
     global timeHour
     global timeMinute
     global timeSecond
+    global numberEntry
     
     #first clear the screen
     pygame.draw.rect(screen, black, [0, 100, 1280, 520])
@@ -1254,11 +1257,17 @@ def timetableScreen(returnButton):
     for i in range(5, 25, 1):
         stringTime = str(i)
         write(str(stringTime + ":00"), normal, white, 10 + (64 * (i - 5)), 110)
-    #then make the significant borders extend down
-        pygame.draw.line(screen, white, [9 + (64 * (i - 5)), 110], [9 + (64 * (i - 5)), 510])
+        for j in range (4): # this draws the minimum increments that I shall allow.
+            pygame.draw.line(screen, darkGrey, [5 + ((64 * (i - 5)) + (16 * j)), 164],[5 + ((64 * (i - 5)) + (16 * j)), 510])
+        #then make the hour borders extend down
+        pygame.draw.line(screen, white, [5 + (64 * (i - 5)), 100], [5 + (64 * (i - 5)), 510])
+        for k in range(numberEntry + 1):
+            pygame.draw.line(screen, white, [0, (164 + (k * 42))], [1280, (164 + (k * 42))])
+            
     #then define the placeable regions
     #then make the rectangles to be placed
     #then make the rectangles draggable, snapping to coordinates
+        #actually no, make it so that eft click does place, and right click removes
     pygame.display.update()
     #then make the file to save it.
         
@@ -1447,5 +1456,6 @@ numberTrains = 0
 timeHour = 5
 timeminute = 0
 timesecond = 0
+numberEntry = 0
 
 gameLoop()
