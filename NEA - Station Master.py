@@ -189,8 +189,8 @@ def game():
     contractButton = button(darkGrey, [235, 635, 180, 75], "Contracts", clockTextFont, white, 240, 655)
     contractButton.drawButton()
     #potential fact button
-    factButton = button(darkGrey, [430, 635, 75, 75], "", clockTextFont, white, 10, 10)
-    factButton.drawButton()
+    timetableButton = button(darkGrey, [430, 635, 170, 75], "Timetable", clockTextFont, white, 435, 655)
+    timetableButton.drawButton()
     #return to main menu button
     menuButton = button(pink, [1200, 635, 75, 75], "", clockTextFont, white, 1210, 655)
     menuButton.drawButton()
@@ -220,6 +220,11 @@ def game():
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     contracts(menuButton)
+            elif timetableButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                timetableButton.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    timetableScreen(menuButton)
             elif event.type == pygame.QUIT:
                 waiting = False
                 pygame.quit()
@@ -229,6 +234,7 @@ def game():
                 RDButton.changeButtonColour(darkGrey)
                 constructButton.changeButtonColour(darkGrey)
                 contractButton.changeButtonColour(darkGrey)
+                timetableButton.changeButtonColour(darkGrey)
     #train1 = train(white, 1230, 350, 50, 20, -1)
     #train1.drawTrain()
     #time.sleep(1)
@@ -1125,6 +1131,7 @@ def contracts(returnButton):
 
 #function to draw the contracts you can buy
 def drawContracts(TOC, returnButton):
+    global numberTrains
     contractsList = [] # the list that will contain the data
     pygame.draw.rect(screen, black, [0, 100, 1280, 520]) # cover screen
     with open("saveData/contracts/" + TOC + ".txt","r",newline="") as file:
@@ -1216,7 +1223,8 @@ def drawContracts(TOC, returnButton):
                 if contracts[i].buttonCoords.collidepoint((pygame.mouse.get_pos())) and contractsList[i + 1][2] == "1":
                     contracts[i].changeButtonColour(pink)
                     if event.type == pygame.MOUSEBUTTONUP:
-                        numberTrains = contractsList[i+1][1]
+                         numberTrains = numberTrains + contractsList[i+1][1]
+                         print(numberTrains)
                 if contractsList[i + 1][2] == "0":
                     contracts[i].changeButtonColour(white)
                     returnButton.changeButtonColour(darkGrey)
@@ -1232,6 +1240,9 @@ def drawContracts(TOC, returnButton):
                     pygame.quit()
                     sys.exit()
                 pygame.display.update()
+
+def timetableScreen(returnButton):
+    pass
     
         
 #new object for train
@@ -1415,5 +1426,6 @@ signalPriceBoost = 0 #as a percentage
 incidentRisk = 65 #as a percentage
 platPrice = 5000 #price of a new platform at the start of the game
 platCount = 0
+numberTrains = 0
 
 gameLoop()
