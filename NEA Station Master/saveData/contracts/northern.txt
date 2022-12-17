@@ -1,3 +1,3 @@
-coaches, frequency/tpd, unlocked?
+coaches, extra frequency/tpd, unlocked?
 1,2,0
-2,4,0
+2,2,0
