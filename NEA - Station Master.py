@@ -1250,10 +1250,16 @@ def timetableScreen(returnButton):
     #first clear the screen
     pygame.draw.rect(screen, black, [0, 100, 1280, 520])
     #Then make the time bar along the top
-    #then make the significant boders extend down
+    pygame.draw.rect(screen, darkGrey, [0, 100, 1280, 64])
+    for i in range(5, 25, 1):
+        stringTime = str(i)
+        write(str(stringTime + ":00"), normal, white, 10 + (64 * (i - 5)), 110)
+    #then make the significant borders extend down
+        pygame.draw.line(screen, white, [9 + (64 * (i - 5)), 110], [9 + (64 * (i - 5)), 510])
     #then define the placeable regions
     #then make the rectangles to be placed
     #then make the rectangles draggable, snapping to coordinates
+    pygame.display.update()
     #then make the file to save it.
         
 #new object for train
