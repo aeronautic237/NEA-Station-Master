@@ -1242,8 +1242,19 @@ def drawContracts(TOC, returnButton):
                 pygame.display.update()
 
 def timetableScreen(returnButton):
-    pass
+    global numberTrains
+    global timeHour
+    global timeMinute
+    global timeSecond
     
+    #first clear the screen
+    pygame.draw.rect(screen, black, [0, 100, 1280, 520])
+    #Then make the time bar along the top
+    #then make the significant boders extend down
+    #then define the placeable regions
+    #then make the rectangles to be placed
+    #then make the rectangles draggable, snapping to coordinates
+    #then make the file to save it.
         
 #new object for train
 class train:
@@ -1427,5 +1438,8 @@ incidentRisk = 65 #as a percentage
 platPrice = 5000 #price of a new platform at the start of the game
 platCount = 0
 numberTrains = 0
+timeHour = 5
+timeminute = 0
+timesecond = 0
 
 gameLoop()
