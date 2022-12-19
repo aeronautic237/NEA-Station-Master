@@ -1271,7 +1271,7 @@ def timetableScreen(returnButton):
     
     #then define the placeable regions
     positionCoord = pygame.mouse.get_pos()# position of the mouse
-    position = pygame.Rect((positionCoord[0]-(positionCoord[0]%16),positionCoord[1]-(positionCoord[1]%42)),(16,42))#location on the array
+    position = pygame.Rect(((positionCoord[0] + 5)-(positionCoord[0]%16),(positionCoord[1] - 4)-(positionCoord[1]%42)),(16,42))#location on the array
     waiting = True
     while waiting:
         for event in pygame.event.get():
@@ -1284,7 +1284,9 @@ def timetableScreen(returnButton):
                 pygame.display.update()
                 if position.collidepoint((pygame.mouse.get_pos())) == False:
                     pygame.draw.rect(screen, black, position)
-                position = pygame.Rect((positionCoord[0]-(positionCoord[0]%16),positionCoord[1]-(positionCoord[1]%42)),(16,42))#location on the array
+                    position = pygame.Rect(((positionCoord[0] + 5)-(positionCoord[0]%16),(positionCoord[1] - 4)-(positionCoord[1]%42)),(16,42))#location on the array
+                    pygame.draw.rect(screen, menuScreenColour, position) # draw a white box to show where the mouse is.
+
     #then make the rectangles to be placed
     #then make the rectangles draggable, snapping to coordinates
         #actually no, make it so that left click does place, and right click removes
@@ -1476,6 +1478,6 @@ numberTrains = 0
 timeHour = 5
 timeminute = 0
 timesecond = 0
-numberEntry = 4
+numberEntry = 6
 
 gameLoop()
