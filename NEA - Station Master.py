@@ -1249,7 +1249,7 @@ def timetableScreen(returnButton):
     global timeMinute
     global timeSecond
     global numberEntry
-    
+    remainingTrains = numberTrains
     #first clear the screen
     pygame.draw.rect(screen, black, [0, 100, 1280, 520])
     #Then make the time bar along the top
@@ -1261,13 +1261,30 @@ def timetableScreen(returnButton):
             pygame.draw.line(screen, darkGrey, [5 + ((64 * (i - 5)) + (16 * j)), 164],[5 + ((64 * (i - 5)) + (16 * j)), 510])
         #then make the hour borders extend down
         pygame.draw.line(screen, white, [5 + (64 * (i - 5)), 100], [5 + (64 * (i - 5)), 510])
+        #hours increments are 64 pixels apart
         for k in range(numberEntry + 1):
             pygame.draw.line(screen, white, [0, (164 + (k * 42))], [1280, (164 + (k * 42))])
-            
+
+        #quuarter-hour incremens are 16 pixels apart
+    pygame.display.update()
+    #all increments are 42 pixels vertically
+    
     #then define the placeable regions
+    positionCoord = pygame.mouse.get_pos()# position of the mouse
+    position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            positionCoord = pygame.mouse.get_pos() # variable stores the position of the mouse
+            if positionCoord[1] > 164 and positionCoord[1] < (164 + (numberEntry * 42)) and positionCoord[0] > 4:
+                #the above line will check if the cursor is in a buildable area before moving the rectangle.
+                positionCoord = pygame.mouse.get_pos()#new position of the mouse
+                storeCoordx, storeCoordy = int(position[0]/40), int(position[1]/40)# stores the coordinates of the mouse against the .txt grid (idexed from 1
+                pygame.draw.rect(screen, menuScreenColour, position) # draw a white box to show where the mouse is.
+                pygame.display.update()
     #then make the rectangles to be placed
     #then make the rectangles draggable, snapping to coordinates
-        #actually no, make it so that eft click does place, and right click removes
+        #actually no, make it so that left click does place, and right click removes
     pygame.display.update()
     #then make the file to save it.
         
