@@ -1251,7 +1251,7 @@ def timetableScreen(returnButton):
     global timeSecond
     global numberEntry
     global timetableArray
-    remainingTrains = numberTrains
+    remainingTrains = numberTrains    
 
     #from save get timetable
     i = 0
@@ -1262,8 +1262,7 @@ def timetableScreen(returnButton):
             i += 1
 
     #0 = locked
-    #1 = unlocked
-    #2 = train present
+    #1 = train present
     
     #first clear the screen
     pygame.draw.rect(screen, black, [0, 100, 1280, 520])
@@ -1283,8 +1282,9 @@ def timetableScreen(returnButton):
     #now draw the placed services
     for i in range(0, len(timetableArray),1):
         for j in range(0, len(timetableArray[i]),1):
-            if timetableArray[i][j] == "2":
+            if timetableArray[i][j] == "1":
                 pygame.draw.rect(screen, white, [(j * 16) + 6, ((i + 4) * 42) - 3, 15, 41])
+                remainingTrains = remainingTrains - 1
             else:
                 pygame.draw.rect(screen, black, [(j * 16) + 6, ((i + 4) * 42) - 3, 15, 41])
 
@@ -1308,7 +1308,7 @@ def timetableScreen(returnButton):
                 print(storeCoordy)
                 print(storeCoordx)
                 if position.collidepoint((pygame.mouse.get_pos())) == False:
-                    if timetableArray[storeCoordy][storeCoordx] == "2":
+                    if timetableArray[storeCoordy][storeCoordx] == "1":
                         pygame.draw.rect(screen, white, position)
                     else:
                         pygame.draw.rect(screen, black, position)
@@ -1316,13 +1316,28 @@ def timetableScreen(returnButton):
                     pygame.draw.rect(screen, menuScreenColour, position) # draw a purple box to show where the mouse is.
     #then make clicky functionality
                 if event.type == pygame.MOUSEBUTTONUP:#checks for a click
-                    if remainingTrains != 0 and timetableArray[storeCoordy][storeCoordx] == "1":
-                        timetableArray[storeCoordy][storeCoordx] = "2"
-                        remainingTrains = remainingTrains - 1
-                    elif timetableArray[storeCoordy][storeCoordx] == "2":
+                    if remainingTrains != 0 and timetableArray[storeCoordy][storeCoordx] == "0":
                         timetableArray[storeCoordy][storeCoordx] = "1"
+                        remainingTrains = remainingTrains - 1
+                    elif timetableArray[storeCoordy][storeCoordx] == "1":
+                        timetableArray[storeCoordy][storeCoordx] = "0"
                         remainingTrains = remainingTrains + 1
                 storeCoordx, storeCoordy = int((position[0]/16)), int((position[1]/42) - 3)# stores the coordinates of the mouse against the .txt grid ()
+
+            if returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                returnButton.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    #save the game
+                    with open("saveData/timetable.txt", "w", newline="") as file:
+                        writer = csv.writer(file)
+                        writer.writerows(timetableArray)
+                    #return to previous screen
+                    game()
+            elif event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            else:
+                returnButton.changeButtonColour(darkGrey)
     #then make the rectangles draggable, snapping to coordinates
         #actually no, make it so that left click does place, and right click removes
     pygame.display.update()
