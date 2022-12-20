@@ -23,7 +23,7 @@ thirdRail,1
 OHLE,0
 OHLE HS,0
 fourthRail,0
-toilet,0
+toilet,1
 timetable,0
 DMI,0
 LCD,0

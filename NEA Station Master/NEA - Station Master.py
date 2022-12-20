@@ -45,6 +45,7 @@ gamestate = "menu"
 researchProgress = [[0 for x in range(2)] for y in range(33)]#create an array in which to store the data
 trackLayout = [[0 for x in range(32)] for y in range(13)]#create an array in which the trackLayout is stored
 entryLayout = [[0 for x in range(2)] for y in range(4)]#create an array in which the entry points are stored
+timetableArray = [[0 for x in range(80)] for y in range(8)]#creates an array in which the timetable is to be stored
 
 #defing the various functions of the game here
 def mainMenu():
@@ -189,8 +190,8 @@ def game():
     contractButton = button(darkGrey, [235, 635, 180, 75], "Contracts", clockTextFont, white, 240, 655)
     contractButton.drawButton()
     #potential fact button
-    factButton = button(darkGrey, [430, 635, 75, 75], "", clockTextFont, white, 10, 10)
-    factButton.drawButton()
+    timetableButton = button(darkGrey, [430, 635, 170, 75], "Timetable", clockTextFont, white, 435, 655)
+    timetableButton.drawButton()
     #return to main menu button
     menuButton = button(pink, [1200, 635, 75, 75], "", clockTextFont, white, 1210, 655)
     menuButton.drawButton()
@@ -220,6 +221,11 @@ def game():
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     contracts(menuButton)
+            elif timetableButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                timetableButton.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    waiting = False
+                    timetableScreen(menuButton)
             elif event.type == pygame.QUIT:
                 waiting = False
                 pygame.quit()
@@ -229,6 +235,7 @@ def game():
                 RDButton.changeButtonColour(darkGrey)
                 constructButton.changeButtonColour(darkGrey)
                 contractButton.changeButtonColour(darkGrey)
+                timetableButton.changeButtonColour(darkGrey)
     #train1 = train(white, 1230, 350, 50, 20, -1)
     #train1.drawTrain()
     #time.sleep(1)
@@ -813,6 +820,7 @@ def buildPoints(returnButton):
 
 def buildEntry(returnButton):
     global money
+    global numberEntry
     #cover up the other buttons
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 275, 100])
     notFinished = True
@@ -894,6 +902,7 @@ def buildEntry(returnButton):
                     with open("saveData/entryPoints.txt", "w", newline="") as file:
                         writer = csv.writer(file)
                         writer.writerows(entryLayout)
+                        numberEntry += 1
                     shop()
             else:
                 returnButton.changeButtonColour(darkGrey)
@@ -1218,6 +1227,7 @@ def drawContracts(TOC, returnButton):
                     contracts[i].changeButtonColour(pink)
                     if event.type == pygame.MOUSEBUTTONUP:
                          numberTrains = numberTrains + contractsList[i+1][1]
+                         print(numberTrains)
                 if contractsList[i + 1][2] == "0":
                     contracts[i].changeButtonColour(white)
                     returnButton.changeButtonColour(darkGrey)
@@ -1233,7 +1243,75 @@ def drawContracts(TOC, returnButton):
                     pygame.quit()
                     sys.exit()
                 pygame.display.update()
+
+def timetableScreen(returnButton):
+    global numberTrains
+    global timeHour
+    global timeMinute
+    global timeSecond
+    global numberEntry
+    global timetableArray
+    remainingTrains = numberTrains
+
+    #from save get timetable
+    i = 0
+    with open("saveData/timetable.txt") as file:
+        reader = csv.reader(file)
+        for row in reader:
+            timetableArray[i] = row
+            i += 1
+
+    #0 = locked
+    #1 = unlocked
+    #2 = train present
     
+    #first clear the screen
+    pygame.draw.rect(screen, black, [0, 100, 1280, 520])
+    #Then make the time bar along the top
+    pygame.draw.rect(screen, darkGrey, [0, 100, 1280, 64])
+    for i in range(5, 25, 1):
+        stringTime = str(i)
+        write(str(stringTime + ":00"), normal, white, 10 + (64 * (i - 5)), 110)
+        for j in range (4): # this draws the minimum increments that I shall allow.
+            pygame.draw.line(screen, darkGrey, [5 + ((64 * (i - 5)) + (16 * j)), 164],[5 + ((64 * (i - 5)) + (16 * j)), 510])
+        #then make the hour borders extend down
+        pygame.draw.line(screen, white, [5 + (64 * (i - 5)), 100], [5 + (64 * (i - 5)), 510])
+        #hours increments are 64 pixels apart
+        for k in range(numberEntry + 1):
+            pygame.draw.line(screen, white, [0, (164 + (k * 42))], [1280, (164 + (k * 42))])
+
+        #quuarter-hour increments are 16 pixels apart and there are 80 slots per row
+    pygame.display.update()
+    #all increments are 42 pixels vertically
+    
+    #then define the placeable regions
+    positionCoord = pygame.mouse.get_pos()# position of the mouse
+    position = pygame.Rect(((positionCoord[0] + 6)-(positionCoord[0]%16),(positionCoord[1] - 3)-(positionCoord[1]%42)),(15,41))#location on the array
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            positionCoord = pygame.mouse.get_pos() # variable stores the position of the mouse
+            if positionCoord[1] > 164 and positionCoord[1] < (164 + (numberEntry * 42)) and positionCoord[0] > 4:
+                #the above line will check if the cursor is in a buildable area before moving the rectangle.
+                positionCoord = pygame.mouse.get_pos()#new position of the mouse
+                storeCoordx, storeCoordy = int((position[0]/16)), int((position[1]/42) - 3)# stores the coordinates of the mouse against the .txt grid (idexed from 1
+                pygame.draw.rect(screen, menuScreenColour, position) # draw a white box to show where the mouse is.
+                pygame.display.update()
+                if position.collidepoint((pygame.mouse.get_pos())) == False:
+                    pygame.draw.rect(screen, black, position)
+                    position = pygame.Rect(((positionCoord[0] + 6)-(positionCoord[0]%16),(positionCoord[1] - 3)-(positionCoord[1]%42)),(15,41))#location on the array
+                    pygame.draw.rect(screen, menuScreenColour, position) # draw a white box to show where the mouse is.
+                print(storeCoordy)
+                print(storeCoordx)
+    #then make the rectangles to be placed
+                if event.type == pygame.MOUSEBUTTONUP:#checks for a click
+                    #condition if the square has a signal in it already
+                    if remainingTrains != 0:
+                        remainingTrains = remainingTrains - 1
+    #then make the rectangles draggable, snapping to coordinates
+        #actually no, make it so that left click does place, and right click removes
+    pygame.display.update()
+    #then make the file to save it.
         
 #new object for train
 class train:
@@ -1417,5 +1495,9 @@ incidentRisk = 65 #as a percentage
 platPrice = 5000 #price of a new platform at the start of the game
 platCount = 0
 numberTrains = 0
+timeHour = 5
+timeminute = 0
+timesecond = 0
+numberEntry = 4
 
 gameLoop()
