@@ -1314,11 +1314,14 @@ def timetableScreen(returnButton):
                         pygame.draw.rect(screen, black, position)
                     position = pygame.Rect(((positionCoord[0] + 6)-(positionCoord[0]%16),(positionCoord[1] - 3)-(positionCoord[1]%42)),(15,41))#location on the array
                     pygame.draw.rect(screen, menuScreenColour, position) # draw a purple box to show where the mouse is.
-    #then make the rectangles to be placed
+    #then make clicky functionality
                 if event.type == pygame.MOUSEBUTTONUP:#checks for a click
-                    #condition if the square has a signal in it already
-                    if remainingTrains != 0:
+                    if remainingTrains != 0 and timetableArray[storeCoordy][storeCoordx] == "1":
+                        timetableArray[storeCoordy][storeCoordx] = "2"
                         remainingTrains = remainingTrains - 1
+                    elif timetableArray[storeCoordy][storeCoordx] == "2":
+                        timetableArray[storeCoordy][storeCoordx] = "1"
+                        remainingTrains = remainingTrains + 1
                 storeCoordx, storeCoordy = int((position[0]/16)), int((position[1]/42) - 3)# stores the coordinates of the mouse against the .txt grid ()
     #then make the rectangles draggable, snapping to coordinates
         #actually no, make it so that left click does place, and right click removes
