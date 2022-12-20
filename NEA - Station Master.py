@@ -45,6 +45,7 @@ gamestate = "menu"
 researchProgress = [[0 for x in range(2)] for y in range(33)]#create an array in which to store the data
 trackLayout = [[0 for x in range(32)] for y in range(13)]#create an array in which the trackLayout is stored
 entryLayout = [[0 for x in range(2)] for y in range(4)]#create an array in which the entry points are stored
+timetableArray = [[0 for x in range(80)] for y in range(8)]#creates an array in which the timetable is to be stored
 
 #defing the various functions of the game here
 def mainMenu():
@@ -1249,7 +1250,21 @@ def timetableScreen(returnButton):
     global timeMinute
     global timeSecond
     global numberEntry
+    global timetableArray
     remainingTrains = numberTrains
+
+    #from save get timetable
+    i = 0
+    with open("saveData/timetable.txt") as file:
+        reader = csv.reader(file)
+        for row in reader:
+            timetableArray[i] = row
+            i += 1
+
+    #0 = locked
+    #1 = unlocked
+    #2 = train present
+    
     #first clear the screen
     pygame.draw.rect(screen, black, [0, 100, 1280, 520])
     #Then make the time bar along the top
@@ -1265,7 +1280,15 @@ def timetableScreen(returnButton):
         for k in range(numberEntry + 1):
             pygame.draw.line(screen, white, [0, (164 + (k * 42))], [1280, (164 + (k * 42))])
 
-        #quuarter-hour incremens are 16 pixels apart
+    #now draw the placed services
+    for i in range(0, len(timetableArray),1):
+        for j in range(0, len(timetableArray[i]),1):
+            if timetableArray[i][j] == "2":
+                pygame.draw.rect(screen, white, [(j * 16) + 6, ((i + 4) * 42) - 3, 15, 41])
+            else:
+                pygame.draw.rect(screen, black, [(j * 16) + 6, ((i + 4) * 42) - 3, 15, 41])
+
+        #quuarter-hour increments are 16 pixels apart and there are 80 slots per row
     pygame.display.update()
     #all increments are 42 pixels vertically
     
@@ -1279,15 +1302,23 @@ def timetableScreen(returnButton):
             if positionCoord[1] > 164 and positionCoord[1] < (164 + (numberEntry * 42)) and positionCoord[0] > 4:
                 #the above line will check if the cursor is in a buildable area before moving the rectangle.
                 positionCoord = pygame.mouse.get_pos()#new position of the mouse
-                storeCoordx, storeCoordy = int(position[0]/16), int(position[1]/42)# stores the coordinates of the mouse against the .txt grid (idexed from 1
-                pygame.draw.rect(screen, menuScreenColour, position) # draw a white box to show where the mouse is.
+                pygame.draw.rect(screen, menuScreenColour, position) # draw a purple box to show where the mouse is.
                 pygame.display.update()
+                storeCoordx, storeCoordy = int((position[0]/16)), int((position[1]/42) - 3)# stores the coordinates of the mouse against the .txt grid (idexed from 1
+                print(storeCoordy)
+                print(storeCoordx)
                 if position.collidepoint((pygame.mouse.get_pos())) == False:
-                    pygame.draw.rect(screen, black, position)
+                    if timetableArray[storeCoordy][storeCoordx] == 2:
+                        pygame.draw.rect(screen, white, position)
+                    else:
+                        pygame.draw.rect(screen, black, position)
                     position = pygame.Rect(((positionCoord[0] + 6)-(positionCoord[0]%16),(positionCoord[1] - 3)-(positionCoord[1]%42)),(15,41))#location on the array
-                    pygame.draw.rect(screen, menuScreenColour, position) # draw a white box to show where the mouse is.
-
+                    pygame.draw.rect(screen, menuScreenColour, position) # draw a purple box to show where the mouse is.
     #then make the rectangles to be placed
+                if event.type == pygame.MOUSEBUTTONUP:#checks for a click
+                    #condition if the square has a signal in it already
+                    if remainingTrains != 0:
+                        remainingTrains = remainingTrains - 1
     #then make the rectangles draggable, snapping to coordinates
         #actually no, make it so that left click does place, and right click removes
     pygame.display.update()
