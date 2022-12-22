@@ -56,19 +56,28 @@ def incrementClock():
     global timeHour
     global timeMinute
     global timeSecond
-    timeSecond = timeSecond + 1 # increment seconds
-    if timeSecond == 60: # increment minutes
+    int(timeSecond)
+    int(timeHour)
+    int(timeMinute)
+    timeSecond = int(timeSecond) + 1 # increment seconds
+    if int(timeSecond) == 60: # increment minutes
         timeSecond = 0
-        timeMinute = timeMinute + 1
-    if timeMinute == 60: # increment hours
+        timeMinute = int(timeMinute) + 1
+    if int(timeMinute) == 60: # increment hours
         timeMinute = 0
-        timeHour = timeHour + 1
-    if timeHour == 24: # increment days (reset clock)
+        timeHour = int(timeHour) + 1
+    if int(timeHour) == 24: # increment days (reset clock)
         timeHour = 4
+    #if int(timeSecond) < 10:
+     #   timeSecond = "0" + str(timeSecond)
+    #if int(timeMinute) < 10:
+     #   timeMinute = "0" + str(timeMinute)
+    #if int(timeHour) < 10:
+     #   timeHour = "0" + str(timeHour)
     print(timeSecond)
     print(timeMinute)
     print(timeHour)
-    write(str(timeHour) + ":" + str(timeMinute) + ":" + str(timeSecond), clockFont, white, 510, 15)
+    write(str(timeHour).zfill(2) + ":" + str(timeMinute).zfill(2) + ":" + str(timeSecond).zfill(2), clockFont, white, 510, 15)
     pygame.display.update()
 
 
