@@ -5,6 +5,7 @@ import pygame
 import sys
 import time
 import csv
+import threading
 
 #initialise pygame
 pygame.font.init()
@@ -48,6 +49,26 @@ entryLayout = [[0 for x in range(2)] for y in range(4)]#create an array in which
 timetableArray = [[0 for x in range(80)] for y in range(8)]#creates an array in which the timetable is to be stored
 
 #defing the various functions of the game here
+
+#this will increment the clock - needs to be called every second (or more depending on the multiplier
+def incrementClock():
+    global timeHour
+    global timeMinute
+    global timeSecond
+    timeSecond = timeSecond + 1 # increment seconds
+    if timeSecond == 60: # increment minutes
+        timeSecond = 0
+        timeMinute = timeMinute + 1
+    if timeMinute == 60: # increment hours
+        timeMinute = 0
+        timeHour = timeHour + 1
+    if timeHour == 24: # increment days (reset clock)
+        timeHour = 4
+    print(timeSecond)
+    print(timeMinute)
+    print(timeHour)
+
+
 def mainMenu():
 
     #This will draw the menu
@@ -199,37 +220,43 @@ def game():
     pygame.display.update()
     #this is where we do the mechanics
     waiting = True
+    incrementer = RepeatedTimer(1, incrementClock)
     while waiting == True:
-        start = time.time()
         for event in pygame.event.get():
             if menuButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 menuButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     gamestate = "menu"
+                    incrementer.stop()
                     mainMenu()
             elif RDButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 RDButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
+                    incrementer.stop()
                     research()
             elif constructButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 constructButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
+                    incrementer.stop()
                     shop()
             elif contractButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 contractButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
+                    incrementer.stop()
                     contracts(menuButton)
             elif timetableButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 timetableButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
+                    incrementer.stop()
                     timetableScreen(menuButton)
             elif event.type == pygame.QUIT:
                 waiting = False
+                incrementer.stop()
                 pygame.quit()
                 sys.exit()
             else:
@@ -238,9 +265,6 @@ def game():
                 constructButton.changeButtonColour(darkGrey)
                 contractButton.changeButtonColour(darkGrey)
                 timetableButton.changeButtonColour(darkGrey)
-        end = time.time()
-        total = total + (end - start)
-        print(total)
     #train1 = train(white, 1230, 350, 50, 20, -1)
     #train1.drawTrain()
     #time.sleep(1)
@@ -1487,6 +1511,32 @@ class entryButton(button):
     def setState(self):
         self.state = "1"
         entryLayout[self.saveLocationy][self.saveLocationx] = self.state
+
+# I will use this to increment the clock every second
+class RepeatedTimer(): # https://stackoverflow.com/questions/474528/how-to-repeatedly-execute-a-function-every-x-seconds
+  def __init__(self, interval, function):
+    self._timer = None
+    self.interval = interval
+    self.function = function
+    self.is_running = False
+    self.next_call = time.time()
+    self.start()
+
+  def _run(self):
+    self.is_running = False
+    self.start()
+    self.function()
+
+  def start(self):
+    if not self.is_running:
+      self.next_call += self.interval
+      self._timer = threading.Timer(self.next_call - time.time(), self._run)
+      self._timer.start()
+      self.is_running = True
+
+  def stop(self):
+    self._timer.cancel()
+    self.is_running = False
         
 #will print text as the user wishes
 def write(text, font, colour, xpos, ypos):
@@ -1530,9 +1580,9 @@ incidentRisk = 65 #as a percentage
 platPrice = 5000 #price of a new platform at the start of the game
 platCount = 0
 numberTrains = 0
-timeHour = 5
-timeminute = 0
-timesecond = 0
+timeHour = 4
+timeMinute = 0
+timeSecond = 0
 numberEntry = 4
 
 gameLoop()
