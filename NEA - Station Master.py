@@ -52,6 +52,7 @@ timetableArray = [[0 for x in range(80)] for y in range(8)]#creates an array in 
 
 #this will increment the clock - needs to be called every second (or more depending on the multiplier
 def incrementClock():
+    pygame.draw.rect(screen, menuScreenColour, [510, 15, 310, 60])
     global timeHour
     global timeMinute
     global timeSecond
@@ -67,6 +68,8 @@ def incrementClock():
     print(timeSecond)
     print(timeMinute)
     print(timeHour)
+    write(str(timeHour) + ":" + str(timeMinute) + ":" + str(timeSecond), clockFont, white, 510, 15)
+    pygame.display.update()
 
 
 def mainMenu():
@@ -201,7 +204,7 @@ def game():
     clockX25 = button(darkGrey, [1160, 10, 75, 75], "25x", clockTextFont, white, 1170, 30)
     clockX25.drawButton()
     pygame.draw.rect(screen, pink, [500, 10, 330, 75], 5)
-    write("00:00:00", clockFont, white, 510, 15)
+    #write("00:00:00", clockFont, white, 510, 15)
     #RDButton
     RDButton = button(darkGrey, [10, 635, 75, 75], "R&D", clockTextFont, white, 10, 655)
     RDButton.drawButton()
