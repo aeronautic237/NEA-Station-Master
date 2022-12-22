@@ -100,6 +100,7 @@ def mainMenu():
 
 #This is where the game is run
 def game():
+    total = 0 # records the total time elapsed
     #this is mainly for debugging purposes, may not be necessary in the final build
     print("Starting Game")
     gameState = "game"
@@ -238,7 +239,8 @@ def game():
                 contractButton.changeButtonColour(darkGrey)
                 timetableButton.changeButtonColour(darkGrey)
         end = time.time()
-        print(str(end - start))
+        total = total + (end - start)
+        print(total)
     #train1 = train(white, 1230, 350, 50, 20, -1)
     #train1.drawTrain()
     #time.sleep(1)
@@ -1271,13 +1273,13 @@ def timetableScreen(returnButton):
     pygame.draw.rect(screen, black, [0, 100, 1280, 520])
     #Then make the time bar along the top
     pygame.draw.rect(screen, darkGrey, [0, 100, 1280, 64])
-    for i in range(5, 25, 1):
+    for i in range(4, 24, 1):
         stringTime = str(i)
-        write(str(stringTime + ":00"), normal, white, 10 + (64 * (i - 5)), 110)
+        write(str(stringTime + ":00"), normal, white, 10 + (64 * (i - 4)), 110)
         for j in range (4): # this draws the minimum increments that I shall allow.
-            pygame.draw.line(screen, darkGrey, [5 + ((64 * (i - 5)) + (16 * j)), 164],[5 + ((64 * (i - 5)) + (16 * j)), 510])
+            pygame.draw.line(screen, darkGrey, [5 + ((64 * (i - 4)) + (16 * j)), 164],[5 + ((64 * (i - 4)) + (16 * j)), 510])
         #then make the hour borders extend down
-        pygame.draw.line(screen, white, [5 + (64 * (i - 5)), 100], [5 + (64 * (i - 5)), 510])
+        pygame.draw.line(screen, white, [5 + (64 * (i - 4)), 100], [5 + (64 * (i - 4)), 510])
         #hours increments are 64 pixels apart
         for k in range(numberEntry + 1):
             pygame.draw.line(screen, white, [0, (164 + (k * 42))], [1280, (164 + (k * 42))])
