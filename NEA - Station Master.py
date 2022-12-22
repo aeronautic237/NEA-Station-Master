@@ -199,6 +199,7 @@ def game():
     #this is where we do the mechanics
     waiting = True
     while waiting == True:
+        start = time.time()
         for event in pygame.event.get():
             if menuButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 menuButton.changeButtonColour(pink)
@@ -236,6 +237,8 @@ def game():
                 constructButton.changeButtonColour(darkGrey)
                 contractButton.changeButtonColour(darkGrey)
                 timetableButton.changeButtonColour(darkGrey)
+        end = time.time()
+        print(str(end - start))
     #train1 = train(white, 1230, 350, 50, 20, -1)
     #train1.drawTrain()
     #time.sleep(1)
