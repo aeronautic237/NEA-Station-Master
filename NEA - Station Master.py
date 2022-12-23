@@ -133,7 +133,7 @@ def mainMenu():
 
 #This is where the game is run
 def game():
-    total = 0 # records the total time elapsed
+    multiplier = 1 # speed of the clock
     #this is mainly for debugging purposes, may not be necessary in the final build
     print("Starting Game")
     gameState = "game"
@@ -192,12 +192,6 @@ def game():
     clockIcon = pygame.image.load("Clock_Icon.jpg")
     clockIcon = pygame.transform.scale(clockIcon, (75, 75))
     screen.blit(clockIcon, (420, 10))
-    #placeholder to pause the clock
-    pauseClock = button(darkGrey, [840, 10, 75, 75], "", buttonFont, white, 850, 20)
-    pauseIcon = pygame.image.load("pause_Icon.png")
-    pauseIcon = pygame.transform.scale(pauseIcon, (70, 70))
-    pauseClock.drawButton()
-    screen.blit(pauseIcon, (842.5, 12.5))
     #placeholder to play the clock
     playClock = button(darkGrey, [920, 10, 75,75], "", buttonFont, white, 850, 20)
     playClockIcon = pygame.image.load("play_icon.png")
@@ -213,6 +207,8 @@ def game():
     clockX25 = button(darkGrey, [1160, 10, 75, 75], "25x", clockTextFont, white, 1170, 30)
     clockX25.drawButton()
     pygame.draw.rect(screen, pink, [500, 10, 330, 75], 5)
+    #list of multipliers:
+    multipliers = [playClock, clockX5, clockX15, clockX25]
     #write("00:00:00", clockFont, white, 510, 15)
     #RDButton
     RDButton = button(darkGrey, [10, 635, 75, 75], "R&D", clockTextFont, white, 10, 655)
@@ -232,7 +228,7 @@ def game():
     pygame.display.update()
     #this is where we do the mechanics
     waiting = True
-    incrementer = RepeatedTimer(1, incrementClock)
+    incrementer = RepeatedTimer(multiplier, incrementClock)
     while waiting == True:
         for event in pygame.event.get():
             if menuButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
@@ -266,6 +262,22 @@ def game():
                     waiting = False
                     incrementer.stop()
                     timetableScreen(menuButton)
+            elif playClock.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                playClock.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    multiplier = 1
+            elif clockX5.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                clockX5.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    multiplier = 0.2
+            elif clockX15.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                clockX15.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    multiplier = 1 / 15
+            elif clockX25.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                clockX25.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    multiplier = 1 / 25
             elif event.type == pygame.QUIT:
                 waiting = False
                 incrementer.stop()
@@ -277,6 +289,9 @@ def game():
                 constructButton.changeButtonColour(darkGrey)
                 contractButton.changeButtonColour(darkGrey)
                 timetableButton.changeButtonColour(darkGrey)
+                for i in range(0, len(multipliers)):
+                    multipliers[i].changeButtonColour(darkGrey)
+                    
     #train1 = train(white, 1230, 350, 50, 20, -1)
     #train1.drawTrain()
     #time.sleep(1)
