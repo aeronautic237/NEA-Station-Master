@@ -266,18 +266,22 @@ def game():
                 playClock.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     multiplier = 1
+                    incrementer.setInterval(multiplier)
             elif clockX5.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 clockX5.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     multiplier = 0.2
+                    incrementer.setInterval(multiplier)
             elif clockX15.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 clockX15.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     multiplier = 1 / 15
+                    incrementer.setInterval(multiplier)
             elif clockX25.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 clockX25.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     multiplier = 1 / 25
+                    incrementer.setInterval(multiplier)
             elif event.type == pygame.QUIT:
                 waiting = False
                 incrementer.stop()
@@ -1541,29 +1545,33 @@ class entryButton(button):
 
 # I will use this to increment the clock every second
 class RepeatedTimer(): # https://stackoverflow.com/questions/474528/how-to-repeatedly-execute-a-function-every-x-seconds
-  def __init__(self, interval, function):
-    self._timer = None
-    self.interval = interval
-    self.function = function
-    self.is_running = False
-    self.next_call = time.time()
-    self.start()
+    def __init__(self, interval, function):
+        self._timer = None
+        self.interval = interval
+        self.function = function
+        self.is_running = False
+        self.next_call = time.time()
+        self.start()
 
-  def _run(self):
-    self.is_running = False
-    self.start()
-    self.function()
+    def _run(self):
+        self.is_running = False
+        self.start()
+        self.function()
 
-  def start(self):
-    if not self.is_running:
-      self.next_call += self.interval
-      self._timer = threading.Timer(self.next_call - time.time(), self._run)
-      self._timer.start()
-      self.is_running = True
+    def start(self):
+        if not self.is_running:
+            self.next_call += self.interval
+            self._timer = threading.Timer(self.next_call - time.time(), self._run)
+            self._timer.start()
+            self.is_running = True
 
-  def stop(self):
-    self._timer.cancel()
-    self.is_running = False
+    def stop(self):
+        self._timer.cancel()
+        self.is_running = False
+
+    def setInterval(self, newInterval):
+        self.interval = newInterval
+    
         
 #will print text as the user wishes
 def write(text, font, colour, xpos, ypos):
