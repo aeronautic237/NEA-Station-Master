@@ -52,7 +52,6 @@ timetableArray = [[0 for x in range(80)] for y in range(8)]#creates an array in 
 
 #this will increment the clock - needs to be called every second (or more depending on the multiplier
 def incrementClock():
-    pygame.draw.rect(screen, menuScreenColour, [510, 15, 310, 60])
     global timeHour
     global timeMinute
     global timeSecond
@@ -77,6 +76,7 @@ def incrementClock():
     print(timeSecond)
     print(timeMinute)
     print(timeHour)
+    pygame.draw.rect(screen, menuScreenColour, [510, 15, 310, 60])
     write(str(timeHour).zfill(2) + ":" + str(timeMinute).zfill(2) + ":" + str(timeSecond).zfill(2), clockFont, white, 510, 15)
     pygame.display.update()
 
@@ -193,7 +193,7 @@ def game():
     clockIcon = pygame.transform.scale(clockIcon, (75, 75))
     screen.blit(clockIcon, (420, 10))
     #placeholder to play the clock
-    playClock = button(darkGrey, [920, 10, 75,75], "", buttonFont, white, 850, 20)
+    playClock = button(darkGrey, [920, 10, 75,75], "x1", clockTextFont, white, 940, 30)
     playClockIcon = pygame.image.load("play_icon.png")
     playClockIcon = pygame.transform.scale(playClockIcon, (70, 70))
     playClock.drawButton()
@@ -201,14 +201,18 @@ def game():
     #placeholder for the 5X clock speed
     clockX5 = button(darkGrey, [1000, 10, 75,75], "5x", clockTextFont, white, 1020, 30)
     clockX5.drawButton()
+    #placeholder for the 15X clock speed
     clockX15 = button(darkGrey, [1080, 10, 75, 75], "15x", clockTextFont, white, 1090, 30)
     clockX15.drawButton()
     #placeholder for the 25X clock speed
     clockX25 = button(darkGrey, [1160, 10, 75, 75], "25x", clockTextFont, white, 1170, 30)
     clockX25.drawButton()
+    #and for the newly introduced X100 clock speed
+    clockX50 = button(darkGrey, [840, 10, 75, 75], "50x", clockTextFont, white, 850, 30)
+    clockX50.drawButton()
     pygame.draw.rect(screen, pink, [500, 10, 330, 75], 5)
     #list of multipliers:
-    multipliers = [playClock, clockX5, clockX15, clockX25]
+    multipliers = [playClock, clockX5, clockX15, clockX25, clockX50]
     #write("00:00:00", clockFont, white, 510, 15)
     #RDButton
     RDButton = button(darkGrey, [10, 635, 75, 75], "R&D", clockTextFont, white, 10, 655)
@@ -281,6 +285,11 @@ def game():
                 clockX25.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     multiplier = 1 / 25
+                    incrementer.setInterval(multiplier)
+            elif clockX50.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                clockX50.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    multiplier = 1 / 50
                     incrementer.setInterval(multiplier)
             elif event.type == pygame.QUIT:
                 waiting = False
