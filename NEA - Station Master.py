@@ -1432,6 +1432,9 @@ def timetableScreen(returnButton):
                         timetableArray[storeCoordy][storeCoordx] = "0"
                         remainingTrains = remainingTrains + 1
                 storeCoordx, storeCoordy = int((position[0]/16)), int((position[1]/42) - 3)# stores the coordinates of the mouse against the .txt grid ()
+                #will tell the user how many trains they have left
+                pygame.draw.rect(screen, black, [50, 540, 100, 60])
+                write(str(remainingTrains) + " trains remaining", clockFont, white, 50, 540)
 
             if returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 returnButton.changeButtonColour(pink)
