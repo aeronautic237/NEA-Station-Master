@@ -192,6 +192,9 @@ def game():
     clockIcon = pygame.image.load("Clock_Icon.jpg")
     clockIcon = pygame.transform.scale(clockIcon, (75, 75))
     screen.blit(clockIcon, (420, 10))
+    #button to skip forward time to spawn next train
+    skipForward = button(darkGrey, [320, 10, 80, 80], "", clockTextFont, white, 325, 15)
+    skipForward.drawButton()
     #placeholder to play the clock
     playClock = button(darkGrey, [920, 10, 75,75], "x1", clockTextFont, white, 940, 30)
     playClockIcon = pygame.image.load("play_icon.png")
@@ -291,6 +294,10 @@ def game():
                 if event.type == pygame.MOUSEBUTTONUP:
                     multiplier = 1 / 50
                     incrementer.setInterval(multiplier)
+            elif skipForward.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                skipForward.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    forwardTime(timeHour, timeMinute, timeSecond)
             elif event.type == pygame.QUIT:
                 waiting = False
                 incrementer.stop()
@@ -302,6 +309,7 @@ def game():
                 constructButton.changeButtonColour(darkGrey)
                 contractButton.changeButtonColour(darkGrey)
                 timetableButton.changeButtonColour(darkGrey)
+                skipForward.changeButtonColour(darkGrey)
                 for i in range(0, len(multipliers)):
                     multipliers[i].changeButtonColour(darkGrey)
                     
@@ -313,6 +321,38 @@ def game():
     #train1.departPlat()
     #train1.destroyTrain()
     #pygame.display.update()
+
+#will set the time to the next train in the timetable (parameters are starting point)
+def forwardTime(hours, minutes, seconds):
+    time = 0
+    global timeHour
+    global timeMinute
+    global timeSecond
+    with open("saveData/timetable.txt","r") as file:
+        reader = csv.reader(file)
+        i = 0
+        for row in reader:
+            timetableArray[i] = row
+            i = i + 1
+    hours = hours - 4
+    time = time + seconds
+    time = time + (minutes * 60)
+    time = time + (hours * 3600)
+    time = int(time // (3600 / 4))
+    temp = int((time + 1) % 80)
+    while temp != time:
+        for j in range(0, len(timetableArray)):
+            if timetableArray[j][temp] == "1":
+                time = temp
+                time = time * (3600 / 4)
+                hours = time // 3600
+                time = time - (hours * 3600)
+                minutes = time / 60
+                timeHour = int(hours + 4)
+                timeMinute = int(minutes)
+                timeSecond = 0
+                return "ends the function"
+        temp = (temp + 1) % 80
 
 def research():
 
