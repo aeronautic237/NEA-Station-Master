@@ -1,2 +1,2 @@
-coaches, frequency, unlocked?
-7,576,0
+coaches, frequency, unlocked?, criteria
+7,576,0,16

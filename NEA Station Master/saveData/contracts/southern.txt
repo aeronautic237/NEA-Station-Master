@@ -1,6 +1,6 @@
-coaches,frequency,unlocked?
-4,24,0
-4,24,0
-8,-12,0
-8,12,0
-12,0,0
+coaches,frequency,unlocked?, criteria
+4,24,0,11
+4,24,0,11
+8,-12,0,12
+8,12,0,12
+12,0,0,13

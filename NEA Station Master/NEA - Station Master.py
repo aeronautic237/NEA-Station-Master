@@ -5,6 +5,7 @@ import pygame
 import sys
 import time
 import csv
+import threading
 
 #initialise pygame
 pygame.font.init()
@@ -48,6 +49,38 @@ entryLayout = [[0 for x in range(2)] for y in range(4)]#create an array in which
 timetableArray = [[0 for x in range(80)] for y in range(8)]#creates an array in which the timetable is to be stored
 
 #defing the various functions of the game here
+
+#this will increment the clock - needs to be called every second (or more depending on the multiplier
+def incrementClock():
+    global timeHour
+    global timeMinute
+    global timeSecond
+    int(timeSecond)
+    int(timeHour)
+    int(timeMinute)
+    timeSecond = int(timeSecond) + 1 # increment seconds
+    if int(timeSecond) == 60: # increment minutes
+        timeSecond = 0
+        timeMinute = int(timeMinute) + 1
+    if int(timeMinute) == 60: # increment hours
+        timeMinute = 0
+        timeHour = int(timeHour) + 1
+    if int(timeHour) == 24: # increment days (reset clock)
+        timeHour = 4
+    #if int(timeSecond) < 10:
+     #   timeSecond = "0" + str(timeSecond)
+    #if int(timeMinute) < 10:
+     #   timeMinute = "0" + str(timeMinute)
+    #if int(timeHour) < 10:
+     #   timeHour = "0" + str(timeHour)
+    print(timeSecond)
+    print(timeMinute)
+    print(timeHour)
+    pygame.draw.rect(screen, menuScreenColour, [510, 15, 310, 60])
+    write(str(timeHour).zfill(2) + ":" + str(timeMinute).zfill(2) + ":" + str(timeSecond).zfill(2), clockFont, white, 510, 15)
+    pygame.display.update()
+
+
 def mainMenu():
 
     #This will draw the menu
@@ -100,6 +133,7 @@ def mainMenu():
 
 #This is where the game is run
 def game():
+    multiplier = 1 # speed of the clock
     #this is mainly for debugging purposes, may not be necessary in the final build
     print("Starting Game")
     gameState = "game"
@@ -158,14 +192,11 @@ def game():
     clockIcon = pygame.image.load("Clock_Icon.jpg")
     clockIcon = pygame.transform.scale(clockIcon, (75, 75))
     screen.blit(clockIcon, (420, 10))
-    #placeholder to pause the clock
-    pauseClock = button(darkGrey, [840, 10, 75, 75], "", buttonFont, white, 850, 20)
-    pauseIcon = pygame.image.load("pause_Icon.png")
-    pauseIcon = pygame.transform.scale(pauseIcon, (70, 70))
-    pauseClock.drawButton()
-    screen.blit(pauseIcon, (842.5, 12.5))
+    #button to skip forward time to spawn next train
+    skipForward = button(darkGrey, [320, 10, 80, 80], "", clockTextFont, white, 325, 15)
+    skipForward.drawButton()
     #placeholder to play the clock
-    playClock = button(darkGrey, [920, 10, 75,75], "", buttonFont, white, 850, 20)
+    playClock = button(darkGrey, [920, 10, 75,75], "x1", clockTextFont, white, 940, 30)
     playClockIcon = pygame.image.load("play_icon.png")
     playClockIcon = pygame.transform.scale(playClockIcon, (70, 70))
     playClock.drawButton()
@@ -173,13 +204,19 @@ def game():
     #placeholder for the 5X clock speed
     clockX5 = button(darkGrey, [1000, 10, 75,75], "5x", clockTextFont, white, 1020, 30)
     clockX5.drawButton()
+    #placeholder for the 15X clock speed
     clockX15 = button(darkGrey, [1080, 10, 75, 75], "15x", clockTextFont, white, 1090, 30)
     clockX15.drawButton()
     #placeholder for the 25X clock speed
     clockX25 = button(darkGrey, [1160, 10, 75, 75], "25x", clockTextFont, white, 1170, 30)
     clockX25.drawButton()
+    #and for the newly introduced X100 clock speed
+    clockX50 = button(darkGrey, [840, 10, 75, 75], "50x", clockTextFont, white, 850, 30)
+    clockX50.drawButton()
     pygame.draw.rect(screen, pink, [500, 10, 330, 75], 5)
-    write("00:00:00", clockFont, white, 510, 15)
+    #list of multipliers:
+    multipliers = [playClock, clockX5, clockX15, clockX25, clockX50]
+    #write("00:00:00", clockFont, white, 510, 15)
     #RDButton
     RDButton = button(darkGrey, [10, 635, 75, 75], "R&D", clockTextFont, white, 10, 655)
     RDButton.drawButton()
@@ -198,6 +235,7 @@ def game():
     pygame.display.update()
     #this is where we do the mechanics
     waiting = True
+    incrementer = RepeatedTimer(multiplier, incrementClock)
     while waiting == True:
         for event in pygame.event.get():
             if menuButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
@@ -205,29 +243,64 @@ def game():
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     gamestate = "menu"
+                    incrementer.stop()
                     mainMenu()
             elif RDButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 RDButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
+                    incrementer.stop()
                     research()
             elif constructButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 constructButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
+                    incrementer.stop()
                     shop()
             elif contractButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 contractButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
+                    incrementer.stop()
                     contracts(menuButton)
             elif timetableButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 timetableButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
+                    incrementer.stop()
                     timetableScreen(menuButton)
+            elif playClock.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                playClock.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    multiplier = 1
+                    incrementer.setInterval(multiplier)
+            elif clockX5.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                clockX5.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    multiplier = 0.2
+                    incrementer.setInterval(multiplier)
+            elif clockX15.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                clockX15.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    multiplier = 1 / 15
+                    incrementer.setInterval(multiplier)
+            elif clockX25.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                clockX25.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    multiplier = 1 / 25
+                    incrementer.setInterval(multiplier)
+            elif clockX50.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                clockX50.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    multiplier = 1 / 50
+                    incrementer.setInterval(multiplier)
+            elif skipForward.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                skipForward.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    forwardTime(timeHour, timeMinute, timeSecond)
             elif event.type == pygame.QUIT:
                 waiting = False
+                incrementer.stop()
                 pygame.quit()
                 sys.exit()
             else:
@@ -236,6 +309,10 @@ def game():
                 constructButton.changeButtonColour(darkGrey)
                 contractButton.changeButtonColour(darkGrey)
                 timetableButton.changeButtonColour(darkGrey)
+                skipForward.changeButtonColour(darkGrey)
+                for i in range(0, len(multipliers)):
+                    multipliers[i].changeButtonColour(darkGrey)
+                    
     #train1 = train(white, 1230, 350, 50, 20, -1)
     #train1.drawTrain()
     #time.sleep(1)
@@ -244,6 +321,38 @@ def game():
     #train1.departPlat()
     #train1.destroyTrain()
     #pygame.display.update()
+
+#will set the time to the next train in the timetable (parameters are starting point)
+def forwardTime(hours, minutes, seconds):
+    time = 0
+    global timeHour
+    global timeMinute
+    global timeSecond
+    with open("saveData/timetable.txt","r") as file:
+        reader = csv.reader(file)
+        i = 0
+        for row in reader:
+            timetableArray[i] = row
+            i = i + 1
+    hours = hours - 4
+    time = time + seconds
+    time = time + (minutes * 60)
+    time = time + (hours * 3600)
+    time = int(time // (3600 / 4))
+    temp = int((time + 1) % 80)
+    while temp != time:
+        for j in range(0, len(timetableArray)):
+            if timetableArray[j][temp] == "1":
+                time = temp
+                time = time * (3600 / 4)
+                hours = time // 3600
+                time = time - (hours * 3600)
+                minutes = time / 60
+                timeHour = int(hours + 4)
+                timeMinute = int(minutes)
+                timeSecond = 0
+                return "ends the function"
+        temp = (temp + 1) % 80
 
 def research():
 
@@ -1134,6 +1243,9 @@ def contracts(returnButton):
 
 #function to draw the contracts you can buy
 def drawContracts(TOC, returnButton):
+    #There are 17 researches that unlock TOCs, and there are 34 unlockable contracts! It's perfect!
+    #They all have to be the same price BTW, so probably best to keep it as £1000?
+    #I think the criteria for the contracts are in the files now........may need to check
     global numberTrains
     contractsList = [] # the list that will contain the data
     pygame.draw.rect(screen, black, [0, 100, 1280, 520]) # cover screen
@@ -1145,25 +1257,25 @@ def drawContracts(TOC, returnButton):
     if TOC == "northern":
         contract1 = button(darkGrey, [400, 250, 150, 50], "1 car, 2 tpd", normal, white, 425, 265)
         contract2 = button(darkGrey, [650, 250, 150, 50], "2 cars, 4 tpd", normal, white, 675, 265)
-        contracts = [contract1, contract2]
-        for i in range ( len ( contracts ) ):
-            contracts[i].drawButton()
+        contractsButtonList = [contract1, contract2]
+        for i in range ( len ( contractsButtonList ) ):
+            contractsButtonList[i].drawButton()
         pygame.display.update()
     elif TOC == "southEastern":
         contract1 = button(darkGrey, [50, 250, 150, 50], "2 cars, 2 tpd", normal, white, 75, 265)
         contract2 = button(darkGrey, [250, 250, 150, 50], "2 cars, 6 tpd", normal, white, 275, 265)
-        contract2 = button(darkGrey, [450, 250, 150, 50], "3 cars, 12 tpd", normal, white, 475, 265)
-        contract3 = button(darkGrey, [650, 250, 150, 50], "4 cars, 12 tpd", normal, white, 675, 265)
-        contract4 = button(darkGrey, [850, 250, 150, 50], "6 cars, 24, tpd", normal, white, 875, 265)
-        contract5 = button(darkGrey, [1050, 250, 150, 50], "7 cars, 48 tpd", normal, white, 1075, 265)
-        contract6 = button(darkGrey, [250, 350, 150, 50], "3 cars, 4 tpd", normal, white, 275, 365)
-        contract7 = button(darkGrey, [450, 350, 150, 50], "4 cars, 6 tpd", normal, white, 475, 365)
-        contract8 = button(darkGrey, [650, 350, 150, 50], "6 cars, 12 tpd", normal, white, 675, 365)
-        contract9 = button(darkGrey, [850, 350, 150, 50], "8 cars, 12 tpd", normal, white, 875, 365)
-        contract10 = button(darkGrey, [1050, 350, 150, 50], "10 cars, 24 tpd", normal, white, 1075, 365)
-        contracts = [contract1, contract2, contract3, contract4, contract5, contract6, contract7, contract8, contract9, contract10]
-        for i in range ( len ( contracts ) ):
-            contracts[i].drawButton()
+        contract3 = button(darkGrey, [450, 250, 150, 50], "3 cars, 12 tpd", normal, white, 475, 265)
+        contract4 = button(darkGrey, [650, 250, 150, 50], "4 cars, 12 tpd", normal, white, 675, 265)
+        contract5 = button(darkGrey, [850, 250, 150, 50], "6 cars, 24, tpd", normal, white, 875, 265)
+        contract6 = button(darkGrey, [1050, 250, 150, 50], "7 cars, 48 tpd", normal, white, 1075, 265)
+        contract7 = button(darkGrey, [250, 350, 150, 50], "3 cars, 4 tpd", normal, white, 275, 365)
+        contract8 = button(darkGrey, [450, 350, 150, 50], "4 cars, 6 tpd", normal, white, 475, 365)
+        contract9 = button(darkGrey, [650, 350, 150, 50], "6 cars, 12 tpd", normal, white, 675, 365)
+        contract10 = button(darkGrey, [850, 350, 150, 50], "8 cars, 12 tpd", normal, white, 875, 365)
+        contract11 = button(darkGrey, [1050, 350, 150, 50], "10 cars, 24 tpd", normal, white, 1075, 365)
+        contractsButtonList = [contract1, contract2, contract3, contract4, contract5, contract6, contract7, contract8, contract9, contract10, contract11]
+        for i in range ( len ( contractsButtonList ) ):
+            contractsButtonList[i].drawButton()
         pygame.display.update()
     elif TOC == "scotRail":
         contract1 = button(darkGrey, [250, 250, 150, 50], "3 cars, 12 tpd", normal, white, 275, 265)
@@ -1173,9 +1285,9 @@ def drawContracts(TOC, returnButton):
         contract5 = button(darkGrey, [450, 350, 150, 50], "3 cars, 24 tpd", normal, white, 475, 365)
         contract6 = button(darkGrey, [650, 350, 150, 50], "4 cars, 48 tpd", normal, white, 675, 365)
         contract7 = button(darkGrey, [850, 350, 150, 50], "5 cars, 96 tpd", normal, white, 875, 365)
-        contracts = [contract1, contract2, contract3, contract4, contract5, contract6, contract7]
-        for i in range ( len ( contracts ) ):
-            contracts[i].drawButton()
+        contractsButtonList = [contract1, contract2, contract3, contract4, contract5, contract6, contract7]
+        for i in range ( len ( contractsButtonList ) ):
+            contractsButtonList[i].drawButton()
         pygame.display.update()
     elif TOC == "southern":
         contract1 = button(darkGrey, [150, 250, 150, 50], "4 cars, 24 tpd", normal, white, 175, 265)
@@ -1183,38 +1295,38 @@ def drawContracts(TOC, returnButton):
         contract3 = button(darkGrey, [550, 250, 150, 50], "8 cars, 36 tpd", normal, white, 575, 265)
         contract4 = button(darkGrey, [750, 250, 150, 50], "8 cars, 48 tpd", normal, white, 775, 265)
         contract5 = button(darkGrey, [950, 250, 150, 50], "12 cars, 48 tpd", normal, white, 975, 265)
-        contracts = [contract1, contract2, contract3, contract4, contract5]
-        for i in range ( len ( contracts ) ):
-            contracts[i].drawButton()
+        contractsButtonList = [contract1, contract2, contract3, contract4, contract5]
+        for i in range ( len ( contractsButtonList ) ):
+            contractsButtonList[i].drawButton()
         pygame.display.update()
     elif TOC == "thamesLink":
         contract1 = button(darkGrey, [400, 250, 150, 50], "8 cars, 24 tpd", normal, white, 425, 265)
         contract2 = button(darkGrey, [600, 250, 150, 50], "8 cars, 24 tpd", normal, white, 625, 265)
         contract3 = button(darkGrey, [800, 250, 150, 50], "12 cars, 96 tpd", normal, white, 825, 265)
-        contracts = [contract1, contract2, contract3]
-        for i in range ( len ( contracts ) ):
-            contracts[i].drawButton()
+        contractsButtonList = [contract1, contract2, contract3]
+        for i in range ( len ( contractsButtonList ) ):
+            contractsButtonList[i].drawButton()
         pygame.display.update()
     elif TOC == "crossRail":
         contract1 = button(darkGrey, [300, 250, 200, 50], "7 cars, 288 tpd", normal, white, 325, 265)
         contract2 = button(darkGrey, [550, 250, 200, 50], "9 cars, 576 tpd", normal, white, 575, 265)
         contract3 = button(darkGrey, [800, 250, 200, 50], "11 cars, 576 tpd", normal, white, 825, 265)
-        contracts = [contract1, contract2, contract3]
-        for i in range ( len ( contracts ) ):
-            contracts[i].drawButton()
+        contractsButtonList = [contract1, contract2, contract3]
+        for i in range ( len ( contractsButtonList ) ):
+            contractsButtonList[i].drawButton()
         pygame.display.update()
     elif TOC == "tube":
         contract1 = button(darkGrey, [520, 250, 200, 50], "7 cars, 576 tpd", normal, white, 545, 265)
-        contracts = [contract1]
-        for i in range ( len ( contracts ) ):
-            contracts[i].drawButton()
+        contractsButtonList = [contract1]
+        for i in range ( len ( contractsButtonList ) ):
+            contractsButtonList[i].drawButton()
         pygame.display.update()
     elif TOC == "SEHS":
         contract1 = button(darkGrey, [420, 250, 200, 50], "6 cars, 48 tpd", normal, white, 445, 265)
         contract2 = button(darkGrey, [670, 250, 200, 50], "12 cars, 48 tpd", normal, white, 695, 265)
-        contracts = [contract1, contract2]
-        for i in range ( len ( contracts ) ):
-            contracts[i].drawButton()
+        contractsButtonList = [contract1, contract2]
+        for i in range ( len ( contractsButtonList ) ):
+            contractsButtonList[i].drawButton()
         pygame.display.update()
     i = 0
     returnButton.drawButton()
@@ -1222,23 +1334,30 @@ def drawContracts(TOC, returnButton):
     waiting = True
     while waiting:
         for event in pygame.event.get():
-            for i in range(len(contracts)):
-                if contracts[i].buttonCoords.collidepoint((pygame.mouse.get_pos())) and contractsList[i + 1][2] == "1":
-                    contracts[i].changeButtonColour(pink)
+            for i in range(len(contractsButtonList)):
+                if contractsButtonList[i].buttonCoords.collidepoint((pygame.mouse.get_pos())) and contractsList[i + 1][2] == "1": # for if is available and hovered over
+                    contractsButtonList[i].changeButtonColour(pink)
                     if event.type == pygame.MOUSEBUTTONUP:
-                         numberTrains = numberTrains + contractsList[i+1][1]
+                         numberTrains = numberTrains + int(contractsList[i+1][1])
                          print(numberTrains)
-                if contractsList[i + 1][2] == "0":
-                    contracts[i].changeButtonColour(white)
+                         contractsList[i+1][2] = "2"
+                elif contractsList[i + 1][2] == "0": # for if it is locked
+                    contractsButtonList[i].changeButtonColour(white)
                     returnButton.changeButtonColour(darkGrey)
-                if contractsList[i+1][2] == "1":
-                    contracts[i].changeButtonColour(darkGrey)
+                elif contractsList[i+1][2] == "1": # for if it is available
+                    contractsButtonList[i].changeButtonColour(darkGrey)
+                    returnButton.changeButtonColour(darkGrey)
+                elif contractsList[i+1][2] == "2": # for if it is bought
+                    contractsButtonList[i].changeButtonColour(pink)
                     returnButton.changeButtonColour(darkGrey)
                 if returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                     returnButton.changeButtonColour(pink)
                     if event.type == pygame.MOUSEBUTTONUP:
                         waiting = False
-                        contracts()
+                        with open("saveData/contracts/" + TOC + ".txt", "w", newline="") as fo:
+                            writer = csv.writer(fo)
+                            writer.writerows(contractsList)
+                        contracts(returnButton)
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
@@ -1251,7 +1370,7 @@ def timetableScreen(returnButton):
     global timeSecond
     global numberEntry
     global timetableArray
-    remainingTrains = numberTrains
+    remainingTrains = numberTrains    
 
     #from save get timetable
     i = 0
@@ -1262,23 +1381,31 @@ def timetableScreen(returnButton):
             i += 1
 
     #0 = locked
-    #1 = unlocked
-    #2 = train present
+    #1 = train present
     
     #first clear the screen
     pygame.draw.rect(screen, black, [0, 100, 1280, 520])
     #Then make the time bar along the top
     pygame.draw.rect(screen, darkGrey, [0, 100, 1280, 64])
-    for i in range(5, 25, 1):
+    for i in range(4, 24, 1):
         stringTime = str(i)
-        write(str(stringTime + ":00"), normal, white, 10 + (64 * (i - 5)), 110)
+        write(str(stringTime + ":00"), normal, white, 10 + (64 * (i - 4)), 110)
         for j in range (4): # this draws the minimum increments that I shall allow.
-            pygame.draw.line(screen, darkGrey, [5 + ((64 * (i - 5)) + (16 * j)), 164],[5 + ((64 * (i - 5)) + (16 * j)), 510])
+            pygame.draw.line(screen, darkGrey, [5 + ((64 * (i - 4)) + (16 * j)), 164],[5 + ((64 * (i - 4)) + (16 * j)), 510])
         #then make the hour borders extend down
-        pygame.draw.line(screen, white, [5 + (64 * (i - 5)), 100], [5 + (64 * (i - 5)), 510])
+        pygame.draw.line(screen, white, [5 + (64 * (i - 4)), 100], [5 + (64 * (i - 4)), 510])
         #hours increments are 64 pixels apart
         for k in range(numberEntry + 1):
             pygame.draw.line(screen, white, [0, (164 + (k * 42))], [1280, (164 + (k * 42))])
+
+    #now draw the placed services
+    for i in range(0, len(timetableArray),1):
+        for j in range(0, len(timetableArray[i]),1):
+            if timetableArray[i][j] == "1":
+                pygame.draw.rect(screen, white, [(j * 16) + 6, ((i + 4) * 42) - 3, 15, 41])
+                remainingTrains = remainingTrains - 1
+            else:
+                pygame.draw.rect(screen, black, [(j * 16) + 6, ((i + 4) * 42) - 3, 15, 41])
 
         #quuarter-hour increments are 16 pixels apart and there are 80 slots per row
     pygame.display.update()
@@ -1287,6 +1414,7 @@ def timetableScreen(returnButton):
     #then define the placeable regions
     positionCoord = pygame.mouse.get_pos()# position of the mouse
     position = pygame.Rect(((positionCoord[0] + 6)-(positionCoord[0]%16),(positionCoord[1] - 3)-(positionCoord[1]%42)),(15,41))#location on the array
+    storeCoordx, storeCoordy = 0, 0
     waiting = True
     while waiting:
         for event in pygame.event.get():
@@ -1294,20 +1422,44 @@ def timetableScreen(returnButton):
             if positionCoord[1] > 164 and positionCoord[1] < (164 + (numberEntry * 42)) and positionCoord[0] > 4:
                 #the above line will check if the cursor is in a buildable area before moving the rectangle.
                 positionCoord = pygame.mouse.get_pos()#new position of the mouse
-                storeCoordx, storeCoordy = int((position[0]/16)), int((position[1]/42) - 3)# stores the coordinates of the mouse against the .txt grid (idexed from 1
-                pygame.draw.rect(screen, menuScreenColour, position) # draw a white box to show where the mouse is.
+                pygame.draw.rect(screen, menuScreenColour, position) # draw a purple box to show where the mouse is.
                 pygame.display.update()
-                if position.collidepoint((pygame.mouse.get_pos())) == False:
-                    pygame.draw.rect(screen, black, position)
-                    position = pygame.Rect(((positionCoord[0] + 6)-(positionCoord[0]%16),(positionCoord[1] - 3)-(positionCoord[1]%42)),(15,41))#location on the array
-                    pygame.draw.rect(screen, menuScreenColour, position) # draw a white box to show where the mouse is.
                 print(storeCoordy)
                 print(storeCoordx)
-    #then make the rectangles to be placed
+                if position.collidepoint((pygame.mouse.get_pos())) == False:
+                    if timetableArray[storeCoordy][storeCoordx] == "1":
+                        pygame.draw.rect(screen, white, position)
+                    else:
+                        pygame.draw.rect(screen, black, position)
+                    position = pygame.Rect(((positionCoord[0] + 6)-(positionCoord[0]%16),(positionCoord[1] - 3)-(positionCoord[1]%42)),(15,41))#location on the array
+                    pygame.draw.rect(screen, menuScreenColour, position) # draw a purple box to show where the mouse is.
+    #then make clicky functionality
                 if event.type == pygame.MOUSEBUTTONUP:#checks for a click
-                    #condition if the square has a signal in it already
-                    if remainingTrains != 0:
+                    if remainingTrains != 0 and timetableArray[storeCoordy][storeCoordx] == "0":
+                        timetableArray[storeCoordy][storeCoordx] = "1"
                         remainingTrains = remainingTrains - 1
+                    elif timetableArray[storeCoordy][storeCoordx] == "1":
+                        timetableArray[storeCoordy][storeCoordx] = "0"
+                        remainingTrains = remainingTrains + 1
+                storeCoordx, storeCoordy = int((position[0]/16)), int((position[1]/42) - 3)# stores the coordinates of the mouse against the .txt grid ()
+                #will tell the user how many trains they have left
+                pygame.draw.rect(screen, black, [50, 540, 100, 60])
+                write(str(remainingTrains) + " trains remaining", clockFont, white, 50, 540)
+
+            if returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                returnButton.changeButtonColour(pink)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    #save the game
+                    with open("saveData/timetable.txt", "w", newline="") as file:
+                        writer = csv.writer(file)
+                        writer.writerows(timetableArray)
+                    #return to previous screen
+                    game()
+            elif event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            else:
+                returnButton.changeButtonColour(darkGrey)
     #then make the rectangles draggable, snapping to coordinates
         #actually no, make it so that left click does place, and right click removes
     pygame.display.update()
@@ -1452,6 +1604,36 @@ class entryButton(button):
     def setState(self):
         self.state = "1"
         entryLayout[self.saveLocationy][self.saveLocationx] = self.state
+
+# I will use this to increment the clock every second
+class RepeatedTimer(): # https://stackoverflow.com/questions/474528/how-to-repeatedly-execute-a-function-every-x-seconds
+    def __init__(self, interval, function):
+        self._timer = None
+        self.interval = interval
+        self.function = function
+        self.is_running = False
+        self.next_call = time.time()
+        self.start()
+
+    def _run(self):
+        self.is_running = False
+        self.start()
+        self.function()
+
+    def start(self):
+        if not self.is_running:
+            self.next_call += self.interval
+            self._timer = threading.Timer(self.next_call - time.time(), self._run)
+            self._timer.start()
+            self.is_running = True
+
+    def stop(self):
+        self._timer.cancel()
+        self.is_running = False
+
+    def setInterval(self, newInterval):
+        self.interval = newInterval
+    
         
 #will print text as the user wishes
 def write(text, font, colour, xpos, ypos):
@@ -1495,9 +1677,10 @@ incidentRisk = 65 #as a percentage
 platPrice = 5000 #price of a new platform at the start of the game
 platCount = 0
 numberTrains = 0
-timeHour = 5
-timeminute = 0
-timesecond = 0
+timeHour = 4
+timeMinute = 0
+timeSecond = 0
 numberEntry = 4
+numberContractsUnlocked = 0
 
 gameLoop()

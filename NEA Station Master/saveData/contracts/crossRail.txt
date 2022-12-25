@@ -1,4 +1,4 @@
-coaches, added frequency, unlocked?
-7,288,0
-9,288,0
-11,0,0
+coaches, added frequency, unlocked?, criteria
+7,288,0,15
+9,288,0,15
+11,0,0,16
