@@ -1254,9 +1254,9 @@ def drawContracts(TOC, returnButton):
     if TOC == "northern":
         contract1 = button(darkGrey, [400, 250, 150, 50], "1 car, 2 tpd", normal, white, 425, 265)
         contract2 = button(darkGrey, [650, 250, 150, 50], "2 cars, 4 tpd", normal, white, 675, 265)
-        contracts = [contract1, contract2]
-        for i in range ( len ( contracts ) ):
-            contracts[i].drawButton()
+        contractsButtonList = [contract1, contract2]
+        for i in range ( len ( contractsButtonList ) ):
+            contractsButtonList[i].drawButton()
         pygame.display.update()
     elif TOC == "southEastern":
         contract1 = button(darkGrey, [50, 250, 150, 50], "2 cars, 2 tpd", normal, white, 75, 265)
@@ -1270,9 +1270,9 @@ def drawContracts(TOC, returnButton):
         contract8 = button(darkGrey, [650, 350, 150, 50], "6 cars, 12 tpd", normal, white, 675, 365)
         contract9 = button(darkGrey, [850, 350, 150, 50], "8 cars, 12 tpd", normal, white, 875, 365)
         contract10 = button(darkGrey, [1050, 350, 150, 50], "10 cars, 24 tpd", normal, white, 1075, 365)
-        contracts = [contract1, contract2, contract3, contract4, contract5, contract6, contract7, contract8, contract9, contract10]
-        for i in range ( len ( contracts ) ):
-            contracts[i].drawButton()
+        contractsButtonList = [contract1, contract2, contract3, contract4, contract5, contract6, contract7, contract8, contract9, contract10]
+        for i in range ( len ( contractsButtonList ) ):
+            contractsButtonList[i].drawButton()
         pygame.display.update()
     elif TOC == "scotRail":
         contract1 = button(darkGrey, [250, 250, 150, 50], "3 cars, 12 tpd", normal, white, 275, 265)
@@ -1282,9 +1282,9 @@ def drawContracts(TOC, returnButton):
         contract5 = button(darkGrey, [450, 350, 150, 50], "3 cars, 24 tpd", normal, white, 475, 365)
         contract6 = button(darkGrey, [650, 350, 150, 50], "4 cars, 48 tpd", normal, white, 675, 365)
         contract7 = button(darkGrey, [850, 350, 150, 50], "5 cars, 96 tpd", normal, white, 875, 365)
-        contracts = [contract1, contract2, contract3, contract4, contract5, contract6, contract7]
-        for i in range ( len ( contracts ) ):
-            contracts[i].drawButton()
+        contractsButtonList = [contract1, contract2, contract3, contract4, contract5, contract6, contract7]
+        for i in range ( len ( contractsButtonList ) ):
+            contractsButtonList[i].drawButton()
         pygame.display.update()
     elif TOC == "southern":
         contract1 = button(darkGrey, [150, 250, 150, 50], "4 cars, 24 tpd", normal, white, 175, 265)
@@ -1292,38 +1292,38 @@ def drawContracts(TOC, returnButton):
         contract3 = button(darkGrey, [550, 250, 150, 50], "8 cars, 36 tpd", normal, white, 575, 265)
         contract4 = button(darkGrey, [750, 250, 150, 50], "8 cars, 48 tpd", normal, white, 775, 265)
         contract5 = button(darkGrey, [950, 250, 150, 50], "12 cars, 48 tpd", normal, white, 975, 265)
-        contracts = [contract1, contract2, contract3, contract4, contract5]
-        for i in range ( len ( contracts ) ):
-            contracts[i].drawButton()
+        contractsButtonList = [contract1, contract2, contract3, contract4, contract5]
+        for i in range ( len ( contractsButtonList ) ):
+            contractsButtonList[i].drawButton()
         pygame.display.update()
     elif TOC == "thamesLink":
         contract1 = button(darkGrey, [400, 250, 150, 50], "8 cars, 24 tpd", normal, white, 425, 265)
         contract2 = button(darkGrey, [600, 250, 150, 50], "8 cars, 24 tpd", normal, white, 625, 265)
         contract3 = button(darkGrey, [800, 250, 150, 50], "12 cars, 96 tpd", normal, white, 825, 265)
-        contracts = [contract1, contract2, contract3]
-        for i in range ( len ( contracts ) ):
-            contracts[i].drawButton()
+        contractsButtonList = [contract1, contract2, contract3]
+        for i in range ( len ( contractsButtonList ) ):
+            contractsButtonList[i].drawButton()
         pygame.display.update()
     elif TOC == "crossRail":
         contract1 = button(darkGrey, [300, 250, 200, 50], "7 cars, 288 tpd", normal, white, 325, 265)
         contract2 = button(darkGrey, [550, 250, 200, 50], "9 cars, 576 tpd", normal, white, 575, 265)
         contract3 = button(darkGrey, [800, 250, 200, 50], "11 cars, 576 tpd", normal, white, 825, 265)
-        contracts = [contract1, contract2, contract3]
-        for i in range ( len ( contracts ) ):
-            contracts[i].drawButton()
+        contractsButtonList = [contract1, contract2, contract3]
+        for i in range ( len ( contractsButtonList ) ):
+            contractsButtonList[i].drawButton()
         pygame.display.update()
     elif TOC == "tube":
         contract1 = button(darkGrey, [520, 250, 200, 50], "7 cars, 576 tpd", normal, white, 545, 265)
-        contracts = [contract1]
-        for i in range ( len ( contracts ) ):
-            contracts[i].drawButton()
+        contractsButtonList = [contract1]
+        for i in range ( len ( contractsButtonList ) ):
+            contractsButtonList[i].drawButton()
         pygame.display.update()
     elif TOC == "SEHS":
         contract1 = button(darkGrey, [420, 250, 200, 50], "6 cars, 48 tpd", normal, white, 445, 265)
         contract2 = button(darkGrey, [670, 250, 200, 50], "12 cars, 48 tpd", normal, white, 695, 265)
-        contracts = [contract1, contract2]
-        for i in range ( len ( contracts ) ):
-            contracts[i].drawButton()
+        contractsButtonList = [contract1, contract2]
+        for i in range ( len ( contractsButtonList ) ):
+            contractsButtonList[i].drawButton()
         pygame.display.update()
     i = 0
     returnButton.drawButton()
@@ -1331,23 +1331,30 @@ def drawContracts(TOC, returnButton):
     waiting = True
     while waiting:
         for event in pygame.event.get():
-            for i in range(len(contracts)):
-                if contracts[i].buttonCoords.collidepoint((pygame.mouse.get_pos())) and contractsList[i + 1][2] == "1":
-                    contracts[i].changeButtonColour(pink)
+            for i in range(len(contractsButtonList)):
+                if contractsButtonList[i].buttonCoords.collidepoint((pygame.mouse.get_pos())) and contractsList[i + 1][2] == "1": # for if is available and hovered over
+                    contractsButtonList[i].changeButtonColour(pink)
                     if event.type == pygame.MOUSEBUTTONUP:
-                         numberTrains = numberTrains + contractsList[i+1][1]
+                         numberTrains = numberTrains + int(contractsList[i+1][1])
                          print(numberTrains)
-                if contractsList[i + 1][2] == "0":
-                    contracts[i].changeButtonColour(white)
+                         contractsList[i+1][2] = "2"
+                elif contractsList[i + 1][2] == "0": # for if it is locked
+                    contractsButtonList[i].changeButtonColour(white)
                     returnButton.changeButtonColour(darkGrey)
-                if contractsList[i+1][2] == "1":
-                    contracts[i].changeButtonColour(darkGrey)
+                elif contractsList[i+1][2] == "1": # for if it is available
+                    contractsButtonList[i].changeButtonColour(darkGrey)
+                    returnButton.changeButtonColour(darkGrey)
+                elif contractsList[i+1][2] == "2": # for if it is bought
+                    contractsButtonList[i].changeButtonColour(pink)
                     returnButton.changeButtonColour(darkGrey)
                 if returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                     returnButton.changeButtonColour(pink)
                     if event.type == pygame.MOUSEBUTTONUP:
                         waiting = False
-                        contracts()
+                        with open("saveData/contracts/" + TOC + ".txt", "w", newline="") as fo:
+                            writer = csv.writer(fo)
+                            writer.writerows(contractsList)
+                        contracts(returnButton)
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
