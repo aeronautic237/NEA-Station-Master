@@ -442,7 +442,8 @@ def research():
                                     global incidentRisk
                                     incidentRisk = 15 #reduce risk of an incident occuring by 50%
                                 elif effect1 == "C":
-                                    pass #This effect will be applied on the contract screen
+                                    global numberContractsUnlocked
+                                    numberContractsUnlocked = numberContractsUnlocked + 1#This effect will be applied on the contract screen
                                 else:
                                     global SPADRisk
                                     SPADRisk = SPADRisk - int(effect1) #decrease the risk of a SPAD
@@ -1174,13 +1175,20 @@ def contracts(returnButton):
     SEHS = button(darkGrey, [840, 400, 390, 125], "First High Speed", clockTextFont, white, 850, 410) # First High Speed button
     #draw the buttons
     northern.drawButton()
-    southEastern.drawButton()
-    scotRail.drawButton()
-    southern.drawButton()
-    thamesLink.drawButton()
-    crossRail.drawButton()
-    tube.drawButton()
-    SEHS.drawButton()
+    if numberContractsUnlocked > 0:
+        southEastern.drawButton()
+    if numberContractsUnlocked > 6:
+        scotRail.drawButton()
+    if numberContractsUnlocked > 10:
+        southern.drawButton()
+    if numberContractsUnlocked > 12:
+        thamesLink.drawButton()
+    if numberContractsUnlocked > 14:
+        crossRail.drawButton()
+    if numberContractsUnlocked > 15:
+        tube.drawButton()
+        SEHS.drawButton()
+    write("Next contract costs £" + str(int(1000 + (numberContractsUnlocked * 250))), clockTextFont, white, 435, 550)
     pygame.display.update()#update screens.
     # list of all TOCs in game - just in case
     TOClist = [northern, southEastern, scotRail, southern, thamesLink, crossRail, tube, SEHS]
@@ -1192,37 +1200,37 @@ def contracts(returnButton):
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     drawContracts("northern", returnButton)
-            elif southEastern.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif southEastern.buttonCoords.collidepoint((pygame.mouse.get_pos())) and numberContractsUnlocked > 0:
                 southEastern.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     drawContracts("southEastern", returnButton)
-            elif scotRail.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif scotRail.buttonCoords.collidepoint((pygame.mouse.get_pos())) and numberContractsUnlocked > 6:
                 scotRail.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     drawContracts("scotRail", returnButton)
-            elif southern.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif southern.buttonCoords.collidepoint((pygame.mouse.get_pos())) and numberContractsUnlocked > 10:
                 southern.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     drawContracts("southern", returnButton)
-            elif thamesLink.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif thamesLink.buttonCoords.collidepoint((pygame.mouse.get_pos())) and numberContractsUnlocked > 12:
                 thamesLink.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     drawContracts("thamesLink", returnButton)
-            elif crossRail.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif crossRail.buttonCoords.collidepoint((pygame.mouse.get_pos())) and numberContractsUnlocked > 14:
                 crossRail.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     drawContracts("crossRail", returnButton)
-            elif tube.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif tube.buttonCoords.collidepoint((pygame.mouse.get_pos()))and numberContractsUnlocked > 15:
                 tube.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     drawContracts("tube", returnButton)
-            elif SEHS.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif SEHS.buttonCoords.collidepoint((pygame.mouse.get_pos())) and numberContractsUnlocked > 15:
                 SEHS.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
@@ -1236,14 +1244,31 @@ def contracts(returnButton):
                 pygame.quit()
                 sys.exit()
             else:
-                i = 0 # decided to try something new here.
-                for i in range(len(TOClist)):
-                    TOClist[i].changeButtonColour(darkGrey)
-                    returnButton.changeButtonColour(darkGrey)
+                northern.changeButtonColour(darkGrey)
+                if numberContractsUnlocked > 0:
+                    southEastern.changeButtonColour(darkGrey)
+                if numberContractsUnlocked > 6:
+                    scotRail.changeButtonColour(darkGrey)
+                if numberContractsUnlocked > 10:
+                    southern.changeButtonColour(darkGrey)
+                if numberContractsUnlocked > 12:
+                    thamesLink.changeButtonColour(darkGrey)
+                if numberContractsUnlocked > 14:
+                    crossRail.changeButtonColour(darkGrey)
+                if numberContractsUnlocked > 15:
+                    tube.changeButtonColour(darkGrey)
+                    SEHS.changeButtonColour(darkGrey)
+                returnButton.changeButtonColour(darkGrey)
 
 #function to draw the contracts you can buy
 def drawContracts(TOC, returnButton):
+    #There are 17 researches that unlock TOCs, and there are 34 unlockable contracts! It's perfect!
+    #They all have to be the same price BTW, so probably best to keep it as £1000?
+    #I think the criteria for the contracts are in the files now........may need to check
     global numberTrains
+    global rewardTrain
+    global money
+    global numberContractsUnlocked
     contractsList = [] # the list that will contain the data
     pygame.draw.rect(screen, black, [0, 100, 1280, 520]) # cover screen
     with open("saveData/contracts/" + TOC + ".txt","r",newline="") as file:
@@ -1261,16 +1286,16 @@ def drawContracts(TOC, returnButton):
     elif TOC == "southEastern":
         contract1 = button(darkGrey, [50, 250, 150, 50], "2 cars, 2 tpd", normal, white, 75, 265)
         contract2 = button(darkGrey, [250, 250, 150, 50], "2 cars, 6 tpd", normal, white, 275, 265)
-        contract2 = button(darkGrey, [450, 250, 150, 50], "3 cars, 12 tpd", normal, white, 475, 265)
-        contract3 = button(darkGrey, [650, 250, 150, 50], "4 cars, 12 tpd", normal, white, 675, 265)
-        contract4 = button(darkGrey, [850, 250, 150, 50], "6 cars, 24, tpd", normal, white, 875, 265)
-        contract5 = button(darkGrey, [1050, 250, 150, 50], "7 cars, 48 tpd", normal, white, 1075, 265)
-        contract6 = button(darkGrey, [250, 350, 150, 50], "3 cars, 4 tpd", normal, white, 275, 365)
-        contract7 = button(darkGrey, [450, 350, 150, 50], "4 cars, 6 tpd", normal, white, 475, 365)
-        contract8 = button(darkGrey, [650, 350, 150, 50], "6 cars, 12 tpd", normal, white, 675, 365)
-        contract9 = button(darkGrey, [850, 350, 150, 50], "8 cars, 12 tpd", normal, white, 875, 365)
-        contract10 = button(darkGrey, [1050, 350, 150, 50], "10 cars, 24 tpd", normal, white, 1075, 365)
-        contractsButtonList = [contract1, contract2, contract3, contract4, contract5, contract6, contract7, contract8, contract9, contract10]
+        contract3 = button(darkGrey, [450, 250, 150, 50], "3 cars, 12 tpd", normal, white, 475, 265)
+        contract4 = button(darkGrey, [650, 250, 150, 50], "4 cars, 12 tpd", normal, white, 675, 265)
+        contract5 = button(darkGrey, [850, 250, 150, 50], "6 cars, 24, tpd", normal, white, 875, 265)
+        contract6 = button(darkGrey, [1050, 250, 150, 50], "7 cars, 48 tpd", normal, white, 1075, 265)
+        contract7 = button(darkGrey, [250, 350, 150, 50], "3 cars, 4 tpd", normal, white, 275, 365)
+        contract8 = button(darkGrey, [450, 350, 150, 50], "4 cars, 6 tpd", normal, white, 475, 365)
+        contract9 = button(darkGrey, [650, 350, 150, 50], "6 cars, 12 tpd", normal, white, 675, 365)
+        contract10 = button(darkGrey, [850, 350, 150, 50], "8 cars, 12 tpd", normal, white, 875, 365)
+        contract11 = button(darkGrey, [1050, 350, 150, 50], "10 cars, 24 tpd", normal, white, 1075, 365)
+        contractsButtonList = [contract1, contract2, contract3, contract4, contract5, contract6, contract7, contract8, contract9, contract10, contract11]
         for i in range ( len ( contractsButtonList ) ):
             contractsButtonList[i].drawButton()
         pygame.display.update()
@@ -1315,6 +1340,8 @@ def drawContracts(TOC, returnButton):
     elif TOC == "tube":
         contract1 = button(darkGrey, [520, 250, 200, 50], "7 cars, 576 tpd", normal, white, 545, 265)
         contractsButtonList = [contract1]
+        write("This contract is automatic. You cannot add these services to the timetable.", clockTextFont, white, 10, 400)
+        write(" They operate with no user input, generating money in the background.", clockTextFont, white, 0, 450)
         for i in range ( len ( contractsButtonList ) ):
             contractsButtonList[i].drawButton()
         pygame.display.update()
@@ -1322,6 +1349,8 @@ def drawContracts(TOC, returnButton):
         contract1 = button(darkGrey, [420, 250, 200, 50], "6 cars, 48 tpd", normal, white, 445, 265)
         contract2 = button(darkGrey, [670, 250, 200, 50], "12 cars, 48 tpd", normal, white, 695, 265)
         contractsButtonList = [contract1, contract2]
+        write("This contract is automatic. You cannot add these services to the timetable.", clockTextFont, white, 10, 400)
+        write(" They operate with no user input, generating money in the background.", clockTextFont, white, 0, 450)
         for i in range ( len ( contractsButtonList ) ):
             contractsButtonList[i].drawButton()
         pygame.display.update()
@@ -1334,13 +1363,17 @@ def drawContracts(TOC, returnButton):
             for i in range(len(contractsButtonList)):
                 if contractsButtonList[i].buttonCoords.collidepoint((pygame.mouse.get_pos())) and contractsList[i + 1][2] == "1": # for if is available and hovered over
                     contractsButtonList[i].changeButtonColour(pink)
-                    if event.type == pygame.MOUSEBUTTONUP:
-                         numberTrains = numberTrains + int(contractsList[i+1][1])
-                         print(numberTrains)
-                         contractsList[i+1][2] = "2"
+                    if event.type == pygame.MOUSEBUTTONUP: # for if it is clicked
+                        money = money - (1000 + (numberContractsUnlocked * 250))
+                        numberTrains = numberTrains + int(contractsList[i+1][1])
+                        rewardTrain = rewardTrain + 250
+                        print(numberTrains)
+                        contractsList[i+1][2] = "2"
                 elif contractsList[i + 1][2] == "0": # for if it is locked
                     contractsButtonList[i].changeButtonColour(white)
                     returnButton.changeButtonColour(darkGrey)
+                    if numberContractsUnlocked >= int(contractsList[i + 1][3]): # checks if the criteria for unlocking is met
+                        contractsList[i+1][2] = "1"
                 elif contractsList[i+1][2] == "1": # for if it is available
                     contractsButtonList[i].changeButtonColour(darkGrey)
                     returnButton.changeButtonColour(darkGrey)
@@ -1678,5 +1711,7 @@ timeHour = 4
 timeMinute = 0
 timeSecond = 0
 numberEntry = 4
+numberContractsUnlocked = 0
+rewardTrain = 500
 
 gameLoop()
