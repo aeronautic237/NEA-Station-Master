@@ -1368,20 +1368,16 @@ def drawContracts(TOC, returnButton):
                     if contractsList[2][2] == "2":
                         for j in range(7, 12):
                             contractsList[i][2] = "0"
-                        contractOverriden = True
                     elif contractsList[7][2] == "2":
                         for j in range(2, 7):
                             contractsList[i][2] = "0"
-                        contractOverriden = True
                 elif TOC == "scotRail":
                     if contractsList[2][2] == "2":
                         for j in range(5, 8):
                             contractsList[i][2] = "0"
-                        contractOverriden = True
                     elif contractsList[5][2] == "2":
                         for j in range(2, 5):
                             contractsList[i][2] = "0"
-                        contractOverriden = True
                 if contractsButtonList[i].buttonCoords.collidepoint((pygame.mouse.get_pos())) and contractsList[i + 1][2] == "1": # for if is available and hovered over
                     contractsButtonList[i].changeButtonColour(pink)
                     if event.type == pygame.MOUSEBUTTONUP and money >= (1000 + (numberContractsUnlocked * 250)): # for if it is clicked
@@ -1393,8 +1389,23 @@ def drawContracts(TOC, returnButton):
                 elif contractsList[i + 1][2] == "0": # for if it is locked
                     contractsButtonList[i].changeButtonColour(white)
                     returnButton.changeButtonColour(darkGrey)
-                    if numberContractsUnlocked >= int(contractsList[i + 1][3]) and not contractOverriden: # checks if the criteria for unlocking is met
-                        contractsList[i+1][2] = "1"
+                    if numberContractsUnlocked >= int(contractsList[i + 1][3]): # checks if the criteria for unlocking is met
+                        if not splitPaths:
+                            contractsList[i+1][2] = "1"
+                        elif TOC == "southEastern":
+                            if contractsList[2][2] == "2":
+                                for j in range(7, 12):
+                                    contractsList[i][2] = "0"
+                            elif contractsList[7][2] == "2":
+                                for j in range(2, 7):
+                                    contractsList[i][2] = "0"
+                        elif TOC == "scotRail":
+                            if contractsList[2][2] == "2":
+                                for j in range(5, 8):
+                                    contractsList[i][2] = "0"
+                            elif contractsList[5][2] == "2":
+                                for j in range(2, 5):
+                                    contractsList[i][2] = "0"
                 elif contractsList[i+1][2] == "1": # for if it is available
                     contractsButtonList[i].changeButtonColour(darkGrey)
                     returnButton.changeButtonColour(darkGrey)
@@ -1720,7 +1731,7 @@ def gameLoop():
                 running = False
     pygame.quit()
 
-money = 30000 #in pounds
+money = 300000 #in pounds
 incidentRecoverySpeed = 1 #as a mutiplier
 SPADRisk = 85 #as a percentage
 signalPriceBoost = 0 #as a percentage
@@ -1732,7 +1743,7 @@ timeHour = 4
 timeMinute = 0
 timeSecond = 0
 numberEntry = 4
-numberContractsUnlocked = 6
+numberContractsUnlocked = 17
 rewardTrain = 500
 
 gameLoop()
