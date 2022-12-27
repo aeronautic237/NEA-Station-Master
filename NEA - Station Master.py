@@ -1269,6 +1269,7 @@ def drawContracts(TOC, returnButton):
     global rewardTrain
     global money
     global numberContractsUnlocked
+    splitPaths = False # boolean stores whether there are split paths or not
     contractsList = [] # the list that will contain the data
     pygame.draw.rect(screen, black, [0, 100, 1280, 520]) # cover screen
     with open("saveData/contracts/" + TOC + ".txt","r",newline="") as file:
@@ -1284,6 +1285,7 @@ def drawContracts(TOC, returnButton):
             contractsButtonList[i].drawButton()
         pygame.display.update()
     elif TOC == "southEastern":
+        splitPaths = True
         contract1 = button(darkGrey, [50, 250, 150, 50], "2 cars, 2 tpd", normal, white, 75, 265)
         contract2 = button(darkGrey, [250, 250, 150, 50], "2 cars, 6 tpd", normal, white, 275, 265)
         contract3 = button(darkGrey, [450, 250, 150, 50], "3 cars, 12 tpd", normal, white, 475, 265)
@@ -1300,6 +1302,7 @@ def drawContracts(TOC, returnButton):
             contractsButtonList[i].drawButton()
         pygame.display.update()
     elif TOC == "scotRail":
+        splitPaths = True
         contract1 = button(darkGrey, [250, 250, 150, 50], "3 cars, 12 tpd", normal, white, 275, 265)
         contract2 = button(darkGrey, [450, 250, 150, 50], "4 cars, 12 tpd", normal, white, 475, 265)
         contract3 = button(darkGrey, [650, 250, 150, 50], "5 cars, 24 tpd", normal, white, 675, 265)
@@ -1361,9 +1364,27 @@ def drawContracts(TOC, returnButton):
     while waiting:
         for event in pygame.event.get():
             for i in range(len(contractsButtonList)):
+                if TOC == "southEastern":
+                    if contractsList[2][2] == "2":
+                        for j in range(7, 12):
+                            contractsList[i][2] = "0"
+                        contractOverriden = True
+                    elif contractsList[7][2] == "2":
+                        for j in range(2, 7):
+                            contractsList[i][2] = "0"
+                        contractOverriden = True
+                elif TOC == "scotRail":
+                    if contractsList[2][2] == "2":
+                        for j in range(5, 8):
+                            contractsList[i][2] = "0"
+                        contractOverriden = True
+                    elif contractsList[5][2] == "2":
+                        for j in range(2, 5):
+                            contractsList[i][2] = "0"
+                        contractOverriden = True
                 if contractsButtonList[i].buttonCoords.collidepoint((pygame.mouse.get_pos())) and contractsList[i + 1][2] == "1": # for if is available and hovered over
                     contractsButtonList[i].changeButtonColour(pink)
-                    if event.type == pygame.MOUSEBUTTONUP: # for if it is clicked
+                    if event.type == pygame.MOUSEBUTTONUP and money >= (1000 + (numberContractsUnlocked * 250)): # for if it is clicked
                         money = money - (1000 + (numberContractsUnlocked * 250))
                         numberTrains = numberTrains + int(contractsList[i+1][1])
                         rewardTrain = rewardTrain + 250
@@ -1372,7 +1393,7 @@ def drawContracts(TOC, returnButton):
                 elif contractsList[i + 1][2] == "0": # for if it is locked
                     contractsButtonList[i].changeButtonColour(white)
                     returnButton.changeButtonColour(darkGrey)
-                    if numberContractsUnlocked >= int(contractsList[i + 1][3]): # checks if the criteria for unlocking is met
+                    if numberContractsUnlocked >= int(contractsList[i + 1][3]) and not contractOverriden: # checks if the criteria for unlocking is met
                         contractsList[i+1][2] = "1"
                 elif contractsList[i+1][2] == "1": # for if it is available
                     contractsButtonList[i].changeButtonColour(darkGrey)
@@ -1711,7 +1732,7 @@ timeHour = 4
 timeMinute = 0
 timeSecond = 0
 numberEntry = 4
-numberContractsUnlocked = 0
+numberContractsUnlocked = 6
 rewardTrain = 500
 
 gameLoop()
