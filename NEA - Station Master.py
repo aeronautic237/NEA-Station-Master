@@ -970,37 +970,37 @@ def buildEntry(returnButton):
                 if event.type == pygame.MOUSEBUTTONUP:
                     entryButton1.setState()
                     money = money - 2500
-            elif entryButton2.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif entryButton2.buttonCoords.collidepoint((pygame.mouse.get_pos())) and entryButton1.getState() == "1":
                 entryButton2.changeButtonColour(menuScreenColour)
                 if event.type == pygame.MOUSEBUTTONUP:
                     entryButton2.setState()
                     money = money - 2500
-            elif entryButton3.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif entryButton3.buttonCoords.collidepoint((pygame.mouse.get_pos())) and entryButton2.getState() == "1":
                 entryButton3.changeButtonColour(menuScreenColour)
                 if event.type == pygame.MOUSEBUTTONUP:
                     entryButton3.setState()
                     money = money - 2500
-            elif entryButton4.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif entryButton4.buttonCoords.collidepoint((pygame.mouse.get_pos())) and entryButton3.getState() == "1":
                 entryButton4.changeButtonColour(menuScreenColour)
                 if event.type == pygame.MOUSEBUTTONUP:
                     entryButton4.setState()
                     money = money - 2500
-            elif entryButton5.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif entryButton5.buttonCoords.collidepoint((pygame.mouse.get_pos())) and entryButton4.getState() == "1":
                 entryButton5.changeButtonColour(menuScreenColour)
                 if event.type == pygame.MOUSEBUTTONUP:
                     entryButton5.setState()
                     money = money - 2500
-            elif entryButton6.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif entryButton6.buttonCoords.collidepoint((pygame.mouse.get_pos())) and entryButton5.getState() == "1":
                 entryButton6.changeButtonColour(menuScreenColour)
                 if event.type == pygame.MOUSEBUTTONUP:
                     entryButton6.setState()
                     money = money - 2500
-            elif entryButton7.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif entryButton7.buttonCoords.collidepoint((pygame.mouse.get_pos())) and entryButton6.getState() == "1":
                 entryButton7.changeButtonColour(menuScreenColour)
                 if event.type == pygame.MOUSEBUTTONUP:
                     entryButton7.setState()
                     money = money - 2500
-            elif entryButton8.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif entryButton8.buttonCoords.collidepoint((pygame.mouse.get_pos())) and entryButton7.getState() == "1":
                 entryButton8.changeButtonColour(menuScreenColour)
                 if event.type == pygame.MOUSEBUTTONUP:
                     entryButton8.setState()
@@ -1666,6 +1666,10 @@ class entryButton(button):
     def setState(self):
         self.state = "1"
         entryLayout[self.saveLocationy][self.saveLocationx] = self.state
+
+    #this was added in much later - I needed to return the state of the entry point
+    def getState(self):
+        return self.state
 
 # I will use this to increment the clock every second
 class RepeatedTimer(): # https://stackoverflow.com/questions/474528/how-to-repeatedly-execute-a-function-every-x-seconds
