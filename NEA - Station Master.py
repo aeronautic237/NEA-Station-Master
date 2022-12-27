@@ -1367,17 +1367,17 @@ def drawContracts(TOC, returnButton):
                 if TOC == "southEastern":
                     if contractsList[2][2] == "2":
                         for j in range(7, 12):
-                            contractsList[i][2] = "0"
+                            contractsList[j][2] = "0"
                     elif contractsList[7][2] == "2":
                         for j in range(2, 7):
-                            contractsList[i][2] = "0"
+                            contractsList[j][2] = "0"
                 elif TOC == "scotRail":
                     if contractsList[2][2] == "2":
                         for j in range(5, 8):
-                            contractsList[i][2] = "0"
+                            contractsList[j][2] = "0"
                     elif contractsList[5][2] == "2":
                         for j in range(2, 5):
-                            contractsList[i][2] = "0"
+                            contractsList[j][2] = "0"
                 if contractsButtonList[i].buttonCoords.collidepoint((pygame.mouse.get_pos())) and contractsList[i + 1][2] == "1": # for if is available and hovered over
                     contractsButtonList[i].changeButtonColour(pink)
                     if event.type == pygame.MOUSEBUTTONUP and money >= (1000 + (numberContractsUnlocked * 250)): # for if it is clicked
@@ -1395,17 +1395,17 @@ def drawContracts(TOC, returnButton):
                         elif TOC == "southEastern":
                             if contractsList[2][2] == "2":
                                 for j in range(7, 12):
-                                    contractsList[i][2] = "0"
+                                    contractsList[j][2] = "0"
                             elif contractsList[7][2] == "2":
                                 for j in range(2, 7):
-                                    contractsList[i][2] = "0"
+                                    contractsList[j][2] = "0"
                         elif TOC == "scotRail":
                             if contractsList[2][2] == "2":
                                 for j in range(5, 8):
-                                    contractsList[i][2] = "0"
+                                    contractsList[j][2] = "0"
                             elif contractsList[5][2] == "2":
                                 for j in range(2, 5):
-                                    contractsList[i][2] = "0"
+                                    contractsList[j][2] = "0"
                 elif contractsList[i+1][2] == "1": # for if it is available
                     contractsButtonList[i].changeButtonColour(darkGrey)
                     returnButton.changeButtonColour(darkGrey)
