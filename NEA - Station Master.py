@@ -1390,15 +1390,15 @@ def drawContracts(TOC, returnButton):
                     contractsButtonList[i].changeButtonColour(white)
                     returnButton.changeButtonColour(darkGrey)
                     if numberContractsUnlocked >= int(contractsList[i + 1][3]): # checks if the criteria for unlocking is met
-                        if not splitPaths:
-                            contractsList[i+1][2] = "1"
-                        elif TOC == "southEastern":
+                        contractsList[i+1][2] = "1"
+                        if TOC == "southEastern":
                             if contractsList[2][2] == "2":
                                 for j in range(7, 12):
                                     contractsList[j][2] = "0"
                             elif contractsList[7][2] == "2":
                                 for j in range(2, 7):
                                     contractsList[j][2] = "0"
+                            
                         elif TOC == "scotRail":
                             if contractsList[2][2] == "2":
                                 for j in range(5, 8):
