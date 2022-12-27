@@ -1,5 +1,5 @@
 techonology, researchedState
-sigBoxBell,1
+sigBoxBell,0
 trackPhone,0
 cabPhone,0
 GSMR,0
@@ -19,11 +19,11 @@ checkRail,0
 welding,0
 superElevate,0
 greaser,0
-thirdRail,1
+thirdRail,0
 OHLE,0
 OHLE HS,0
 fourthRail,0
-toilet,1
+toilet,0
 timetable,0
 DMI,0
 LCD,0
