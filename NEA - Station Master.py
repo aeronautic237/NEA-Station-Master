@@ -73,9 +73,6 @@ def incrementClock():
      #   timeMinute = "0" + str(timeMinute)
     #if int(timeHour) < 10:
      #   timeHour = "0" + str(timeHour)
-    print(timeSecond)
-    print(timeMinute)
-    print(timeHour)
     pygame.draw.rect(screen, menuScreenColour, [510, 15, 310, 60])
     write(str(timeHour).zfill(2) + ":" + str(timeMinute).zfill(2) + ":" + str(timeSecond).zfill(2), clockFont, white, 510, 15)
     pygame.display.update()
@@ -131,6 +128,28 @@ def mainMenu():
                 quitButton.changeButtonColour(black)
                 #pygame.display.update()
 
+#This will to the clicky click business (setting points, setting signals, calling on trains)
+def gameplay(trackLayout, eventType, signalList, pointsList):
+    positionCoord = pygame.mouse.get_pos()# position of the mouse
+    position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
+    storeCoordx, storeCoordy = int(position[0]/40) - 1, int(position[1]/40) - 5
+    if eventType == pygame.MOUSEBUTTONUP:
+        #check for points
+        if trackLayout[storeCoordy][storeCoordx] == "2":
+            for i in range(0, len(pointsList)):
+                if pointsList[i].getPosition()[0] == storeCoordx and pointsList[i].getPosition()[1] == storeCoordy:# checks if the relevant set of points are found
+                    pointsList[i].setState()
+        elif trackLayout[storeCoordy][storeCoordx] == "3":
+            for i in range(0, len(pointsList)):
+                if pointsList[i].getPosition()[0] == storeCoordx and pointsList[i].getPosition()[1] == storeCoordy - 1: #checks if the relevant set of points are found
+                    poinstList[i].setState()
+        elif trackLayout[storeCoordy][storeCoordx] == "6" or trackLayout[storeCoordy][storeCoordx] == "5":# checks for signal
+            for i in range(0, len(signalList)):
+                if signalList[i].getPosition()[0] == storeCoordx and signalList[i].getPosition()[1] == storeCoordy:
+                    signalList[i].setState()
+        
+
+
 #This is where the game is run
 def game():
     multiplier = 1 # speed of the clock
@@ -142,6 +161,8 @@ def game():
     #drawing the tracks, stations, signals, and points
     screen.fill(black)
     with open("saveData/tracksPlatforms.txt", "r") as file:
+        signalList = []#clears the list every time the main game screen is loaded
+        pointsList = []#list of signals and points in the game
         reader = csv.reader(file)
         i = 0
         for row in reader:
@@ -155,6 +176,7 @@ def game():
                 elif trackLayout[i-2][j] == "2": # upwards points
                     pygame.draw.line(screen, gold, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
                     pygame.draw.line(screen, gold, ((40 * j) + 60, (140 + (40 * i))),((40 * j) + 60, (120 + (40 * i))))
+                    pointsList.append(classPoints(0, i-2, j))
                 elif trackLayout[i-2][j] == "3":#downwards points
                     pygame.draw.line(screen, gold, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
                     pygame.draw.line(screen, gold, ((40 * j) + 60, (140 + (40 * i))),((40 * j) + 60, (160 + (40 * i))))
@@ -164,11 +186,13 @@ def game():
                     pygame.draw.line(screen, white, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
                     pygame.draw.polygon(screen, red, (((40*j) + 53, (120 + (40 * i))),((40 * j) + 80 , (40 * i) + 140),((40 * j) + 53, (40 * i) + 160)))#This is a signal
                     pygame.display.update()
+                    signalList.append(classSignal(0, i-2, j))
                 #replaces the train with a rightward set of signals
                 elif trackLayout[i-2][j] == "6":
                     pygame.draw.line(screen, white, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
                     pygame.draw.polygon(screen, red, (((40*j) + 67, (120 + (40 * i))),((40 * j) + 40 , (40 * i) + 140),((40 * j) + 67, (40 * i) + 160)))#This is a signal
                     pygame.display.update()
+                    signalList.append(classSignal(0, i-2, j))
     with open("saveData/entryPoints.txt", "r") as file:
         reader = csv.reader(file)
         i = 0
@@ -312,6 +336,7 @@ def game():
                 skipForward.changeButtonColour(darkGrey)
                 for i in range(0, len(multipliers)):
                     multipliers[i].changeButtonColour(darkGrey)
+                gameplay(trackLayout, event.type, signalList, pointsList)
                     
     #train1 = train(white, 1230, 350, 50, 20, -1)
     #train1.drawTrain()
@@ -1700,7 +1725,42 @@ class RepeatedTimer(): # https://stackoverflow.com/questions/474528/how-to-repea
     def setInterval(self, newInterval):
         self.interval = newInterval
     
-        
+#this will represent an interactable set of points
+class classPoints():
+
+    def __init__(self, state, x, y):
+        self.state = state# which way it is facing - 0 for straight, 1 for diversion
+        self.x = x#x position on the layout
+        self.y = y#y osition of the layout
+
+    def setState(self):
+        self.state = 1 - self.state # toggle state
+
+    def getState(self):
+        return self.state
+
+    def getPosition(self):
+        return self.x, self.y
+
+
+#this will represent an interactable signal
+class classSignal():
+
+    def __init__(self, state, x, y):
+        self.state = state# what is it? 0 for red, 1 for green
+        self.x = x#x position on the layout
+        self.y = y#y position on the layout
+
+    def setState(self):
+        self.state = 1 - self.state#toggle state
+
+    def getState(self):
+        return self.state
+
+    def getPosition(self):
+        return self.x, self.y
+
+    
 #will print text as the user wishes
 def write(text, font, colour, xpos, ypos):
     font = font
@@ -1746,8 +1806,8 @@ numberTrains = 0
 timeHour = 4
 timeMinute = 0
 timeSecond = 0
-numberEntry = 4
-numberContractsUnlocked = 17
+numberEntry = 0
+numberContractsUnlocked = 0
 rewardTrain = 500
 
 gameLoop()
