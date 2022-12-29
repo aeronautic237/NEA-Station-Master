@@ -137,18 +137,35 @@ def gameplay(trackLayout, eventType, signalList, pointsList):
         #check for points
         if trackLayout[storeCoordy][storeCoordx] == "2":
             for i in range(0, len(pointsList)):
-                if pointsList[i].getPosition()[0] == storeCoordx and pointsList[i].getPosition()[1] == storeCoordy:# checks if the relevant set of points are found
+                if pointsList[i].getPosition()[1] == storeCoordx and pointsList[i].getPosition()[0] == storeCoordy:# checks if the relevant set of points are found
                     pointsList[i].setState()
         elif trackLayout[storeCoordy][storeCoordx] == "3":
             for i in range(0, len(pointsList)):
-                if pointsList[i].getPosition()[0] == storeCoordx and pointsList[i].getPosition()[1] == storeCoordy - 1: #checks if the relevant set of points are found
+                if pointsList[i].getPosition()[1] == storeCoordx and pointsList[i].getPosition()[0] == storeCoordy - 1: #checks if the relevant set of points are found
                     poinstList[i].setState()
+        #check for signals
         elif trackLayout[storeCoordy][storeCoordx] == "6" or trackLayout[storeCoordy][storeCoordx] == "5":# checks for signal
             for i in range(0, len(signalList)):
-                if signalList[i].getPosition()[0] == storeCoordx and signalList[i].getPosition()[1] == storeCoordy:
+                if signalList[i].getPosition()[1] == storeCoordx and signalList[i].getPosition()[0] == storeCoordy:
                     signalList[i].setState()
-        
-
+    for j in range(0, len(pointsList)):
+        if pointsList[j].getState() == 0:
+            pygame.draw.line(screen, black, ((40 * pointsList[j].getPosition()[1]) + 60, (181 + (40 * pointsList[j].getPosition()[0]))), ((40 * pointsList[j].getPosition()[1]) + 60, (219 + (40 * pointsList[j].getPosition()[0]))))
+        elif pointsList[j].getState() == 1:
+            pygame.draw.line(screen, gold, ((40 * pointsList[j].getPosition()[1]) + 60, (181 + (40 * pointsList[j].getPosition()[0]))), ((40 * pointsList[j].getPosition()[1]) + 60, (219 + (40 * pointsList[j].getPosition()[0]))))
+    for j in range(0, len(signalList)):
+        if signalList[j].getState() == 0:
+            if trackLayout[signalList[j].getPosition()[0]][signalList[j].getPosition()[1]] == "5":
+                pygame.draw.polygon(screen, red, (((40 * signalList[j].getPosition()[1]) + 53, (200 + (40 * signalList[j].getPosition()[0]))),((40 * signalList[j].getPosition()[1]) + 80 , (40 * signalList[j].getPosition()[0]) + 220),((40 * signalList[j].getPosition()[1]) + 53, (40 * signalList[j].getPosition()[0]) + 240)))
+            elif trackLayout[signalList[j].getPosition()[0]][signalList[j].getPosition()[1]] == "6":
+                pygame.draw.polygon(screen, red, (((40 * signalList[j].getPosition()[1]) + 67, (200 + (40 * signalList[j].getPosition()[0]))),((40 * signalList[j].getPosition()[1]) + 40 , (40 * signalList[j].getPosition()[0]) + 220),((40 * signalList[j].getPosition()[1]) + 67, (40 * signalList[j].getPosition()[0]) + 240)))
+        elif signalList[j].getState() == 1:
+            if trackLayout[signalList[j].getPosition()[0]][signalList[j].getPosition()[1]] == "5":
+                pygame.draw.polygon(screen, green, (((40 * signalList[j].getPosition()[1]) + 53, (200 + (40 * signalList[j].getPosition()[0]))),((40 * signalList[j].getPosition()[1]) + 80 , (40 * signalList[j].getPosition()[0]) + 220),((40 * signalList[j].getPosition()[1]) + 53, (40 * signalList[j].getPosition()[0]) + 240)))
+            elif trackLayout[signalList[j].getPosition()[0]][signalList[j].getPosition()[1]] == "6":
+                pygame.draw.polygon(screen, green, (((40 * signalList[j].getPosition()[1]) + 67, (200 + (40 * signalList[j].getPosition()[0]))),((40 * signalList[j].getPosition()[1]) + 40 , (40 * signalList[j].getPosition()[0]) + 220),((40 * signalList[j].getPosition()[1]) + 67, (40 * signalList[j].getPosition()[0]) + 240)))
+    pygame.display.update()
+                
 
 #This is where the game is run
 def game():
@@ -328,6 +345,7 @@ def game():
                 pygame.quit()
                 sys.exit()
             else:
+                gameplay(trackLayout, event.type, signalList, pointsList)
                 menuButton.changeButtonColour(darkGrey)
                 RDButton.changeButtonColour(darkGrey)
                 constructButton.changeButtonColour(darkGrey)
@@ -336,7 +354,6 @@ def game():
                 skipForward.changeButtonColour(darkGrey)
                 for i in range(0, len(multipliers)):
                     multipliers[i].changeButtonColour(darkGrey)
-                gameplay(trackLayout, event.type, signalList, pointsList)
                     
     #train1 = train(white, 1230, 350, 50, 20, -1)
     #train1.drawTrain()
