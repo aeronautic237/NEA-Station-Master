@@ -141,8 +141,8 @@ def gameplay(trackLayout, eventType, signalList, pointsList):
                     pointsList[i].setState()
         elif trackLayout[storeCoordy][storeCoordx] == "3":
             for i in range(0, len(pointsList)):
-                if pointsList[i].getPosition()[1] == storeCoordx and pointsList[i].getPosition()[0] == storeCoordy - 1: #checks if the relevant set of points are found
-                    poinstList[i].setState()
+                if pointsList[i].getPosition()[1] == storeCoordx and pointsList[i].getPosition()[0] == storeCoordy + 1: #checks if the relevant set of points are found
+                    pointsList[i].setState()
         #check for signals
         elif trackLayout[storeCoordy][storeCoordx] == "6" or trackLayout[storeCoordy][storeCoordx] == "5":# checks for signal
             for i in range(0, len(signalList)):
@@ -151,8 +151,12 @@ def gameplay(trackLayout, eventType, signalList, pointsList):
     for j in range(0, len(pointsList)):
         if pointsList[j].getState() == 0:
             pygame.draw.line(screen, black, ((40 * pointsList[j].getPosition()[1]) + 60, (181 + (40 * pointsList[j].getPosition()[0]))), ((40 * pointsList[j].getPosition()[1]) + 60, (219 + (40 * pointsList[j].getPosition()[0]))))
+            pygame.draw.line(screen, gold, ((40 * pointsList[j].getPosition()[1]) + 40, (180 + (40 * pointsList[j].getPosition()[0]))), ((40 * pointsList[j].getPosition()[1]) + 80, (180 + (40 * pointsList[j].getPosition()[0]))))
+            pygame.draw.line(screen, gold, ((40 * pointsList[j].getPosition()[1]) + 40, (220 + (40 * pointsList[j].getPosition()[0]))), ((40 * pointsList[j].getPosition()[1]) + 80, (220 + (40 * pointsList[j].getPosition()[0]))))
         elif pointsList[j].getState() == 1:
             pygame.draw.line(screen, gold, ((40 * pointsList[j].getPosition()[1]) + 60, (181 + (40 * pointsList[j].getPosition()[0]))), ((40 * pointsList[j].getPosition()[1]) + 60, (219 + (40 * pointsList[j].getPosition()[0]))))
+            pygame.draw.line(screen, gold, ((40 * pointsList[j].getPosition()[1]) + 40, (180 + (40 * pointsList[j].getPosition()[0]))), ((40 * pointsList[j].getPosition()[1]) + 80, (180 + (40 * pointsList[j].getPosition()[0]))))
+            pygame.draw.line(screen, gold, ((40 * pointsList[j].getPosition()[1]) + 40, (220 + (40 * pointsList[j].getPosition()[0]))), ((40 * pointsList[j].getPosition()[1]) + 80, (220 + (40 * pointsList[j].getPosition()[0]))))
     for j in range(0, len(signalList)):
         if signalList[j].getState() == 0:
             if trackLayout[signalList[j].getPosition()[0]][signalList[j].getPosition()[1]] == "5":
@@ -277,6 +281,8 @@ def game():
     #this is where we do the mechanics
     waiting = True
     incrementer = RepeatedTimer(multiplier, incrementClock)
+    tempTrain = train(0, 295, 1)
+    trainMovement = RepeatedTimer(3/multiplier, moveTempTrain, tempTrain)
     while waiting == True:
         for event in pygame.event.get():
             if menuButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
@@ -363,6 +369,9 @@ def game():
     #train1.departPlat()
     #train1.destroyTrain()
     #pygame.display.update()
+
+def moveTempTrain(tempTrain):
+    tempTrain.moveTrain(40,0)
 
 #will set the time to the next train in the timetable (parameters are starting point)
 def forwardTime(hours, minutes, seconds):
@@ -1572,18 +1581,18 @@ def timetableScreen(returnButton):
 #new object for train
 class train:
     #construct a train
-    def __init__(self, colour, x, y, width, height, xDirection):
-        self.colour = colour
+    def __init__(self, x, y, xDirection):
+        #self.colour = colour
         self.x = x
         self.y = y
-        self.width = width
-        self.height = height
-        self.train = pygame.Rect([x, y, width, height])
+        #self.width = width
+        #self.height = height
+        self.train = pygame.Rect([x, y, 30, 10])
         self.xDirection = xDirection
 
     #draw the train
     def drawTrain(self):
-        pygame.draw.rect(screen, self.colour, self.train)
+        pygame.draw.rect(screen, lightBlue, self.train)
         pygame.display.update()
 
     #move the train
@@ -1596,7 +1605,7 @@ class train:
         self.x = self.x + moveX
         self.y = self.y + moveY
         #draw the new train
-        pygame.draw.rect(screen, self.colour, self.train)
+        pygame.draw.rect(screen, lightBlue, self.train)
         pygame.display.update()
 
     #destroy the trani
@@ -1604,7 +1613,7 @@ class train:
         #change rectangle colour to black
         pygame.draw.rect(screen, black, self.train)
         #replace track
-        pygame.draw.line(screen, white, [self.x, self.y + (self.height/2)], [self.x + self.width, (self.y + self.height/2)])
+        pygame.draw.line(screen, white, [self.x, self.y + (10/2)], [self.x + 30, (self.y + 10/2)])
         
 
     #pre-programmed approach control
@@ -1715,10 +1724,12 @@ class entryButton(button):
 
 # I will use this to increment the clock every second
 class RepeatedTimer(): # https://stackoverflow.com/questions/474528/how-to-repeatedly-execute-a-function-every-x-seconds
-    def __init__(self, interval, function):
+    def __init__(self, interval, function, *args, **kwargs):
         self._timer = None
         self.interval = interval
         self.function = function
+        self.args = args
+        self.kwargs = kwargs
         self.is_running = False
         self.next_call = time.time()
         self.start()
@@ -1726,7 +1737,7 @@ class RepeatedTimer(): # https://stackoverflow.com/questions/474528/how-to-repea
     def _run(self):
         self.is_running = False
         self.start()
-        self.function()
+        self.function(*self.args, **self.kwargs)
 
     def start(self):
         if not self.is_running:
