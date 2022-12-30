@@ -282,7 +282,7 @@ def game():
     waiting = True
     incrementer = RepeatedTimer(multiplier, incrementClock)
     tempTrain = train(0, 295, 1)
-    trainMovement = RepeatedTimer(3/multiplier, moveTempTrain, tempTrain)
+    trainMovement = RepeatedTimer(3*multiplier, moveTempTrain, tempTrain)
     while waiting == True:
         for event in pygame.event.get():
             if menuButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
@@ -291,56 +291,66 @@ def game():
                     waiting = False
                     gamestate = "menu"
                     incrementer.stop()
+                    trainMovement.stop()
                     mainMenu()
             elif RDButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 RDButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     incrementer.stop()
+                    trainMovement.stop()
                     research()
             elif constructButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 constructButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     incrementer.stop()
+                    trainMovement.stop()
                     shop()
             elif contractButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 contractButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     incrementer.stop()
+                    trainMovement.stop()
                     contracts(menuButton)
             elif timetableButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 timetableButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     incrementer.stop()
+                    trainMovement.stop()
                     timetableScreen(menuButton)
             elif playClock.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 playClock.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     multiplier = 1
                     incrementer.setInterval(multiplier)
+                    trainMovement.setInterval(3*multiplier)
             elif clockX5.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 clockX5.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     multiplier = 0.2
                     incrementer.setInterval(multiplier)
+                    trainMovement.setInterval(3*multiplier)
             elif clockX15.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 clockX15.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     multiplier = 1 / 15
                     incrementer.setInterval(multiplier)
+                    trainMovement.setInterval(3*multiplier)
             elif clockX25.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 clockX25.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     multiplier = 1 / 25
                     incrementer.setInterval(multiplier)
+                    trainMovement.setInterval(3*multiplier)
             elif clockX50.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 clockX50.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     multiplier = 1 / 50
                     incrementer.setInterval(multiplier)
+                    trainMovement.setInterval(3*multiplier)
             elif skipForward.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 skipForward.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
