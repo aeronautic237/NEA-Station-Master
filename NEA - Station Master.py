@@ -282,7 +282,7 @@ def game():
     waiting = True
     incrementer = RepeatedTimer(multiplier, incrementClock)
     tempTrain = train(0, 295, 1)
-    trainMovement = RepeatedTimer(3*multiplier, moveTempTrain, tempTrain)
+    trainMovement = RepeatedTimer(3*multiplier, tempTrain.moveTrain, trackLayout, pointsList, signalList)
     while waiting == True:
         for event in pygame.event.get():
             if menuButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
@@ -380,8 +380,6 @@ def game():
     #train1.destroyTrain()
     #pygame.display.update()
 
-def moveTempTrain(tempTrain):
-    tempTrain.moveTrain(40,0)
 
 #will set the time to the next train in the timetable (parameters are starting point)
 def forwardTime(hours, minutes, seconds):
@@ -1106,6 +1104,9 @@ def purchasePlatform():
         for i in range(len(trackLayout)):
             if trackLayout[i-2][17] != "0" and trackLayout[i-2][12] != "0" and trackLayout[i-2][15] == "0":
                 trackLayout[i-2][15] = "4"
+                trackLayout[i-2][13] = "7"
+                trackLayout[i-2][14] = "7"
+                trackLayout[i-2][16] = "7"
                 money = money - platPrice
                 platCount = platCount + 1#records the number of platforms in possesion
                 platPrice = platPrice + 5000##increase price of a new platform by £5000
@@ -1599,6 +1600,8 @@ class train:
         #self.height = height
         self.train = pygame.Rect([x, y, 30, 10])
         self.xDirection = xDirection
+        self.visitedPlat = 0
+        self.waitingPlat = 5
 
     #draw the train
     def drawTrain(self):
@@ -1606,14 +1609,73 @@ class train:
         pygame.display.update()
 
     #move the train
-    def moveTrain(self, moveX, moveY):
+    def moveTrain(self, trackLayout, pointsList, signalList):
+
+        #for no track
+        if trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] == "0":
+            pygame.draw.rect(screen, red, self.train)
+            pygame.display.update()
+            print(str(self.train))
+        
+        #for normal track
+        elif trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] == "1" or trackLayout[(self.train[1]//40)-2][(self.train[0]//40)-1] == "7":
+            self.moveTrainEngine(40 * self.xDirection, 0)
+            
+        #for upward points
+        elif trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] == "2":
+            for i in range(0, len(pointsList)):
+                if pointsList[i].getPosition()[1] == (self.train[0]//40)-1 and pointsList[i].getPosition()[0] == (self.train[1]//40)-5:
+                    print("points found")
+                    #for straight
+                    if pointsList[i].getState() == 0:
+                        self.moveTrainEngine(40 * self.xDirection, 0)
+                    #for diverting
+                    elif pointsList[i].getState() == 1:
+                        self.moveTrainEngine(0, -40)
+
+        #for downward points
+        elif trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] == "3":
+            for i in range(0, len(pointsList)):
+                if pointsList[i].getPosition()[1] == (self.train[0]//40)-1 and pointsList[i].getPosition()[0] == ((self.train[1]//40)-5) + 1:
+                    print("points found")
+                    #for straight
+                    if pointsList[i].getState() == 0:
+                        self.moveTrainEngine(40 * self.xDirection, 0)
+                    #for diverting
+                    if pointsList[i].getState() == 1:
+                        self.moveTrainEngine(0, 40)
+
+        #for platforms
+        elif trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] == "4":
+            if self.waitingPlat > 0:
+                self.waitingPlat = self.waitingPlat - 1
+            else:
+                self.visitedPlat = 1
+                self.moveTrainEngine(40 * self.xDirection, 0)
+
+        #for signals
+        elif (self.xDirection == 1 and trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] == "5") or (self.xDirection == -1 and trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] =="6"):
+            for i in range(0, len(signalList)):
+                if signalList[i].getPosition()[1] == (self.train[0]//40)-1 and signalList[i].getPosition()[0] == (self.train[1]//40)-5:
+                    print("signal found")
+                    #for proceed aspect
+                    if signalList[i].getState() == 1:
+                        self.moveTrainEngine(40 * self.xDirection, 0)
+                        #for danger aspect
+                    elif signalList[i].getState() == 0:
+                        print("waiting for signal")
+
+        else:
+            self.moveTrainEngine(40 * self.xDirection, 0)
+
+    def moveTrainEngine(self, moveX, moveY):
         #draw black rectangle over the existing train
         self.destroyTrain()
         #move the train
         self.train.move_ip(moveX, moveY)
         #change the variables so that they are remembered
         self.x = self.x + moveX
-        self.y = self.y + moveY
+        self.y = self.y +  moveY
         #draw the new train
         pygame.draw.rect(screen, lightBlue, self.train)
         pygame.display.update()
@@ -1844,7 +1906,7 @@ numberTrains = 0
 timeHour = 4
 timeMinute = 0
 timeSecond = 0
-numberEntry = 0
+numberEntry = 4
 numberContractsUnlocked = 0
 rewardTrain = 500
 
