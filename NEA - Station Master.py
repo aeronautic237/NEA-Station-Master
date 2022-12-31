@@ -1631,7 +1631,7 @@ class train:
                         self.moveTrainEngine(40 * self.xDirection, 0)
                     #for diverting
                     elif pointsList[i].getState() == 1:
-                        self.moveTrainEngine(0, -40)
+                        self.moveTrainEngine(40 * self.xDirection, -40)
 
         #for downward points
         elif trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] == "3":
@@ -1643,7 +1643,7 @@ class train:
                         self.moveTrainEngine(40 * self.xDirection, 0)
                     #for diverting
                     if pointsList[i].getState() == 1:
-                        self.moveTrainEngine(0, 40)
+                        self.moveTrainEngine(40 * self.xDirection, 40)
 
         #for platforms
         elif trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] == "4":
