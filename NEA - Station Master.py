@@ -6,6 +6,7 @@ import sys
 import time
 import csv
 import threading
+import random
 
 #initialise pygame
 pygame.font.init()
@@ -51,7 +52,7 @@ timetableArray = [[0 for x in range(80)] for y in range(8)]#creates an array in 
 #defing the various functions of the game here
 
 #this will increment the clock - needs to be called every second (or more depending on the multiplier
-def incrementClock():
+def incrementClock(trainsList, trainMovementList, timetableArray, multiplier, trackLayout, pointsList, signalList):
     global timeHour
     global timeMinute
     global timeSecond
@@ -76,6 +77,26 @@ def incrementClock():
     pygame.draw.rect(screen, menuScreenColour, [510, 15, 310, 60])
     write(str(timeHour).zfill(2) + ":" + str(timeMinute).zfill(2) + ":" + str(timeSecond).zfill(2), clockFont, white, 510, 15)
     pygame.display.update()
+
+    if int(timeSecond) == 0 and (int(timeMinute) == 0 or int(timeMinute) == 15 or int(timeMinute) == 30 or int(timeMinute) == 45):
+        print("DEBUG002")
+        hours = timeHour - 4
+        time = 0
+        time = time + (timeMinute * 60)
+        time = time + (hours * 3600)
+        time = int(time // (3600 / 4))
+        temp = int((time + 1) % 80)
+        while temp != time:
+            for j in range(0, len(timetableArray)):
+                if timetableArray[j][temp] == "1":
+                    print("DEBUG001")
+                    trainsList.append(train(1240 * (j % 2), 15 + (40 * (7 + (j // 2))), -1 * (-1 ** j)))
+                    trainMovementList.append(RepeatedTimer(3*multiplier, trainsList[-1].moveTrain, trackLayout, pointsList, signalList))
+            temp = (temp + 1) % 80
+    for i in range(0, len(trainsList)):
+        if trainsList[i].getFinished():
+            trainsList.pop(i)
+            trainMovementList.pop(i)
 
 
 def mainMenu():
@@ -225,7 +246,13 @@ def game():
             for j in range(2):
                 if entryLayout[i][j] == "1":
                     pygame.draw.line(screen, white, ((1240*j),(40 * i) + 300),((1240*j) + 40,(40 * i) + 300))
-                    
+
+    with open("saveData/timetable.txt") as file:
+        reader = csv.reader(file)
+        i = 0
+        for row in reader:
+            timetableArray[i] = row
+            i += 1
     drawPlatform()
     #draw the top and bottom bar
     pygame.draw.rect(screen, menuScreenColour, [0, 0, 1280, 100])
@@ -280,9 +307,10 @@ def game():
     pygame.display.update()
     #this is where we do the mechanics
     waiting = True
-    incrementer = RepeatedTimer(multiplier, incrementClock)
-    tempTrain = train(0, 295, 1)
-    trainMovement = RepeatedTimer(3*multiplier, tempTrain.moveTrain, trackLayout, pointsList, signalList)
+    trainsList = []
+    trainMovementList = []
+    #tempTrain = train(0, 295, 1)
+    incrementer = RepeatedTimer(multiplier, incrementClock, trainsList, trainMovementList, timetableArray, multiplier, trackLayout, pointsList, signalList)
     while waiting == True:
         for event in pygame.event.get():
             if menuButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
@@ -291,66 +319,76 @@ def game():
                     waiting = False
                     gamestate = "menu"
                     incrementer.stop()
-                    trainMovement.stop()
+                    for i in range(len(trainMovementList)):
+                        trainMovementList[i].stop()
                     mainMenu()
             elif RDButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 RDButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     incrementer.stop()
-                    trainMovement.stop()
+                    for i in range(len(trainMovementList)):
+                        trainMovementList[i].stop()
                     research()
             elif constructButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 constructButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     incrementer.stop()
-                    trainMovement.stop()
+                    for i in range(len(trainMovementList)):
+                        trainMovementList[i].stop()
                     shop()
             elif contractButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 contractButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     incrementer.stop()
-                    trainMovement.stop()
+                    for i in range(len(trainMovementList)):
+                        trainMovementList[i].stop()
                     contracts(menuButton)
             elif timetableButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 timetableButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     incrementer.stop()
-                    trainMovement.stop()
+                    for i in range(len(trainMovementList)):
+                        trainMovementList[i].stop()
                     timetableScreen(menuButton)
             elif playClock.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 playClock.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     multiplier = 1
                     incrementer.setInterval(multiplier)
-                    trainMovement.setInterval(3*multiplier)
+                    for i in range(len(trainMovementList)):
+                        trainMovementList[i].setInterval(3*multiplier)
             elif clockX5.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 clockX5.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     multiplier = 0.2
                     incrementer.setInterval(multiplier)
-                    trainMovement.setInterval(3*multiplier)
+                    for i in range(len(trainMovementList)):
+                        trainMovementList[i].setInterval(3*multiplier)
             elif clockX15.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 clockX15.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     multiplier = 1 / 15
                     incrementer.setInterval(multiplier)
-                    trainMovement.setInterval(3*multiplier)
+                    for i in range(len(trainMovementList)):
+                        trainMovementList[i].setInterval(3*multiplier)
             elif clockX25.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 clockX25.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     multiplier = 1 / 25
                     incrementer.setInterval(multiplier)
-                    trainMovement.setInterval(3*multiplier)
+                    for i in range(len(trainMovementList)):
+                        trainMovementList[i].setInterval(3*multiplier)
             elif clockX50.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 clockX50.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     multiplier = 1 / 50
                     incrementer.setInterval(multiplier)
-                    trainMovement.setInterval(3*multiplier)
+                    for i in range(len(trainMovementList)):
+                        trainMovementList[i].setInterval(3*multiplier)
             elif skipForward.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 skipForward.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
@@ -358,6 +396,8 @@ def game():
             elif event.type == pygame.QUIT:
                 waiting = False
                 incrementer.stop()
+                for i in range(len(trainMovementList)):
+                        trainMovementList[i].stop()
                 pygame.quit()
                 sys.exit()
             else:
@@ -404,12 +444,12 @@ def forwardTime(hours, minutes, seconds):
             if timetableArray[j][temp] == "1":
                 time = temp
                 time = time * (3600 / 4)
-                hours = time // 3600
+                hours = (time // 3600) - 1
                 time = time - (hours * 3600)
-                minutes = time / 60
+                minutes = (time / 60) - 1
                 timeHour = int(hours + 4)
                 timeMinute = int(minutes)
-                timeSecond = 0
+                timeSecond = 57
                 return "ends the function"
         temp = (temp + 1) % 80
 
@@ -1602,6 +1642,10 @@ class train:
         self.xDirection = xDirection
         self.visitedPlat = 0
         self.waitingPlat = 5
+        self.finished = False
+        self.recovering = False
+        self.timeRecovery = 64
+        self.incident = False
 
     #draw the train
     def drawTrain(self):
@@ -1610,12 +1654,25 @@ class train:
 
     #move the train
     def moveTrain(self, trackLayout, pointsList, signalList):
+        global incidentRisk
+        global incidentRecoverySpeed
+        
+        chance = random.randint(0, 100)
 
-        #for no track
-        if trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] == "0":
+        #for no track or an incident
+        if self.incident or chance < incidentRisk or trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] == "0":
+            print(str(self.train))
             pygame.draw.rect(screen, red, self.train)
             pygame.display.update()
-            print(str(self.train))
+            if self.recovering:
+                self.timeRecovery = self.timeRecovery / (2*incidentRecoverySpeed)
+            if self.train.collidepoint((pygame.mouse.get_pos())):
+                pygame.draw.rect(screen, gold, self.train)
+                self.recovering = True
+            if self.timeRecovery <= 1:
+                pygame.draw.rect(screen, black, self.train)
+                self.finished = True
+            self.incident = True
         
         #for normal track
         elif trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] == "1" or trackLayout[(self.train[1]//40)-2][(self.train[0]//40)-1] == "7":
@@ -1663,7 +1720,15 @@ class train:
                         self.moveTrainEngine(40 * self.xDirection, 0)
                         #for danger aspect
                     elif signalList[i].getState() == 0:
-                        print("waiting for signal")
+                        global SPADRisk
+                        chance = random.randint(0, 100)
+                        #no SPAD
+                        if chance >= SPADRisk:
+                            print("waiting for signal")
+                        #yes SPAD
+                        else:
+                            print("SPAD")
+                            self.moveTrainEngine(40 * self.xDirection, 0)
 
         else:
             self.moveTrainEngine(40 * self.xDirection, 0)
@@ -1713,6 +1778,10 @@ class train:
         for i in range(245,1,-1):
             self.moveTrain(self.xDirection,0)
             time.sleep(0.01)
+
+    #returns whether the train is finished or not
+    def getFinished(self):
+        return self.finished
 
 #This is our button object
 class button:
@@ -1897,7 +1966,7 @@ def gameLoop():
 
 money = 300000 #in pounds
 incidentRecoverySpeed = 1 #as a mutiplier
-SPADRisk = 85 #as a percentage
+SPADRisk = 90 #as a percentage
 signalPriceBoost = 0 #as a percentage
 incidentRisk = 65 #as a percentage
 platPrice = 5000 #price of a new platform at the start of the game
