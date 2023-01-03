@@ -85,18 +85,18 @@ def incrementClock(trainsList, trainMovementList, timetableArray, multiplier, tr
         time = time + (timeMinute * 60)
         time = time + (hours * 3600)
         time = int(time // (3600 / 4))
-        temp = int((time + 1) % 80)
-        while temp != time:
-            for j in range(0, len(timetableArray)):
-                if timetableArray[j][temp] == "1":
-                    print("DEBUG001")
-                    trainsList.append(train(1240 * (j % 2), 15 + (40 * (7 + (j // 2))), -1 * (-1 ** j)))
-                    trainMovementList.append(RepeatedTimer(3*multiplier, trainsList[-1].moveTrain, trackLayout, pointsList, signalList))
-            temp = (temp + 1) % 80
+        temp = int((time) % 80)
+        for j in range(0, len(timetableArray)):
+            if timetableArray[j][temp] == "1":
+                print(str(j))
+                trainsList.append(train(1240 * (j % 2), 15 + (40 * (7 + (j // 2))), ((-1) ** j)))
+                trainMovementList.append(RepeatedTimer(3*multiplier, trainsList[-1].moveTrain, trackLayout, pointsList, signalList))
     for i in range(0, len(trainsList)):
         if trainsList[i].getFinished():
+            trainMovementList[i].stop()
             trainsList.pop(i)
             trainMovementList.pop(i)
+            print("DEBUG003")
 
 
 def mainMenu():
@@ -389,7 +389,7 @@ def game():
                     incrementer.setInterval(multiplier)
                     for i in range(len(trainMovementList)):
                         trainMovementList[i].setInterval(3*multiplier)
-            elif skipForward.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif skipForward.buttonCoords.collidepoint((pygame.mouse.get_pos())) and len(trainMovementList) == 0:
                 skipForward.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     forwardTime(timeHour, timeMinute, timeSecond)
@@ -551,6 +551,16 @@ def research():
                                     signalPriceBoost = signalPriceBoost + 10 #increase the price of a signal
                                 queryDrawButton = False
                                 pygame.draw.rect(screen, black, [550, 375, 500, 50])
+                                if str(item[i]) == "points":
+                                    global pointsUnlocked
+                                    pointsUnlocked = True
+                                elif str(item[i]) == "semaphore":
+                                    global signalsUnlocked
+                                    signalsUnlocked = True
+                                elif str(item[i]) == "TPWS":
+                                    global TPWSUnlocked
+                                    TPWSUnlocked = True
+                                
                         else:
                             unlockButton.changeButtonColour(darkGrey)
 
@@ -746,6 +756,7 @@ def research():
                 returnButton.changeButtonColour(menuScreenColour)
     
 def shop():
+    global signalsUnlocked
     #re-draw the bottom bar
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 1280, 100])
     #re-draw the return button
@@ -757,7 +768,8 @@ def shop():
     buyTrack.drawButton()
     #build signals
     buySignal = button(darkGrey, [135, 635, 140, 75], "Signals", clockTextFont, white, 140, 655)
-    buySignal.drawButton()
+    if signalsUnlocked:
+        buySignal.drawButton()
     #buld platforms
     buyPlatform = button(darkGrey, [300, 635, 175, 75], "Platforms", clockTextFont, white, 305, 655)
     buyPlatform.drawButton()
@@ -772,7 +784,7 @@ def shop():
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     purchaseTrack(buyTrack, returnButton)
-            elif buySignal.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif buySignal.buttonCoords.collidepoint((pygame.mouse.get_pos())) and signalsUnlocked:
                 buySignal.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
@@ -791,18 +803,21 @@ def shop():
                 sys.exit()
             else:
                 buyTrack.changeButtonColour(darkGrey)
-                buySignal.changeButtonColour(darkGrey)
+                if signalsUnlocked:
+                    buySignal.changeButtonColour(darkGrey)
                 buyPlatform.changeButtonColour(darkGrey)
                 returnButton.changeButtonColour(darkGrey)
 
 def purchaseTrack(buyTrack, returnButton):
     #The save grid will be 32x13 for track, with each square being 40x40
     #change the bottom bar with the relevant options
+    global pointsUnlocked
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 1280, 100])
     buyTrack.drawButton()
     returnButton.drawButton()
     buyPoints = button(darkGrey, [135, 635, 120, 75], "Points", clockTextFont, white, 140, 655)
-    buyPoints.drawButton()
+    if pointsUnlocked:
+        buyPoints.drawButton()
     buyEntry = button(darkGrey, [275, 635, 130, 75],  "Entries", clockTextFont, white, 280, 655)
     buyEntry.drawButton()
     waiting = True
@@ -814,7 +829,7 @@ def purchaseTrack(buyTrack, returnButton):
                 if event.type == pygame.MOUSEBUTTONUP:
                     #code for building track goes here
                     buildTrack(returnButton)
-            elif buyPoints.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif buyPoints.buttonCoords.collidepoint((pygame.mouse.get_pos())) and pointsUnlocked:
                 buyPoints.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     #code for building points goes here
@@ -835,7 +850,8 @@ def purchaseTrack(buyTrack, returnButton):
                 sys.exit()
             else:
                 buyTrack.changeButtonColour(darkGrey)
-                buyPoints.changeButtonColour(darkGrey)
+                if pointsUnlocked:
+                    buyPoints.changeButtonColour(darkGrey)
                 buyEntry.changeButtonColour(darkGrey)
                 returnButton.changeButtonColour(darkGrey)
                 pygame.display.update()
@@ -1638,14 +1654,15 @@ class train:
         self.y = y
         #self.width = width
         #self.height = height
-        self.train = pygame.Rect([x, y, 30, 10])
-        self.xDirection = xDirection
-        self.visitedPlat = 0
-        self.waitingPlat = 5
-        self.finished = False
-        self.recovering = False
-        self.timeRecovery = 64
-        self.incident = False
+        self.train = pygame.Rect([x, y, 30, 10]) # rectangle
+        self.xDirection = xDirection # direction of travel
+        self.visitedPlat = 0 # boolean has it visited a platform
+        self.waitingPlat = 5 # time taken to wait at the platform
+        self.finished = False # has it finished its run?
+        self.recovering = False # has it been set to be hovered over
+        self.timeRecovery = 64 # #time taken to recover and clear site
+        self.incident = False # has it undergone an incident
+        self.chance = random.randint(0, 100) # probability of an incident.
 
     #draw the train
     def drawTrain(self):
@@ -1656,11 +1673,16 @@ class train:
     def moveTrain(self, trackLayout, pointsList, signalList):
         global incidentRisk
         global incidentRecoverySpeed
-        
-        chance = random.randint(0, 100)
+
+        if self.train[0] == 1320 or self.train[0] == -40:
+            self.finished = True
+
+        if self.chance < incidentRisk:
+            if random.randint(0, 10) < 3:
+                self.incident = True
 
         #for no track or an incident
-        if self.incident or chance < incidentRisk or trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] == "0":
+        if self.incident or trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] == "0":
             print(str(self.train))
             pygame.draw.rect(screen, red, self.train)
             pygame.display.update()
@@ -1670,7 +1692,7 @@ class train:
                 pygame.draw.rect(screen, gold, self.train)
                 self.recovering = True
             if self.timeRecovery <= 1:
-                pygame.draw.rect(screen, black, self.train)
+                self.destroyTrain()
                 self.finished = True
             self.incident = True
         
@@ -1721,14 +1743,16 @@ class train:
                         #for danger aspect
                     elif signalList[i].getState() == 0:
                         global SPADRisk
-                        chance = random.randint(0, 100)
                         #no SPAD
-                        if chance >= SPADRisk:
+                        if self.chance >= SPADRisk:
                             print("waiting for signal")
                         #yes SPAD
                         else:
                             print("SPAD")
                             self.moveTrainEngine(40 * self.xDirection, 0)
+                            global TPWSUnlocked
+                            if TPWSUnlocked:
+                                self.incident = True
 
         else:
             self.moveTrainEngine(40 * self.xDirection, 0)
@@ -1966,7 +1990,7 @@ def gameLoop():
 
 money = 300000 #in pounds
 incidentRecoverySpeed = 1 #as a mutiplier
-SPADRisk = 90 #as a percentage
+SPADRisk = 10 #as a percentage
 signalPriceBoost = 0 #as a percentage
 incidentRisk = 65 #as a percentage
 platPrice = 5000 #price of a new platform at the start of the game
@@ -1978,5 +2002,8 @@ timeSecond = 0
 numberEntry = 4
 numberContractsUnlocked = 0
 rewardTrain = 500
+pointsUnlocked = False
+signalsUnlocked = False
+TPWSUnlocked = False
 
 gameLoop()
