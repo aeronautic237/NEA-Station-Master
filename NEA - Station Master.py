@@ -324,8 +324,9 @@ def game():
                     incrementer.stop()
                     for i in range(len(trainMovementList)):
                         trainMovementList[i].stop()
+                    saveGame()
                     mainMenu()
-            elif RDButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif RDButton.buttonCoords.collidepoint((pygame.mouse.get_pos())) and len(trainMovementList) == 0:
                 RDButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
@@ -333,7 +334,7 @@ def game():
                     for i in range(len(trainMovementList)):
                         trainMovementList[i].stop()
                     research()
-            elif constructButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif constructButton.buttonCoords.collidepoint((pygame.mouse.get_pos())) and len(trainMovementList) == 0:
                 constructButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
@@ -341,7 +342,7 @@ def game():
                     for i in range(len(trainMovementList)):
                         trainMovementList[i].stop()
                     shop()
-            elif contractButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif contractButton.buttonCoords.collidepoint((pygame.mouse.get_pos())) and len(trainMovementList) == 0:
                 contractButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
@@ -349,7 +350,7 @@ def game():
                     for i in range(len(trainMovementList)):
                         trainMovementList[i].stop()
                     contracts(menuButton)
-            elif timetableButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif timetableButton.buttonCoords.collidepoint((pygame.mouse.get_pos())) and len(trainMovementList) == 0:
                 timetableButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
@@ -537,7 +538,11 @@ def research():
                                 for j in range (0,33):#updates the array which will be copied over to the list
                                     if researchProgress[j][0] == item[i]:
                                         researchProgress[j][1] = "1"#sets the appropriate element to unlocked
-                                saveGame()
+                                with open("saveData/researched.txt", "w", newline="") as fileOut:
+                                    writer=csv.writer(fileOut)
+                                    for a in range(1):
+                                        for b in range(33):
+                                            writer.writerow(researchProgress[b])
                                 money = money - cost#deducts the cost of the technology
                                 print(money)#more debugging
                                 #apply effects
@@ -748,8 +753,12 @@ def research():
                 returnButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting=False
-                    saveGame()                                
-                    game()#copies the contents of the array to the text, and then returns to the game
+                    with open("saveData/researched.txt", "w", newline="") as fileOut:
+                        writer=csv.writer(fileOut)
+                        for a in range(1):
+                            for b in range(33):
+                                writer.writerow(researchProgress[b])                               
+                    game()#copies the contents of the array to the text file, and then returns to the game
             elif event.type == pygame.QUIT:
                 waiting = False
                 pygame.quit()
@@ -1981,12 +1990,52 @@ def write(text, font, colour, xpos, ypos):
     screen.blit(textSurface, (xpos, ypos))
 
 def saveGame():
-    global researchProgress
+    global researchProgress # done
+    global trackLayout # done
+    global entryLayout # done
+    global timetableArray # done
+    global money # done
+    global incidentRecoverySpeed # done
+    global SPADRisk # done
+    global signalPriceBoost # done
+    global incidentRisk # done
+    global platPrice # done
+    global platCount # done
+    global numberTrains # done
+    global timeHour # done
+    global timeMinute # done
+    global timeSecond # done
+    global numberEntry # done
+    global numberContractsUnlocked # done
+    global rewardTrain # done
+    global pointsUnlocked # done
+    global signalsUnlocked # done
+    global TPWSUnlocked # done
+    
     with open("saveData/researched.txt", "w", newline="") as fileOut:
         writer=csv.writer(fileOut)
         for a in range(1):
             for b in range(33):
                 writer.writerow(researchProgress[b])
+
+    with open("saveData/tracksPlatforms.txt", "w", newline="") as fileOut:
+        writer=csv.writer(fileOut)
+        writer.writerows(trackLayout)
+
+    with open("saveData/entryPoints.txt", "w", newline="") as fileOut:
+        writer=csv.writer(fileOut)
+        writer.writerows(entryLayout)
+
+    with open("saveData/timetable.txt", "w", newline="") as fileOut:
+        writer=csv.writer(fileOut)
+        writer.writerows(timetableArray)
+
+    with open("saveData/variables.txt", "w", newline="") as fileOut:
+        variablesList = [str(money), str(incidentRecoverySpeed), str(SPADRisk), str(signalPriceBoost), str(incidentRisk), str(platPrice), str(platCount), str(numberTrains), str(timeHour), str(timeMinute), str(timeSecond), str(numberEntry), str(numberContractsUnlocked), str(rewardTrain), str(pointsUnlocked), str(signalsUnlocked), str(TPWSUnlocked)]
+        writer=csv.writer(fileOut)
+        for i in range(0, len(variablesList)):
+            fileOut.write(variablesList[i])
+            writer.writerow("")
 
 
 #This is where the game is executed
