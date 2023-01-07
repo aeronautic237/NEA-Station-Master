@@ -1679,7 +1679,7 @@ class train:
         global incidentRisk
         global incidentRecoverySpeed
 
-        if self.train[0] == 1320 or self.train[0] == -40:
+        if self.train[0] == 1280 or self.train[0] == -40:
             self.finished = True
 
         if self.chance < incidentRisk:
