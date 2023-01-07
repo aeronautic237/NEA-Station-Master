@@ -392,6 +392,10 @@ def game():
             elif skipForward.buttonCoords.collidepoint((pygame.mouse.get_pos())) and len(trainMovementList) == 0:
                 skipForward.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
+                    multiplier = 1
+                    incrementer.setInterval(multiplier)
+                    for i in range(0, len(trainMovementList)):
+                        trainMovementList[i].setInterval(3*multiplier)
                     forwardTime(timeHour, timeMinute, timeSecond)
             elif event.type == pygame.QUIT:
                 waiting = False
@@ -1663,6 +1667,7 @@ class train:
         self.timeRecovery = 64 # #time taken to recover and clear site
         self.incident = False # has it undergone an incident
         self.chance = random.randint(0, 100) # probability of an incident.
+        self.SPADchance = random.randint(0, 100) # probability of a SPAD
 
     #draw the train
     def drawTrain(self):
@@ -1679,6 +1684,7 @@ class train:
 
         if self.chance < incidentRisk:
             if random.randint(0, 10) < 3:
+                print("incident")
                 self.incident = True
 
         #for no track or an incident
@@ -1744,7 +1750,7 @@ class train:
                     elif signalList[i].getState() == 0:
                         global SPADRisk
                         #no SPAD
-                        if self.chance >= SPADRisk:
+                        if self.SPADchance >= SPADRisk:
                             print("waiting for signal")
                         #yes SPAD
                         else:
@@ -1752,6 +1758,7 @@ class train:
                             self.moveTrainEngine(40 * self.xDirection, 0)
                             global TPWSUnlocked
                             if TPWSUnlocked:
+                                print("TPWS intervention")
                                 self.incident = True
 
         else:
@@ -1990,7 +1997,7 @@ def gameLoop():
 
 money = 300000 #in pounds
 incidentRecoverySpeed = 1 #as a mutiplier
-SPADRisk = 10 #as a percentage
+SPADRisk = 50 #as a percentage
 signalPriceBoost = 0 #as a percentage
 incidentRisk = 65 #as a percentage
 platPrice = 5000 #price of a new platform at the start of the game
