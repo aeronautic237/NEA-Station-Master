@@ -1181,7 +1181,7 @@ def purchasePlatform():
                 trackLayout[i-2][16] = "7"
                 money = money - platPrice
                 platCount = platCount + 1#records the number of platforms in possesion
-                platPrice = platPrice + 5000##increase price of a new platform by £5000
+                platPrice = platPrice + 2000##increase price of a new platform by £5000
                 break
         with open("saveData/tracksPlatforms.txt", "w", newline="") as file:
             writer = csv.writer(file)
@@ -1990,10 +1990,6 @@ def write(text, font, colour, xpos, ypos):
     screen.blit(textSurface, (xpos, ypos))
 
 def saveGame():
-    global researchProgress # done
-    global trackLayout # done
-    global entryLayout # done
-    global timetableArray # done
     global money # done
     global incidentRecoverySpeed # done
     global SPADRisk # done
@@ -2011,24 +2007,6 @@ def saveGame():
     global pointsUnlocked # done
     global signalsUnlocked # done
     global TPWSUnlocked # done
-    
-    with open("saveData/researched.txt", "w", newline="") as fileOut:
-        writer=csv.writer(fileOut)
-        for a in range(1):
-            for b in range(33):
-                writer.writerow(researchProgress[b])
-
-    with open("saveData/tracksPlatforms.txt", "w", newline="") as fileOut:
-        writer=csv.writer(fileOut)
-        writer.writerows(trackLayout)
-
-    with open("saveData/entryPoints.txt", "w", newline="") as fileOut:
-        writer=csv.writer(fileOut)
-        writer.writerows(entryLayout)
-
-    with open("saveData/timetable.txt", "w", newline="") as fileOut:
-        writer=csv.writer(fileOut)
-        writer.writerows(timetableArray)
 
     with open("saveData/variables.txt", "w", newline="") as fileOut:
         variablesList = [str(money), str(incidentRecoverySpeed), str(SPADRisk), str(signalPriceBoost), str(incidentRisk), str(platPrice), str(platCount), str(numberTrains), str(timeHour), str(timeMinute), str(timeSecond), str(numberEntry), str(numberContractsUnlocked), str(rewardTrain), str(pointsUnlocked), str(signalsUnlocked), str(TPWSUnlocked)]
@@ -2055,22 +2033,40 @@ def gameLoop():
                 running = False
     pygame.quit()
 
-money = 300000 #in pounds
-incidentRecoverySpeed = 1 #as a mutiplier
-SPADRisk = 50 #as a percentage
-signalPriceBoost = 0 #as a percentage
-incidentRisk = 65 #as a percentage
-platPrice = 5000 #price of a new platform at the start of the game
-platCount = 0 #number of platforms
-numberTrains = 0 #number of available trains to be put in the timetable
-timeHour = 4 #hour hand
-timeMinute = 0 #minute hand
-timeSecond = 0 #second hand
-numberEntry = 4 #number of entry points
-numberContractsUnlocked = 0 #number of contrants unlocked...
-rewardTrain = 500 #money earned per train
-pointsUnlocked = False #are points unlocked?
-signalsUnlocked = False #are signals unlocked?
-TPWSUnlocked = False #is TPWS unlocked?
+variablesList = []
+with open("saveData/variables.txt", "r") as fileOut:
+    reader = csv.reader(fileOut)
+    for row in reader:
+        value = str(row)
+        value = value.replace("'","")
+        value = value.replace("[", "")
+        value = value.replace("]", "")
+        variablesList.append(value)
+money = int(variablesList[0]) #in pounds
+incidentRecoverySpeed = int(variablesList[1]) #as a mutiplier
+SPADRisk = int(variablesList[2]) #as a percentage
+signalPriceBoost = int(variablesList[3]) #as a percentage
+incidentRisk = int(variablesList[4]) #as a percentage
+platPrice = int(variablesList[5]) #price of a new platform at the start of the game
+platCount = int(variablesList[6]) #number of platforms
+numberTrains = int(variablesList[7]) #number of available trains to be put in the timetable
+timeHour = int(variablesList[8]) #hour hand
+timeMinute = int(variablesList[9]) #minute hand
+timeSecond = int(variablesList[10]) #second hand
+numberEntry = int(variablesList[11]) #number of entry points
+numberContractsUnlocked = int(variablesList[12]) #number of contrants unlocked...
+rewardTrain = int(variablesList[13]) #money earned per train
+if variablesList[14] == "True":
+    pointsUnlocked = True #are points unlocked?
+else:
+    pointsUnlocked = False
+if variablesList[15] == "True":
+    signalsUnlocked = True #are signals unlocked?
+else:
+    signalsUnlocked = False
+if variablesList[16] == "True":
+    TPWSUnlocked = True #is TPWS unlocked?
+else:
+    TPWSUnlocked = False
 
 gameLoop()
