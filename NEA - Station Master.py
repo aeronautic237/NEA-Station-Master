@@ -151,6 +151,9 @@ def mainMenu():
 
 #This will to the clicky click business (setting points, setting signals, calling on trains)
 def gameplay(trackLayout, eventType, signalList, pointsList):
+    global money
+    pygame.draw.rect(screen, menuScreenColour, [0, 0, 300, 100])
+    write("£" + str(money).zfill(4), buttonFont, gold, 10, 10)
     positionCoord = pygame.mouse.get_pos()# position of the mouse
     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
     storeCoordx, storeCoordy = int(position[0]/40) - 1, int(position[1]/40) - 5
@@ -1311,6 +1314,7 @@ def contracts(returnButton):
         tube.drawButton()
         SEHS.drawButton()
     write("Next contract costs £" + str(int(1000 + (numberContractsUnlocked * 250))), clockTextFont, white, 435, 550)
+    pygame.draw.rect(screen, menuScreenColour, [0, 620, 1000, 100])
     pygame.display.update()#update screens.
     # list of all TOCs in game - just in case
     TOClist = [northern, southEastern, scotRail, southern, thamesLink, crossRail, tube, SEHS]
@@ -1554,7 +1558,9 @@ def timetableScreen(returnButton):
     global timeSecond
     global numberEntry
     global timetableArray
-    remainingTrains = numberTrains    
+    remainingTrains = numberTrains
+
+    pygame.draw.rect(screen, menuScreenColour, [0, 620, 1000, 100])
 
     #from save get timetable
     i = 0
@@ -1660,7 +1666,7 @@ class train:
         #self.height = height
         self.train = pygame.Rect([x, y, 30, 10]) # rectangle
         self.xDirection = xDirection # direction of travel
-        self.visitedPlat = 0 # boolean has it visited a platform
+        self.visitedPlat = False # boolean has it visited a platform
         self.waitingPlat = 5 # time taken to wait at the platform
         self.finished = False # has it finished its run?
         self.recovering = False # has it been set to be hovered over
@@ -1678,9 +1684,13 @@ class train:
     def moveTrain(self, trackLayout, pointsList, signalList):
         global incidentRisk
         global incidentRecoverySpeed
+        global money
 
         if self.train[0] == 1280 or self.train[0] == -40:
             self.finished = True
+            if self.visitedPlat:
+                global rewardTrain
+                money = money + rewardTrain
 
         if self.chance < incidentRisk:
             if random.randint(0, 10) < 3:
@@ -1694,6 +1704,7 @@ class train:
             pygame.display.update()
             if self.recovering:
                 self.timeRecovery = self.timeRecovery / (2*incidentRecoverySpeed)
+                money = money - 100
             if self.train.collidepoint((pygame.mouse.get_pos())):
                 pygame.draw.rect(screen, gold, self.train)
                 self.recovering = True
@@ -1735,7 +1746,7 @@ class train:
             if self.waitingPlat > 0:
                 self.waitingPlat = self.waitingPlat - 1
             else:
-                self.visitedPlat = 1
+                self.visitedPlat = True
                 self.moveTrainEngine(40 * self.xDirection, 0)
 
         #for signals
@@ -2001,16 +2012,16 @@ SPADRisk = 50 #as a percentage
 signalPriceBoost = 0 #as a percentage
 incidentRisk = 65 #as a percentage
 platPrice = 5000 #price of a new platform at the start of the game
-platCount = 0
-numberTrains = 0
-timeHour = 4
-timeMinute = 0
-timeSecond = 0
-numberEntry = 4
-numberContractsUnlocked = 0
-rewardTrain = 500
-pointsUnlocked = False
-signalsUnlocked = False
-TPWSUnlocked = False
+platCount = 0 #number of platforms
+numberTrains = 0 #number of available trains to be put in the timetable
+timeHour = 4 #hour hand
+timeMinute = 0 #minute hand
+timeSecond = 0 #second hand
+numberEntry = 4 #number of entry points
+numberContractsUnlocked = 0 #number of contrants unlocked...
+rewardTrain = 500 #money earned per train
+pointsUnlocked = False #are points unlocked?
+signalsUnlocked = False #are signals unlocked?
+TPWSUnlocked = False #is TPWS unlocked?
 
 gameLoop()
