@@ -757,7 +757,8 @@ def research():
                         writer=csv.writer(fileOut)
                         for a in range(1):
                             for b in range(33):
-                                writer.writerow(researchProgress[b])                               
+                                writer.writerow(researchProgress[b])
+                    saveGame()
                     game()#copies the contents of the array to the text file, and then returns to the game
             elif event.type == pygame.QUIT:
                 waiting = False
@@ -773,6 +774,7 @@ def research():
     
 def shop():
     global signalsUnlocked
+    global platPrice
     #re-draw the bottom bar
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 1280, 100])
     #re-draw the return button
@@ -789,6 +791,7 @@ def shop():
     #buld platforms
     buyPlatform = button(darkGrey, [300, 635, 175, 75], "Platforms", clockTextFont, white, 305, 655)
     buyPlatform.drawButton()
+    write("Platforms: £" + str(platPrice), clockTextFont, white, 500, 635)
     #print it all on screen
     pygame.display.update()
     waiting = True
@@ -804,6 +807,8 @@ def shop():
                 buySignal.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
+                    pygame.draw.rect(screen, menuScreenColour, [300, 620, 800, 100])
+                    pygame.draw.rect(screen, menuScreenColour, [0, 620, 120, 100])
                     purchaseSignal(returnButton)
             elif buyPlatform.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 buyPlatform.changeButtonColour(pink)
@@ -812,6 +817,7 @@ def shop():
             elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 returnButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
+                    pygame.draw.rect(screen, menuScreenColour, [400, 620, 400, 100])
                     waiting = False
                     game()
             elif event.type == pygame.QUIT:
@@ -876,6 +882,7 @@ def buildTrack(returnButton):
     global money # "money referenced before assignment"
     #cover up the other buttons
     pygame.draw.rect(screen, menuScreenColour, [135, 635, 300, 75])
+    write("Track: £800", clockTextFont, white, 200, 635)
     positionCoord = pygame.mouse.get_pos()# position of the mouse
     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
     notFinished = True
@@ -955,6 +962,7 @@ def buildTrack(returnButton):
                     with open("saveData/tracksPlatforms.txt", "w", newline="") as file:
                         writer = csv.writer(file)
                         writer.writerows(trackLayout)
+                    pygame.draw.rect(screen, menuScreenColour, [200, 620, 300, 100])
                     shop()
             else:
                 returnButton.changeButtonColour(darkGrey)
@@ -965,6 +973,7 @@ def buildPoints(returnButton):
     #cover up the other buttons
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 125, 100])
     pygame.draw.rect(screen, menuScreenColour, [275, 635, 150, 75])
+    write("Points: £1000", clockTextFont, white, 300, 635)
     positionCoord = pygame.mouse.get_pos()# position of the mouse
     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
     notFinished = True
@@ -1055,6 +1064,7 @@ def buildPoints(returnButton):
                     with open("saveData/tracksPlatforms.txt", "w", newline="") as file:
                         writer = csv.writer(file)
                         writer.writerows(trackLayout)
+                    pygame.draw.rect(screen, menuScreenColour, [200, 620, 500, 100])
                     shop()
             else:
                 returnButton.changeButtonColour(darkGrey)
@@ -1064,6 +1074,7 @@ def buildEntry(returnButton):
     global numberEntry
     #cover up the other buttons
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 275, 100])
+    write("Entry Points: £2500", clockTextFont, white, 400, 635)
     notFinished = True
     #need to open the file for entry points
     with open("saveData/entryPoints.txt", "r", newline="") as file:
@@ -1144,6 +1155,7 @@ def buildEntry(returnButton):
                         writer = csv.writer(file)
                         writer.writerows(entryLayout)
                         numberEntry += 1
+                    pygame.draw.rect(screen, menuScreenColour, [300, 620, 500, 100])
                     shop()
             else:
                 returnButton.changeButtonColour(darkGrey)
@@ -1210,6 +1222,7 @@ def purchaseSignal(returnButton):
             elif trackLayout[i-2][j] == "3":#downwards points
                 pygame.draw.line(screen, gold, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
                 pygame.draw.line(screen, gold, ((40 * j) + 60, (140 + (40 * i))),((40 * j) + 60, (160 + (40 * i))))
+    write("Signals: £700", clockTextFont, white, 500, 635)
     positionCoord = pygame.mouse.get_pos()# position of the mouse
     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
     notFinished = True
@@ -1292,6 +1305,7 @@ def purchaseSignal(returnButton):
                     with open("saveData/tracksPlatforms.txt", "w", newline="") as file:
                         writer = csv.writer(file)
                         writer.writerows(trackLayout)
+                    pygame.draw.rect(screen, menuScreenColour, [400, 620, 400, 100])
                     shop()
             else:
                 returnButton.changeButtonColour(darkGrey)
