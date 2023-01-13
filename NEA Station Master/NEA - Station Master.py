@@ -6,6 +6,7 @@ import sys
 import time
 import csv
 import threading
+import random
 
 #initialise pygame
 pygame.font.init()
@@ -51,7 +52,7 @@ timetableArray = [[0 for x in range(80)] for y in range(8)]#creates an array in 
 #defing the various functions of the game here
 
 #this will increment the clock - needs to be called every second (or more depending on the multiplier
-def incrementClock():
+def incrementClock(trainsList, trainMovementList, timetableArray, multiplier, trackLayout, pointsList, signalList):
     global timeHour
     global timeMinute
     global timeSecond
@@ -73,12 +74,29 @@ def incrementClock():
      #   timeMinute = "0" + str(timeMinute)
     #if int(timeHour) < 10:
      #   timeHour = "0" + str(timeHour)
-    print(timeSecond)
-    print(timeMinute)
-    print(timeHour)
     pygame.draw.rect(screen, menuScreenColour, [510, 15, 310, 60])
     write(str(timeHour).zfill(2) + ":" + str(timeMinute).zfill(2) + ":" + str(timeSecond).zfill(2), clockFont, white, 510, 15)
     pygame.display.update()
+
+    if int(timeSecond) == 0 and (int(timeMinute) == 0 or int(timeMinute) == 15 or int(timeMinute) == 30 or int(timeMinute) == 45):
+        print("DEBUG002")
+        hours = timeHour - 4
+        time = 0
+        time = time + (timeMinute * 60)
+        time = time + (hours * 3600)
+        time = int(time // (3600 / 4))
+        temp = int((time) % 80)
+        for j in range(0, len(timetableArray)):
+            if timetableArray[j][temp] == "1":
+                print(str(j))
+                trainsList.append(train(1240 * (j % 2), 15 + (40 * (7 + (j // 2))), ((-1) ** j)))
+                trainMovementList.append(RepeatedTimer(3*multiplier, trainsList[-1].moveTrain, trackLayout, pointsList, signalList))
+    for i in range(0, len(trainsList)):
+        if trainsList[i].getFinished():
+            trainMovementList[i].stop()
+            trainsList.pop(i)
+            trainMovementList.pop(i)
+            print("DEBUG003")
 
 
 def mainMenu():
@@ -131,8 +149,57 @@ def mainMenu():
                 quitButton.changeButtonColour(black)
                 #pygame.display.update()
 
+#This will to the clicky click business (setting points, setting signals, calling on trains)
+def gameplay(trackLayout, eventType, signalList, pointsList):
+    updateMoney()
+    positionCoord = pygame.mouse.get_pos()# position of the mouse
+    position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
+    storeCoordx, storeCoordy = int(position[0]/40) - 1, int(position[1]/40) - 5
+    if eventType == pygame.MOUSEBUTTONUP:
+        #check for points
+        if trackLayout[storeCoordy][storeCoordx] == "2":
+            for i in range(0, len(pointsList)):
+                if pointsList[i].getPosition()[1] == storeCoordx and pointsList[i].getPosition()[0] == storeCoordy:# checks if the relevant set of points are found
+                    pointsList[i].setState()
+        elif trackLayout[storeCoordy][storeCoordx] == "3":
+            for i in range(0, len(pointsList)):
+                if pointsList[i].getPosition()[1] == storeCoordx and pointsList[i].getPosition()[0] == storeCoordy + 1: #checks if the relevant set of points are found
+                    pointsList[i].setState()
+        #check for signals
+        elif trackLayout[storeCoordy][storeCoordx] == "6" or trackLayout[storeCoordy][storeCoordx] == "5":# checks for signal
+            for i in range(0, len(signalList)):
+                if signalList[i].getPosition()[1] == storeCoordx and signalList[i].getPosition()[0] == storeCoordy:
+                    signalList[i].setState()
+    for j in range(0, len(pointsList)):
+        if pointsList[j].getState() == 0:
+            pygame.draw.line(screen, black, ((40 * pointsList[j].getPosition()[1]) + 60, (181 + (40 * pointsList[j].getPosition()[0]))), ((40 * pointsList[j].getPosition()[1]) + 60, (219 + (40 * pointsList[j].getPosition()[0]))))
+            pygame.draw.line(screen, gold, ((40 * pointsList[j].getPosition()[1]) + 40, (180 + (40 * pointsList[j].getPosition()[0]))), ((40 * pointsList[j].getPosition()[1]) + 80, (180 + (40 * pointsList[j].getPosition()[0]))))
+            pygame.draw.line(screen, gold, ((40 * pointsList[j].getPosition()[1]) + 40, (220 + (40 * pointsList[j].getPosition()[0]))), ((40 * pointsList[j].getPosition()[1]) + 80, (220 + (40 * pointsList[j].getPosition()[0]))))
+        elif pointsList[j].getState() == 1:
+            pygame.draw.line(screen, gold, ((40 * pointsList[j].getPosition()[1]) + 60, (181 + (40 * pointsList[j].getPosition()[0]))), ((40 * pointsList[j].getPosition()[1]) + 60, (219 + (40 * pointsList[j].getPosition()[0]))))
+            pygame.draw.line(screen, gold, ((40 * pointsList[j].getPosition()[1]) + 40, (180 + (40 * pointsList[j].getPosition()[0]))), ((40 * pointsList[j].getPosition()[1]) + 80, (180 + (40 * pointsList[j].getPosition()[0]))))
+            pygame.draw.line(screen, gold, ((40 * pointsList[j].getPosition()[1]) + 40, (220 + (40 * pointsList[j].getPosition()[0]))), ((40 * pointsList[j].getPosition()[1]) + 80, (220 + (40 * pointsList[j].getPosition()[0]))))
+    for j in range(0, len(signalList)):
+        if signalList[j].getState() == 0:
+            if trackLayout[signalList[j].getPosition()[0]][signalList[j].getPosition()[1]] == "5":
+                pygame.draw.polygon(screen, red, (((40 * signalList[j].getPosition()[1]) + 53, (200 + (40 * signalList[j].getPosition()[0]))),((40 * signalList[j].getPosition()[1]) + 80 , (40 * signalList[j].getPosition()[0]) + 220),((40 * signalList[j].getPosition()[1]) + 53, (40 * signalList[j].getPosition()[0]) + 240)))
+            elif trackLayout[signalList[j].getPosition()[0]][signalList[j].getPosition()[1]] == "6":
+                pygame.draw.polygon(screen, red, (((40 * signalList[j].getPosition()[1]) + 67, (200 + (40 * signalList[j].getPosition()[0]))),((40 * signalList[j].getPosition()[1]) + 40 , (40 * signalList[j].getPosition()[0]) + 220),((40 * signalList[j].getPosition()[1]) + 67, (40 * signalList[j].getPosition()[0]) + 240)))
+        elif signalList[j].getState() == 1:
+            if trackLayout[signalList[j].getPosition()[0]][signalList[j].getPosition()[1]] == "5":
+                pygame.draw.polygon(screen, green, (((40 * signalList[j].getPosition()[1]) + 53, (200 + (40 * signalList[j].getPosition()[0]))),((40 * signalList[j].getPosition()[1]) + 80 , (40 * signalList[j].getPosition()[0]) + 220),((40 * signalList[j].getPosition()[1]) + 53, (40 * signalList[j].getPosition()[0]) + 240)))
+            elif trackLayout[signalList[j].getPosition()[0]][signalList[j].getPosition()[1]] == "6":
+                pygame.draw.polygon(screen, green, (((40 * signalList[j].getPosition()[1]) + 67, (200 + (40 * signalList[j].getPosition()[0]))),((40 * signalList[j].getPosition()[1]) + 40 , (40 * signalList[j].getPosition()[0]) + 220),((40 * signalList[j].getPosition()[1]) + 67, (40 * signalList[j].getPosition()[0]) + 240)))
+    pygame.display.update()
+            
+
 #This is where the game is run
 def game():
+    global entryTutorialRequired
+    global platformTutorial
+    global timetableTutorial
+    global sendOffTimetable
+    global incidentTutorial
     multiplier = 1 # speed of the clock
     #this is mainly for debugging purposes, may not be necessary in the final build
     print("Starting Game")
@@ -142,6 +209,8 @@ def game():
     #drawing the tracks, stations, signals, and points
     screen.fill(black)
     with open("saveData/tracksPlatforms.txt", "r") as file:
+        signalList = []#clears the list every time the main game screen is loaded
+        pointsList = []#list of signals and points in the game
         reader = csv.reader(file)
         i = 0
         for row in reader:
@@ -155,6 +224,7 @@ def game():
                 elif trackLayout[i-2][j] == "2": # upwards points
                     pygame.draw.line(screen, gold, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
                     pygame.draw.line(screen, gold, ((40 * j) + 60, (140 + (40 * i))),((40 * j) + 60, (120 + (40 * i))))
+                    pointsList.append(classPoints(0, i-2, j))
                 elif trackLayout[i-2][j] == "3":#downwards points
                     pygame.draw.line(screen, gold, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
                     pygame.draw.line(screen, gold, ((40 * j) + 60, (140 + (40 * i))),((40 * j) + 60, (160 + (40 * i))))
@@ -164,11 +234,13 @@ def game():
                     pygame.draw.line(screen, white, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
                     pygame.draw.polygon(screen, red, (((40*j) + 53, (120 + (40 * i))),((40 * j) + 80 , (40 * i) + 140),((40 * j) + 53, (40 * i) + 160)))#This is a signal
                     pygame.display.update()
+                    signalList.append(classSignal(0, i-2, j))
                 #replaces the train with a rightward set of signals
                 elif trackLayout[i-2][j] == "6":
                     pygame.draw.line(screen, white, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
                     pygame.draw.polygon(screen, red, (((40*j) + 67, (120 + (40 * i))),((40 * j) + 40 , (40 * i) + 140),((40 * j) + 67, (40 * i) + 160)))#This is a signal
                     pygame.display.update()
+                    signalList.append(classSignal(0, i-2, j))
     with open("saveData/entryPoints.txt", "r") as file:
         reader = csv.reader(file)
         i = 0
@@ -180,7 +252,13 @@ def game():
             for j in range(2):
                 if entryLayout[i][j] == "1":
                     pygame.draw.line(screen, white, ((1240*j),(40 * i) + 300),((1240*j) + 40,(40 * i) + 300))
-                    
+
+    with open("saveData/timetable.txt") as file:
+        reader = csv.reader(file)
+        i = 0
+        for row in reader:
+            timetableArray[i] = row
+            i += 1
     drawPlatform()
     #draw the top and bottom bar
     pygame.draw.rect(screen, menuScreenColour, [0, 0, 1280, 100])
@@ -193,7 +271,7 @@ def game():
     clockIcon = pygame.transform.scale(clockIcon, (75, 75))
     screen.blit(clockIcon, (420, 10))
     #button to skip forward time to spawn next train
-    skipForward = button(darkGrey, [320, 10, 80, 80], "", clockTextFont, white, 325, 15)
+    skipForward = button(darkGrey, [320, 10, 80, 80], "next", clockTextFont, white, 325, 15)
     skipForward.drawButton()
     #placeholder to play the clock
     playClock = button(darkGrey, [920, 10, 75,75], "x1", clockTextFont, white, 940, 30)
@@ -235,7 +313,46 @@ def game():
     pygame.display.update()
     #this is where we do the mechanics
     waiting = True
-    incrementer = RepeatedTimer(multiplier, incrementClock)
+    trainsList = []
+    trainMovementList = []
+    #tempTrain = train(0, 295, 1)
+    incrementer = RepeatedTimer(multiplier, incrementClock, trainsList, trainMovementList, timetableArray, multiplier, trackLayout, pointsList, signalList)
+    if sendOffTutorial:
+        pygame.draw.rect(screen, black, [0, 400, 1000, 100])
+        write("That concludes this tutorial. Above you will find clock speed controls,", clockTextFont, white, 0, 400)
+        write("and a button that will skip time to the next arriving train in the", clockTextFont, white, 0, 450)
+        write("timetable (if you don't want to wait)",clockTextFont, white, 0, 500)
+        pygame.display.update()
+        time.sleep(12.5)
+        pygame.draw.rect(screen, black, [0, 400, 1280, 200])
+        pygame.display.update()
+        sendOfftutorial = False
+        incidentTutorial = True
+    elif timetableTutorial:
+        pygame.draw.rect(screen, black, [0, 400, 1200, 200])
+        write("Now that we have the trains, we need to schedule them.", clockTextFont, white, 100, 400)
+        write("Go to the timetable and come back here when done.", clockTextFont, white, 100, 450)
+        pygame.display.update()
+    elif platformTutorial:
+        pygame.draw.rect(screen, black, [0, 400, 1200, 200])
+        write("We have the track, now we need the trains. Go to CONTRACTS", clockTextFont, white, 100, 400)
+        write("and get a contract fron NORTH TRAINS. Come back here when done.", clockTextFont, white, 100, 450)
+        pygame.display.update()
+    elif entryTutorialRequired:
+        write("Hello", clockTextFont, white, 600, 400)
+        pygame.display.update()
+        time.sleep(2)
+        pygame.draw.rect(screen, black, [600, 400, 100, 100])
+        write("Welcome to Station Master", clockTextFont, white, 400, 400)
+        pygame.display.update()
+        time.sleep(4)
+        pygame.draw.rect(screen, black, [400, 400, 500, 100])
+        write("Let's get you started on your station", clockTextFont, white, 350, 400)
+        pygame.display.update()
+        time.sleep(4)
+        pygame.draw.rect(screen, black, [300, 400, 700, 100])
+        write("Please open the SHOP", clockTextFont, white, 500, 400)
+        pygame.display.update()
     while waiting == True:
         for event in pygame.event.get():
             if menuButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
@@ -244,66 +361,94 @@ def game():
                     waiting = False
                     gamestate = "menu"
                     incrementer.stop()
+                    for i in range(len(trainMovementList)):
+                        trainMovementList[i].stop()
+                    saveGame()
                     mainMenu()
-            elif RDButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif RDButton.buttonCoords.collidepoint((pygame.mouse.get_pos())) and len(trainMovementList) == 0:
                 RDButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     incrementer.stop()
+                    for i in range(len(trainMovementList)):
+                        trainMovementList[i].stop()
                     research()
-            elif constructButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif constructButton.buttonCoords.collidepoint((pygame.mouse.get_pos())) and len(trainMovementList) == 0:
                 constructButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     incrementer.stop()
+                    for i in range(len(trainMovementList)):
+                        trainMovementList[i].stop()
                     shop()
-            elif contractButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif contractButton.buttonCoords.collidepoint((pygame.mouse.get_pos())) and len(trainMovementList) == 0:
                 contractButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     incrementer.stop()
+                    for i in range(len(trainMovementList)):
+                        trainMovementList[i].stop()
                     contracts(menuButton)
-            elif timetableButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif timetableButton.buttonCoords.collidepoint((pygame.mouse.get_pos())) and len(trainMovementList) == 0:
                 timetableButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     incrementer.stop()
+                    for i in range(len(trainMovementList)):
+                        trainMovementList[i].stop()
                     timetableScreen(menuButton)
             elif playClock.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 playClock.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     multiplier = 1
                     incrementer.setInterval(multiplier)
+                    for i in range(len(trainMovementList)):
+                        trainMovementList[i].setInterval(3*multiplier)
             elif clockX5.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 clockX5.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     multiplier = 0.2
                     incrementer.setInterval(multiplier)
+                    for i in range(len(trainMovementList)):
+                        trainMovementList[i].setInterval(3*multiplier)
             elif clockX15.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 clockX15.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     multiplier = 1 / 15
                     incrementer.setInterval(multiplier)
+                    for i in range(len(trainMovementList)):
+                        trainMovementList[i].setInterval(3*multiplier)
             elif clockX25.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 clockX25.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     multiplier = 1 / 25
                     incrementer.setInterval(multiplier)
+                    for i in range(len(trainMovementList)):
+                        trainMovementList[i].setInterval(3*multiplier)
             elif clockX50.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 clockX50.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     multiplier = 1 / 50
                     incrementer.setInterval(multiplier)
-            elif skipForward.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                    for i in range(len(trainMovementList)):
+                        trainMovementList[i].setInterval(3*multiplier)
+            elif skipForward.buttonCoords.collidepoint((pygame.mouse.get_pos())) and len(trainMovementList) == 0:
                 skipForward.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
+                    multiplier = 1
+                    incrementer.setInterval(multiplier)
+                    for i in range(0, len(trainMovementList)):
+                        trainMovementList[i].setInterval(3*multiplier)
                     forwardTime(timeHour, timeMinute, timeSecond)
             elif event.type == pygame.QUIT:
                 waiting = False
                 incrementer.stop()
+                for i in range(len(trainMovementList)):
+                        trainMovementList[i].stop()
                 pygame.quit()
                 sys.exit()
             else:
+                gameplay(trackLayout, event.type, signalList, pointsList)
                 menuButton.changeButtonColour(darkGrey)
                 RDButton.changeButtonColour(darkGrey)
                 constructButton.changeButtonColour(darkGrey)
@@ -321,6 +466,7 @@ def game():
     #train1.departPlat()
     #train1.destroyTrain()
     #pygame.display.update()
+
 
 #will set the time to the next train in the timetable (parameters are starting point)
 def forwardTime(hours, minutes, seconds):
@@ -345,12 +491,12 @@ def forwardTime(hours, minutes, seconds):
             if timetableArray[j][temp] == "1":
                 time = temp
                 time = time * (3600 / 4)
-                hours = time // 3600
+                hours = (time // 3600) - 1
                 time = time - (hours * 3600)
-                minutes = time / 60
+                minutes = (time / 60) - 1
                 timeHour = int(hours + 4)
                 timeMinute = int(minutes)
-                timeSecond = 0
+                timeSecond = 57
                 return "ends the function"
         temp = (temp + 1) % 80
 
@@ -431,7 +577,11 @@ def research():
                                 for j in range (0,33):#updates the array which will be copied over to the list
                                     if researchProgress[j][0] == item[i]:
                                         researchProgress[j][1] = "1"#sets the appropriate element to unlocked
-                                saveGame()
+                                with open("saveData/researched.txt", "w", newline="") as fileOut:
+                                    writer=csv.writer(fileOut)
+                                    for a in range(1):
+                                        for b in range(33):
+                                            writer.writerow(researchProgress[b])
                                 money = money - cost#deducts the cost of the technology
                                 print(money)#more debugging
                                 #apply effects
@@ -452,6 +602,16 @@ def research():
                                     signalPriceBoost = signalPriceBoost + 10 #increase the price of a signal
                                 queryDrawButton = False
                                 pygame.draw.rect(screen, black, [550, 375, 500, 50])
+                                if str(item[i]) == "points":
+                                    global pointsUnlocked
+                                    pointsUnlocked = True
+                                elif str(item[i]) == "semaphore":
+                                    global signalsUnlocked
+                                    signalsUnlocked = True
+                                elif str(item[i]) == "TPWS":
+                                    global TPWSUnlocked
+                                    TPWSUnlocked = True
+                                
                         else:
                             unlockButton.changeButtonColour(darkGrey)
 
@@ -632,8 +792,13 @@ def research():
                 returnButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting=False
-                    saveGame()                                
-                    game()#copies the contents of the array to the text, and then returns to the game
+                    with open("saveData/researched.txt", "w", newline="") as fileOut:
+                        writer=csv.writer(fileOut)
+                        for a in range(1):
+                            for b in range(33):
+                                writer.writerow(researchProgress[b])
+                    saveGame()
+                    game()#copies the contents of the array to the text file, and then returns to the game
             elif event.type == pygame.QUIT:
                 waiting = False
                 pygame.quit()
@@ -647,6 +812,10 @@ def research():
                 returnButton.changeButtonColour(menuScreenColour)
     
 def shop():
+    global signalsUnlocked
+    global platPrice
+    global entryTutorialRequired
+    global numberEntry
     #re-draw the bottom bar
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 1280, 100])
     #re-draw the return button
@@ -658,12 +827,29 @@ def shop():
     buyTrack.drawButton()
     #build signals
     buySignal = button(darkGrey, [135, 635, 140, 75], "Signals", clockTextFont, white, 140, 655)
-    buySignal.drawButton()
+    if signalsUnlocked:
+        buySignal.drawButton()
     #buld platforms
     buyPlatform = button(darkGrey, [300, 635, 175, 75], "Platforms", clockTextFont, white, 305, 655)
     buyPlatform.drawButton()
+    write("Platforms: £" + str(platPrice), clockTextFont, white, 500, 635)
     #print it all on screen
     pygame.display.update()
+    if platformTutorial:
+        pygame.draw.rect(screen, black, [0, 400, 1280, 200])
+        write("Now press the PLATFORM button to buy a platform. One will only be built if", clockTextFont, white, 0, 400)
+        write("there is a track on either side. If it fails, try relaying the track.", clockTextFont, white, 0, 450)
+        write("Once done, hit the return button", clockTextFont, white, 400, 500)
+        pygame.display.update()
+    elif entryTutorialRequired:
+        if numberEntry == 1:
+            pygame.draw.rect(screen, black, [500, 400, 1200, 100])
+            write("Now press the TRACK button", clockTextFont, white, 400, 400)
+            pygame.display.update()
+        elif numberEntry == 2:
+            pygame.draw.rect(screen, black, [0, 400, 1200, 100])
+            write("Now we need to finish the track. Press the TRACK Button", clockTextFont, white, 200, 400)
+            pygame.display.update()
     waiting = True
     #the rest of the function will wait for an input as to what the user wishes to buy
     while waiting:
@@ -673,10 +859,12 @@ def shop():
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
                     purchaseTrack(buyTrack, returnButton)
-            elif buySignal.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif buySignal.buttonCoords.collidepoint((pygame.mouse.get_pos())) and signalsUnlocked:
                 buySignal.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     waiting = False
+                    pygame.draw.rect(screen, menuScreenColour, [300, 620, 800, 100])
+                    pygame.draw.rect(screen, menuScreenColour, [0, 620, 120, 100])
                     purchaseSignal(returnButton)
             elif buyPlatform.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 buyPlatform.changeButtonColour(pink)
@@ -685,6 +873,7 @@ def shop():
             elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 returnButton.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
+                    pygame.draw.rect(screen, menuScreenColour, [400, 620, 400, 100])
                     waiting = False
                     game()
             elif event.type == pygame.QUIT:
@@ -692,20 +881,39 @@ def shop():
                 sys.exit()
             else:
                 buyTrack.changeButtonColour(darkGrey)
-                buySignal.changeButtonColour(darkGrey)
+                if signalsUnlocked:
+                    buySignal.changeButtonColour(darkGrey)
                 buyPlatform.changeButtonColour(darkGrey)
                 returnButton.changeButtonColour(darkGrey)
 
 def purchaseTrack(buyTrack, returnButton):
     #The save grid will be 32x13 for track, with each square being 40x40
     #change the bottom bar with the relevant options
+    global pointsUnlocked
+    global entryTutorialRequired
+    global numberEntry
+    global platformTutorial
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 1280, 100])
     buyTrack.drawButton()
     returnButton.drawButton()
     buyPoints = button(darkGrey, [135, 635, 120, 75], "Points", clockTextFont, white, 140, 655)
-    buyPoints.drawButton()
-    buyEntry = button(darkGrey, [275, 635, 130, 75],  "Entries", clockTextFont, white, 280, 655)
+    if pointsUnlocked:
+        buyPoints.drawButton()
+    buyEntry = button(darkGrey, [275, 635, 130, 75], "Entries", clockTextFont, white, 280, 655)
     buyEntry.drawButton()
+    if entryTutorialRequired:
+        if numberEntry == 1:
+            pygame.draw.rect(screen, black, [400, 400, 700, 100])
+            write("Now press the ENTRIES button", clockTextFont, white, 400, 400)
+            pygame.display.update()
+        elif numberEntry == 2:
+            pygame.draw.rect(screen, black, [0, 400, 1200, 100])
+            write("Press the TRACK button again and finish the track from the entry point", clockTextFont, white, 0, 400)
+            write("to the middle (there is a no-building region in the middle for the platform)", clockTextFont, white, 00, 450)
+            write("Once done, hit the return button", clockTextFont, white, 400, 500)
+            pygame.display.update()
+            platformTutorial = True
+            entryTutorialRequired = False
     waiting = True
     #Again, the following will wait for the user to select an option form the bottom of the screen
     while waiting:
@@ -715,7 +923,7 @@ def purchaseTrack(buyTrack, returnButton):
                 if event.type == pygame.MOUSEBUTTONUP:
                     #code for building track goes here
                     buildTrack(returnButton)
-            elif buyPoints.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+            elif buyPoints.buttonCoords.collidepoint((pygame.mouse.get_pos())) and pointsUnlocked:
                 buyPoints.changeButtonColour(pink)
                 if event.type == pygame.MOUSEBUTTONUP:
                     #code for building points goes here
@@ -736,7 +944,8 @@ def purchaseTrack(buyTrack, returnButton):
                 sys.exit()
             else:
                 buyTrack.changeButtonColour(darkGrey)
-                buyPoints.changeButtonColour(darkGrey)
+                if pointsUnlocked:
+                    buyPoints.changeButtonColour(darkGrey)
                 buyEntry.changeButtonColour(darkGrey)
                 returnButton.changeButtonColour(darkGrey)
                 pygame.display.update()
@@ -745,6 +954,7 @@ def buildTrack(returnButton):
     global money # "money referenced before assignment"
     #cover up the other buttons
     pygame.draw.rect(screen, menuScreenColour, [135, 635, 300, 75])
+    write("Track: £800", clockTextFont, white, 200, 635)
     positionCoord = pygame.mouse.get_pos()# position of the mouse
     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
     notFinished = True
@@ -812,11 +1022,13 @@ def buildTrack(returnButton):
                         trackLayout[storeCoordy-5][storeCoordx-1] = "0"
                         print(trackLayout) #DEBUG
                         money = money + 700 #You will not get a full refund for destroying track
+                        updateMoney()
                     #condition if the selected quare has no track in it already.
                     elif trackLayout[storeCoordy-5][storeCoordx-1] == "0":
                         trackLayout[storeCoordy-5][storeCoordx-1] = "1"
                         print(trackLayout) #DEBUG
                         money = money - 800 #costs 800 to build track
+                        updateMoney()
             #check for whether the return button was hovered over/clicked
             elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 returnButton.changeButtonColour(pink)
@@ -824,6 +1036,7 @@ def buildTrack(returnButton):
                     with open("saveData/tracksPlatforms.txt", "w", newline="") as file:
                         writer = csv.writer(file)
                         writer.writerows(trackLayout)
+                    pygame.draw.rect(screen, menuScreenColour, [200, 620, 300, 100])
                     shop()
             else:
                 returnButton.changeButtonColour(darkGrey)
@@ -834,6 +1047,7 @@ def buildPoints(returnButton):
     #cover up the other buttons
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 125, 100])
     pygame.draw.rect(screen, menuScreenColour, [275, 635, 150, 75])
+    write("Points: £1000", clockTextFont, white, 300, 635)
     positionCoord = pygame.mouse.get_pos()# position of the mouse
     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
     notFinished = True
@@ -901,22 +1115,26 @@ def buildPoints(returnButton):
                         trackLayout[storeCoordy-5][storeCoordx-1] = "2"
                         print(trackLayout) #DEBUG
                         money = money + 900 #You will not get a full refund for destroying track
+                        updateMoney()
                     #condition if the selected quare has a set of points in it already
                     elif trackLayout[storeCoordy-5][storeCoordx-1] == "2":
                         trackLayout[storeCoordy-5][storeCoordx-1] = "1"
                         print(trackLayout) #DEBUG
                         money = money - 1000 #costs 1000 to build points
+                        updateMoney()
                 elif event.type == pygame.MOUSEBUTTONUP and event.button == 3: #checks for a right click
                     #condition if the square has a track in it already
                     if trackLayout[storeCoordy-5][storeCoordx-1] == "1" or trackLayout[storeCoordy-5][storeCoordx-1] == "2":
                         trackLayout[storeCoordy-5][storeCoordx-1] = "3"
                         print(trackLayout) # DEBUG
                         money = money - 1000
+                        updateMoney()
                     #condition if the square has a set of points in it already
                     elif trackLayout[storeCoordy-5][storeCoordx-1] == "3":
                         trackLayout[storeCoordy-5][storeCoordx-1] = "1"
                         print(trackLayout) # DeBUG
                         money = money + 900
+                        updateMoney()
             #check for whether the return button was hovered over/clicked
             elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 returnButton.changeButtonColour(pink)
@@ -924,6 +1142,7 @@ def buildPoints(returnButton):
                     with open("saveData/tracksPlatforms.txt", "w", newline="") as file:
                         writer = csv.writer(file)
                         writer.writerows(trackLayout)
+                    pygame.draw.rect(screen, menuScreenColour, [200, 620, 500, 100])
                     shop()
             else:
                 returnButton.changeButtonColour(darkGrey)
@@ -931,8 +1150,10 @@ def buildPoints(returnButton):
 def buildEntry(returnButton):
     global money
     global numberEntry
+    global entryTutorialRequired
     #cover up the other buttons
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 275, 100])
+    write("Entry Points: £2500", clockTextFont, white, 450, 635)
     notFinished = True
     #need to open the file for entry points
     with open("saveData/entryPoints.txt", "r", newline="") as file:
@@ -962,6 +1183,10 @@ def buildEntry(returnButton):
     entryButton8 = entryButton(black, (1240, 400, 40, 40), "", clockTextFont, black, 0, 0, 1, 3, entryLayout[3][1])
     entryButton8.drawButton()
     pygame.display.update()
+    if entryTutorialRequired:
+        pygame.draw.rect(screen, black, [400, 400, 1000, 100])
+        write("Now you can buy an entry point. Trains will enter your station from these", clockTextFont, white, 50, 400)
+        pygame.display.update()
     #need to chec whether the cursor is in the buildable area.
     while notFinished:
         for event in pygame.event.get():
@@ -970,41 +1195,53 @@ def buildEntry(returnButton):
                 if event.type == pygame.MOUSEBUTTONUP:
                     entryButton1.setState()
                     money = money - 2500
-            elif entryButton2.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                    updateMoney()
+            elif entryButton2.buttonCoords.collidepoint((pygame.mouse.get_pos())) and entryButton5.getState() == "1":
                 entryButton2.changeButtonColour(menuScreenColour)
                 if event.type == pygame.MOUSEBUTTONUP:
                     entryButton2.setState()
                     money = money - 2500
-            elif entryButton3.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                    updateMoney()
+            elif entryButton3.buttonCoords.collidepoint((pygame.mouse.get_pos())) and entryButton6.getState() == "1":
                 entryButton3.changeButtonColour(menuScreenColour)
                 if event.type == pygame.MOUSEBUTTONUP:
                     entryButton3.setState()
                     money = money - 2500
-            elif entryButton4.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                    updateMoney()
+            elif entryButton4.buttonCoords.collidepoint((pygame.mouse.get_pos())) and entryButton7.getState() == "1":
                 entryButton4.changeButtonColour(menuScreenColour)
                 if event.type == pygame.MOUSEBUTTONUP:
                     entryButton4.setState()
                     money = money - 2500
-            elif entryButton5.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                    updateMoney()
+            elif entryButton5.buttonCoords.collidepoint((pygame.mouse.get_pos())) and entryButton1.getState() == "1":
                 entryButton5.changeButtonColour(menuScreenColour)
                 if event.type == pygame.MOUSEBUTTONUP:
                     entryButton5.setState()
                     money = money - 2500
-            elif entryButton6.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                    updateMoney()
+                    if entryTutorialRequired:
+                        pygame.draw.rect(screen, black, [00, 400, 1240, 100])
+                        write("Well done. Now press the return button", clockTextFont, white, 400, 400)
+                        pygame.display.update()
+            elif entryButton6.buttonCoords.collidepoint((pygame.mouse.get_pos())) and entryButton2.getState() == "1":
                 entryButton6.changeButtonColour(menuScreenColour)
                 if event.type == pygame.MOUSEBUTTONUP:
                     entryButton6.setState()
                     money = money - 2500
-            elif entryButton7.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                    updateMoney()
+            elif entryButton7.buttonCoords.collidepoint((pygame.mouse.get_pos())) and entryButton3.getState() == "1":
                 entryButton7.changeButtonColour(menuScreenColour)
                 if event.type == pygame.MOUSEBUTTONUP:
                     entryButton7.setState()
                     money = money - 2500
-            elif entryButton8.buttonCoords.collidepoint((pygame.mouse.get_pos())):
+                    updateMoney()
+            elif entryButton8.buttonCoords.collidepoint((pygame.mouse.get_pos())) and entryButton4.getState() == "1":
                 entryButton8.changeButtonColour(menuScreenColour)
                 if event.type == pygame.MOUSEBUTTONUP:
                     entryButton8.setState()
                     money = money - 2500
+                    updateMoney()
                 #check for whether the return button was hovered over/clicked
             elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 returnButton.changeButtonColour(pink)
@@ -1013,7 +1250,11 @@ def buildEntry(returnButton):
                         writer = csv.writer(file)
                         writer.writerows(entryLayout)
                         numberEntry += 1
+                    pygame.draw.rect(screen, menuScreenColour, [300, 620, 500, 100])
                     shop()
+            elif event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
             else:
                 returnButton.changeButtonColour(darkGrey)
                 entryButton1.changeButtonColour(black)
@@ -1045,9 +1286,13 @@ def purchasePlatform():
         for i in range(len(trackLayout)):
             if trackLayout[i-2][17] != "0" and trackLayout[i-2][12] != "0" and trackLayout[i-2][15] == "0":
                 trackLayout[i-2][15] = "4"
+                trackLayout[i-2][13] = "7"
+                trackLayout[i-2][14] = "7"
+                trackLayout[i-2][16] = "7"
                 money = money - platPrice
+                updateMoney()
                 platCount = platCount + 1#records the number of platforms in possesion
-                platPrice = platPrice + 5000##increase price of a new platform by £5000
+                platPrice = platPrice + 2000##increase price of a new platform by £5000
                 break
         with open("saveData/tracksPlatforms.txt", "w", newline="") as file:
             writer = csv.writer(file)
@@ -1076,6 +1321,7 @@ def purchaseSignal(returnButton):
             elif trackLayout[i-2][j] == "3":#downwards points
                 pygame.draw.line(screen, gold, ((40 * j) + 40, (140 + (40 * i))),((40 * j) + 80, (140 + (40 * i))))
                 pygame.draw.line(screen, gold, ((40 * j) + 60, (140 + (40 * i))),((40 * j) + 60, (160 + (40 * i))))
+    write("Signals: £700", clockTextFont, white, 500, 635)
     positionCoord = pygame.mouse.get_pos()# position of the mouse
     position = pygame.Rect((positionCoord[0]-(positionCoord[0]%40),positionCoord[1]-(positionCoord[1]%40)),(40,40))#location on the array
     notFinished = True
@@ -1135,22 +1381,26 @@ def purchaseSignal(returnButton):
                         trackLayout[storeCoordy-5][storeCoordx-1] = "5"
                         print(trackLayout) #DEBUG
                         money = money + 600 #You will not get a full refund for destroying signal
+                        updateMoney()
                     #condition if the selected quare has a signal in it already
                     elif trackLayout[storeCoordy-5][storeCoordx-1] == "5":
                         trackLayout[storeCoordy-5][storeCoordx-1] = "1"
                         print(trackLayout) #DEBUG
                         money = money - 700 #costs 700 to build signal
+                        updateMoney()
                 elif event.type == pygame.MOUSEBUTTONUP and event.button == 3: #checks for a right click
                     #condition if the square has a signal in it already
                     if trackLayout[storeCoordy-5][storeCoordx-1] == "1" or trackLayout[storeCoordy-5][storeCoordx-1] == "5":
                         trackLayout[storeCoordy-5][storeCoordx-1] = "6"
                         print(trackLayout) # DEBUG
                         money = money - 700
+                        updateMoney()
                     #condition if the square has a signal in it already
                     elif trackLayout[storeCoordy-5][storeCoordx-1] == "6":
                         trackLayout[storeCoordy-5][storeCoordx-1] = "1"
                         print(trackLayout) # DeBUG
                         money = money + 600
+                        updateMoney()
             #check for whether the return button was hovered over/clicked
             elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 returnButton.changeButtonColour(pink)
@@ -1158,6 +1408,7 @@ def purchaseSignal(returnButton):
                     with open("saveData/tracksPlatforms.txt", "w", newline="") as file:
                         writer = csv.writer(file)
                         writer.writerows(trackLayout)
+                    pygame.draw.rect(screen, menuScreenColour, [400, 620, 400, 100])
                     shop()
             else:
                 returnButton.changeButtonColour(darkGrey)
@@ -1189,6 +1440,7 @@ def contracts(returnButton):
         tube.drawButton()
         SEHS.drawButton()
     write("Next contract costs £" + str(int(1000 + (numberContractsUnlocked * 250))), clockTextFont, white, 435, 550)
+    pygame.draw.rect(screen, menuScreenColour, [0, 620, 1000, 100])
     pygame.display.update()#update screens.
     # list of all TOCs in game - just in case
     TOClist = [northern, southEastern, scotRail, southern, thamesLink, crossRail, tube, SEHS]
@@ -1269,6 +1521,7 @@ def drawContracts(TOC, returnButton):
     global rewardTrain
     global money
     global numberContractsUnlocked
+    global platformTutorial
     splitPaths = False # boolean stores whether there are split paths or not
     contractsList = [] # the list that will contain the data
     pygame.draw.rect(screen, black, [0, 100, 1280, 520]) # cover screen
@@ -1386,6 +1639,7 @@ def drawContracts(TOC, returnButton):
                         rewardTrain = rewardTrain + 250
                         print(numberTrains)
                         contractsList[i+1][2] = "2"
+                        updateMoney()
                 elif contractsList[i + 1][2] == "0": # for if it is locked
                     contractsButtonList[i].changeButtonColour(white)
                     returnButton.changeButtonColour(darkGrey)
@@ -1419,6 +1673,10 @@ def drawContracts(TOC, returnButton):
                         with open("saveData/contracts/" + TOC + ".txt", "w", newline="") as fo:
                             writer = csv.writer(fo)
                             writer.writerows(contractsList)
+                        if platformTutorial:
+                            global timetableTutorial
+                            timetableTutorial = True
+                            platformTutorial = False
                         contracts(returnButton)
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -1432,7 +1690,11 @@ def timetableScreen(returnButton):
     global timeSecond
     global numberEntry
     global timetableArray
-    remainingTrains = numberTrains    
+    global timetableTutorial
+    global sendOffTutorial
+    remainingTrains = numberTrains
+
+    pygame.draw.rect(screen, menuScreenColour, [0, 620, 1000, 100])
 
     #from save get timetable
     i = 0
@@ -1472,7 +1734,14 @@ def timetableScreen(returnButton):
         #quuarter-hour increments are 16 pixels apart and there are 80 slots per row
     pygame.display.update()
     #all increments are 42 pixels vertically
-    
+    if timetableTutorial:
+        write("Place the trains when you want them to arrive.", clockTextFont, white, 0, 250)
+        write("Each row corresponds to an entry point you buy.", clockTextFont, white, 0, 300)
+        write("This means row 3 is the third entry point you buy,", clockTextFont, white, 0, 350)
+        write("and row 8 is the eighth and last entry point you can buy.", clockTextFont, white, 0, 400)
+        pygame.display.update()
+        sendOffTutorial = True
+        timetableTutorial = False
     #then define the placeable regions
     positionCoord = pygame.mouse.get_pos()# position of the mouse
     position = pygame.Rect(((positionCoord[0] + 6)-(positionCoord[0]%16),(positionCoord[1] - 3)-(positionCoord[1]%42)),(15,41))#location on the array
@@ -1530,31 +1799,137 @@ def timetableScreen(returnButton):
 #new object for train
 class train:
     #construct a train
-    def __init__(self, colour, x, y, width, height, xDirection):
-        self.colour = colour
+    def __init__(self, x, y, xDirection):
+        #self.colour = colour
         self.x = x
         self.y = y
-        self.width = width
-        self.height = height
-        self.train = pygame.Rect([x, y, width, height])
-        self.xDirection = xDirection
+        #self.width = width
+        #self.height = height
+        self.train = pygame.Rect([x, y, 30, 10]) # rectangle
+        self.xDirection = xDirection # direction of travel
+        self.visitedPlat = False # boolean has it visited a platform
+        self.waitingPlat = 5 # time taken to wait at the platform
+        self.finished = False # has it finished its run?
+        self.recovering = False # has it been set to be hovered over
+        self.timeRecovery = 64 # #time taken to recover and clear site
+        self.incident = False # has it undergone an incident
+        self.chance = random.randint(0, 100) # probability of an incident.
+        self.SPADchance = random.randint(0, 100) # probability of a SPAD
 
     #draw the train
     def drawTrain(self):
-        pygame.draw.rect(screen, self.colour, self.train)
+        pygame.draw.rect(screen, lightBlue, self.train)
         pygame.display.update()
 
     #move the train
-    def moveTrain(self, moveX, moveY):
+    def moveTrain(self, trackLayout, pointsList, signalList):
+        global incidentRisk
+        global incidentRecoverySpeed
+        global money
+        global incidentTutorial
+
+        if self.train[0] == 1280 or self.train[0] == -40:
+            self.finished = True
+            if self.visitedPlat:
+                global rewardTrain
+                money = money + rewardTrain
+
+        if self.chance < incidentRisk:
+            if random.randint(0, 10) < 3:
+                print("incident")
+                self.incident = True
+
+        #for no track or an incident
+        if self.incident or trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] == "0":
+            print(str(self.train))
+            pygame.draw.rect(screen, red, self.train)
+            if incidentTutorial:
+                write("If a train has an incident, it will turn red.", clockTextFont, white, 0, 400)
+                write("Simply hover over it until it briefly turns yellow and it will be cleared eventually", clockTextFont, white, 0, 500)
+            pygame.display.update()
+            if self.recovering:
+                self.timeRecovery = self.timeRecovery / (2*incidentRecoverySpeed)
+                money = money - 100
+            if self.train.collidepoint((pygame.mouse.get_pos())):
+                pygame.draw.rect(screen, gold, self.train)
+                self.recovering = True
+            if self.timeRecovery <= 1:
+                self.destroyTrain()
+                self.finished = True
+            self.incident = True
+        
+        #for normal track
+        elif trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] == "1" or trackLayout[(self.train[1]//40)-2][(self.train[0]//40)-1] == "7":
+            self.moveTrainEngine(40 * self.xDirection, 0)
+            
+        #for upward points
+        elif trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] == "2":
+            for i in range(0, len(pointsList)):
+                if pointsList[i].getPosition()[1] == (self.train[0]//40)-1 and pointsList[i].getPosition()[0] == (self.train[1]//40)-5:
+                    print("points found")
+                    #for straight
+                    if pointsList[i].getState() == 0:
+                        self.moveTrainEngine(40 * self.xDirection, 0)
+                    #for diverting
+                    elif pointsList[i].getState() == 1:
+                        self.moveTrainEngine(40 * self.xDirection, -40)
+
+        #for downward points
+        elif trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] == "3":
+            for i in range(0, len(pointsList)):
+                if pointsList[i].getPosition()[1] == (self.train[0]//40)-1 and pointsList[i].getPosition()[0] == ((self.train[1]//40)-5) + 1:
+                    print("points found")
+                    #for straight
+                    if pointsList[i].getState() == 0:
+                        self.moveTrainEngine(40 * self.xDirection, 0)
+                    #for diverting
+                    if pointsList[i].getState() == 1:
+                        self.moveTrainEngine(40 * self.xDirection, 40)
+
+        #for platforms
+        elif trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] == "4":
+            if self.waitingPlat > 0:
+                self.waitingPlat = self.waitingPlat - 1
+            else:
+                self.visitedPlat = True
+                self.moveTrainEngine(40 * self.xDirection, 0)
+
+        #for signals
+        elif (self.xDirection == 1 and trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] == "5") or (self.xDirection == -1 and trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] =="6"):
+            for i in range(0, len(signalList)):
+                if signalList[i].getPosition()[1] == (self.train[0]//40)-1 and signalList[i].getPosition()[0] == (self.train[1]//40)-5:
+                    print("signal found")
+                    #for proceed aspect
+                    if signalList[i].getState() == 1:
+                        self.moveTrainEngine(40 * self.xDirection, 0)
+                        #for danger aspect
+                    elif signalList[i].getState() == 0:
+                        global SPADRisk
+                        #no SPAD
+                        if self.SPADchance >= SPADRisk:
+                            print("waiting for signal")
+                        #yes SPAD
+                        else:
+                            print("SPAD")
+                            self.moveTrainEngine(40 * self.xDirection, 0)
+                            global TPWSUnlocked
+                            if TPWSUnlocked:
+                                print("TPWS intervention")
+                                self.incident = True
+
+        else:
+            self.moveTrainEngine(40 * self.xDirection, 0)
+
+    def moveTrainEngine(self, moveX, moveY):
         #draw black rectangle over the existing train
         self.destroyTrain()
         #move the train
         self.train.move_ip(moveX, moveY)
         #change the variables so that they are remembered
         self.x = self.x + moveX
-        self.y = self.y + moveY
+        self.y = self.y +  moveY
         #draw the new train
-        pygame.draw.rect(screen, self.colour, self.train)
+        pygame.draw.rect(screen, lightBlue, self.train)
         pygame.display.update()
 
     #destroy the trani
@@ -1562,7 +1937,7 @@ class train:
         #change rectangle colour to black
         pygame.draw.rect(screen, black, self.train)
         #replace track
-        pygame.draw.line(screen, white, [self.x, self.y + (self.height/2)], [self.x + self.width, (self.y + self.height/2)])
+        pygame.draw.line(screen, white, [self.x, self.y + (10/2)], [self.x + 30, (self.y + 10/2)])
         
 
     #pre-programmed approach control
@@ -1590,6 +1965,10 @@ class train:
         for i in range(245,1,-1):
             self.moveTrain(self.xDirection,0)
             time.sleep(0.01)
+
+    #returns whether the train is finished or not
+    def getFinished(self):
+        return self.finished
 
 #This is our button object
 class button:
@@ -1667,12 +2046,18 @@ class entryButton(button):
         self.state = "1"
         entryLayout[self.saveLocationy][self.saveLocationx] = self.state
 
+    #this was added in much later - I needed to return the state of the entry point
+    def getState(self):
+        return self.state
+
 # I will use this to increment the clock every second
 class RepeatedTimer(): # https://stackoverflow.com/questions/474528/how-to-repeatedly-execute-a-function-every-x-seconds
-    def __init__(self, interval, function):
+    def __init__(self, interval, function, *args, **kwargs):
         self._timer = None
         self.interval = interval
         self.function = function
+        self.args = args
+        self.kwargs = kwargs
         self.is_running = False
         self.next_call = time.time()
         self.start()
@@ -1680,7 +2065,7 @@ class RepeatedTimer(): # https://stackoverflow.com/questions/474528/how-to-repea
     def _run(self):
         self.is_running = False
         self.start()
-        self.function()
+        self.function(*self.args, **self.kwargs)
 
     def start(self):
         if not self.is_running:
@@ -1696,7 +2081,42 @@ class RepeatedTimer(): # https://stackoverflow.com/questions/474528/how-to-repea
     def setInterval(self, newInterval):
         self.interval = newInterval
     
-        
+#this will represent an interactable set of points
+class classPoints():
+
+    def __init__(self, state, x, y):
+        self.state = state# which way it is facing - 0 for straight, 1 for diversion
+        self.x = x#x position on the layout
+        self.y = y#y osition of the layout
+
+    def setState(self):
+        self.state = 1 - self.state # toggle state
+
+    def getState(self):
+        return self.state
+
+    def getPosition(self):
+        return self.x, self.y
+
+
+#this will represent an interactable signal
+class classSignal():
+
+    def __init__(self, state, x, y):
+        self.state = state# what is it? 0 for red, 1 for green
+        self.x = x#x position on the layout
+        self.y = y#y position on the layout
+
+    def setState(self):
+        self.state = 1 - self.state#toggle state
+
+    def getState(self):
+        return self.state
+
+    def getPosition(self):
+        return self.x, self.y
+
+    
 #will print text as the user wishes
 def write(text, font, colour, xpos, ypos):
     font = font
@@ -1706,13 +2126,36 @@ def write(text, font, colour, xpos, ypos):
     screen.blit(textSurface, (xpos, ypos))
 
 def saveGame():
-    global researchProgress
-    with open("saveData/researched.txt", "w", newline="") as fileOut:
-        writer=csv.writer(fileOut)
-        for a in range(1):
-            for b in range(33):
-                writer.writerow(researchProgress[b])
+    global money # done
+    global incidentRecoverySpeed # done
+    global SPADRisk # done
+    global signalPriceBoost # done
+    global incidentRisk # done
+    global platPrice # done
+    global platCount # done
+    global numberTrains # done
+    global timeHour # done
+    global timeMinute # done
+    global timeSecond # done
+    global numberEntry # done
+    global numberContractsUnlocked # done
+    global rewardTrain # done
+    global pointsUnlocked # done
+    global signalsUnlocked # done
+    global TPWSUnlocked # done
 
+    with open("saveData/variables.txt", "w", newline="") as fileOut:
+        variablesList = [str(money), str(incidentRecoverySpeed), str(SPADRisk), str(signalPriceBoost), str(incidentRisk), str(platPrice), str(platCount), str(numberTrains), str(timeHour), str(timeMinute), str(timeSecond), str(numberEntry), str(numberContractsUnlocked), str(rewardTrain), str(pointsUnlocked), str(signalsUnlocked), str(TPWSUnlocked), str(entryTutorialRequired)]
+        writer=csv.writer(fileOut)
+        for i in range(0, len(variablesList)):
+            fileOut.write(variablesList[i])
+            writer.writerow("")
+
+def updateMoney():
+    global money
+    pygame.draw.rect(screen, menuScreenColour, [0, 0, 300, 100])
+    write("£" + str(money).zfill(4), buttonFont, gold, 10, 10)
+    pygame.display.update()
 
 #This is where the game is executed
 def gameLoop():
@@ -1731,19 +2174,48 @@ def gameLoop():
                 running = False
     pygame.quit()
 
-money = 300000 #in pounds
-incidentRecoverySpeed = 1 #as a mutiplier
-SPADRisk = 85 #as a percentage
-signalPriceBoost = 0 #as a percentage
-incidentRisk = 65 #as a percentage
-platPrice = 5000 #price of a new platform at the start of the game
-platCount = 0
-numberTrains = 0
-timeHour = 4
-timeMinute = 0
-timeSecond = 0
-numberEntry = 4
-numberContractsUnlocked = 17
-rewardTrain = 500
+variablesList = []
+with open("saveData/variables.txt", "r") as fileOut:
+    reader = csv.reader(fileOut)
+    for row in reader:
+        value = str(row)
+        value = value.replace("'","")
+        value = value.replace("[", "")
+        value = value.replace("]", "")
+        variablesList.append(value)
+money = int(variablesList[0]) #in pounds
+incidentRecoverySpeed = int(variablesList[1]) #as a mutiplier
+SPADRisk = int(variablesList[2]) #as a percentage
+signalPriceBoost = int(variablesList[3]) #as a percentage
+incidentRisk = int(variablesList[4]) #as a percentage
+platPrice = int(variablesList[5]) #price of a new platform at the start of the game
+platCount = int(variablesList[6]) #number of platforms
+numberTrains = int(variablesList[7]) #number of available trains to be put in the timetable
+timeHour = int(variablesList[8]) #hour hand
+timeMinute = int(variablesList[9]) #minute hand
+timeSecond = int(variablesList[10]) #second hand
+numberEntry = int(variablesList[11]) #number of entry points
+numberContractsUnlocked = int(variablesList[12]) #number of contrants unlocked...
+rewardTrain = int(variablesList[13]) #money earned per train
+if variablesList[14] == "True":
+    pointsUnlocked = True #are points unlocked?
+else:
+    pointsUnlocked = False
+if variablesList[15] == "True":
+    signalsUnlocked = True #are signals unlocked?
+else:
+    signalsUnlocked = False
+if variablesList[16] == "True":
+    TPWSUnlocked = True #is TPWS unlocked?
+else:
+    TPWSUnlocked = False
+if variablesList[17] == "True":
+    entryTutorialRequired = True
+else:
+    entryTutorialRequired = False
+platformTutorial = False
+timetableTutorial = False
+sendOffTutorial = False
+incidentTutorial = False
 
 gameLoop()
