@@ -199,6 +199,7 @@ def game():
     global platformTutorial
     global timetableTutorial
     global sendOffTimetable
+    global incidentTutorial
     multiplier = 1 # speed of the clock
     #this is mainly for debugging purposes, may not be necessary in the final build
     print("Starting Game")
@@ -322,10 +323,11 @@ def game():
         write("and a button that will skip time to the next arriving train in the", clockTextFont, white, 0, 450)
         write("timetable (if you don't want to wait)",clockTextFont, white, 0, 500)
         pygame.display.update()
-        time.sleep(12.5)
+        time.sleep(20)
         pygame.draw.rect(screen, black, [0, 400, 1280, 200])
         pygame.display.update()
         sendOfftutorial = False
+        incidentTutorial = True
     elif timetableTutorial:
         pygame.draw.rect(screen, black, [0, 400, 1200, 200])
         write("Now that we have the trains, we need to schedule them.", clockTextFont, white, 100, 400)
@@ -334,7 +336,7 @@ def game():
     elif platformTutorial:
         pygame.draw.rect(screen, black, [0, 400, 1200, 200])
         write("We have the track, now we need the trains. Go to CONTRACTS", clockTextFont, white, 100, 400)
-        write("and get a contract fron NORTH TRAINS. Come back here when done.", clockTextFont, white, 100, 450)
+        write("and get a contract from NORTH TRAINS. Come back here when done.", clockTextFont, white, 100, 450)
         pygame.display.update()
     elif entryTutorialRequired:
         write("Hello", clockTextFont, white, 600, 400)
@@ -489,11 +491,13 @@ def forwardTime(hours, minutes, seconds):
             if timetableArray[j][temp] == "1":
                 time = temp
                 time = time * (3600 / 4)
-                hours = (time // 3600) - 1
+                hours = (time // 3600)
                 time = time - (hours * 3600)
                 minutes = (time / 60) - 1
+                if minutes == 59:
+                    hours = hours - 1
                 timeHour = int(hours + 4)
-                timeMinute = int(minutes)
+                timeMinute = int(minutes % 60)
                 timeSecond = 57
                 return "ends the function"
         temp = (temp + 1) % 80
@@ -1184,6 +1188,7 @@ def buildEntry(returnButton):
     if entryTutorialRequired:
         pygame.draw.rect(screen, black, [400, 400, 1000, 100])
         write("Now you can buy an entry point. Trains will enter your station from these", clockTextFont, white, 50, 400)
+        write("One entry point has already been bought on the left. Buy another from the right", clockTextFont, white, 0, 500)
         pygame.display.update()
     #need to chec whether the cursor is in the buildable area.
     while notFinished:
@@ -1824,6 +1829,7 @@ class train:
         global incidentRisk
         global incidentRecoverySpeed
         global money
+        global incidentTutorial
 
         if self.train[0] == 1280 or self.train[0] == -40:
             self.finished = True
@@ -1840,6 +1846,10 @@ class train:
         if self.incident or trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] == "0":
             print(str(self.train))
             pygame.draw.rect(screen, red, self.train)
+            if incidentTutorial:
+                write("If a train has an incident, it will turn red.", clockTextFont, white, 0, 400)
+                write("Simply hover over it until it briefly turns yellow and it will be", clockTextFont, white, 0, 450)
+                write("cleared eventually. To delete this message, go to another screen and come back.", clockTextFont, white, 0, 500)
             pygame.display.update()
             if self.recovering:
                 self.timeRecovery = self.timeRecovery / (2*incidentRecoverySpeed)
@@ -2210,5 +2220,6 @@ else:
 platformTutorial = False
 timetableTutorial = False
 sendOffTutorial = False
+incidentTutorial = False
 
 gameLoop()
