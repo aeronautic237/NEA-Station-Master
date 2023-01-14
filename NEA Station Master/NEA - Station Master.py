@@ -52,10 +52,11 @@ timetableArray = [[0 for x in range(80)] for y in range(8)]#creates an array in 
 #defing the various functions of the game here
 
 #this will increment the clock - needs to be called every second (or more depending on the multiplier
-def incrementClock(trainsList, trainMovementList, timetableArray, multiplier, trackLayout, pointsList, signalList):
+def incrementClock(trainsList, trainMovementList, timetableArray, trackLayout, pointsList, signalList):
     global timeHour
     global timeMinute
     global timeSecond
+    global multiplier
     int(timeSecond)
     int(timeHour)
     int(timeMinute)
@@ -198,8 +199,9 @@ def game():
     global entryTutorialRequired
     global platformTutorial
     global timetableTutorial
-    global sendOffTimetable
+    global sendOffTutorial
     global incidentTutorial
+    global multiplier
     multiplier = 1 # speed of the clock
     #this is mainly for debugging purposes, may not be necessary in the final build
     print("Starting Game")
@@ -316,17 +318,17 @@ def game():
     trainsList = []
     trainMovementList = []
     #tempTrain = train(0, 295, 1)
-    incrementer = RepeatedTimer(multiplier, incrementClock, trainsList, trainMovementList, timetableArray, multiplier, trackLayout, pointsList, signalList)
+    incrementer = RepeatedTimer(multiplier, incrementClock, trainsList, trainMovementList, timetableArray, trackLayout, pointsList, signalList)
     if sendOffTutorial:
+        sendOfftutorial = False
         pygame.draw.rect(screen, black, [0, 400, 1000, 100])
         write("That concludes this tutorial. Above you will find clock speed controls,", clockTextFont, white, 0, 400)
         write("and a button that will skip time to the next arriving train in the", clockTextFont, white, 0, 450)
         write("timetable (if you don't want to wait)",clockTextFont, white, 0, 500)
         pygame.display.update()
-        time.sleep(12.5)
+        time.sleep(20)
         pygame.draw.rect(screen, black, [0, 400, 1280, 200])
         pygame.display.update()
-        sendOfftutorial = False
         incidentTutorial = True
     elif timetableTutorial:
         pygame.draw.rect(screen, black, [0, 400, 1200, 200])
@@ -336,7 +338,7 @@ def game():
     elif platformTutorial:
         pygame.draw.rect(screen, black, [0, 400, 1200, 200])
         write("We have the track, now we need the trains. Go to CONTRACTS", clockTextFont, white, 100, 400)
-        write("and get a contract fron NORTH TRAINS. Come back here when done.", clockTextFont, white, 100, 450)
+        write("and get a contract from NORTH TRAINS. Come back here when done.", clockTextFont, white, 100, 450)
         pygame.display.update()
     elif entryTutorialRequired:
         write("Hello", clockTextFont, white, 600, 400)
@@ -486,19 +488,38 @@ def forwardTime(hours, minutes, seconds):
     time = time + (hours * 3600)
     time = int(time // (3600 / 4))
     temp = int((time + 1) % 80)
+    time = int((time) % 80)
     while temp != time:
         for j in range(0, len(timetableArray)):
             if timetableArray[j][temp] == "1":
                 time = temp
                 time = time * (3600 / 4)
-                hours = (time // 3600) - 1
+                hours = (time // 3600)
                 time = time - (hours * 3600)
-                minutes = (time / 60) - 1
+                minutes = ((time / 60) - 1) % 60
+                print(minutes)
+                if minutes == 59:
+                    hours = hours - 1
                 timeHour = int(hours + 4)
                 timeMinute = int(minutes)
                 timeSecond = 57
                 return "ends the function"
         temp = (temp + 1) % 80
+        print("DEBUG010")
+    for j in range(0, len(timetableArray)):
+        if timetableArray[j][temp] == "1":
+            time = temp
+            time = time * (3600 / 4)
+            hours = (time // 3600)
+            time = time - (hours * 3600)
+            minutes = ((time / 60) - 1) % 60
+            print(minutes)
+            if minutes == 59:
+                hours = hours - 1
+            timeHour = int(hours + 4)
+            timeMinute = int(minutes)
+            timeSecond = 57
+            return "ends the function"
 
 def research():
 
@@ -587,7 +608,7 @@ def research():
                                 #apply effects
                                 if effect1 == "IR":
                                     global incidentRecoverySpeed
-                                    incidentRecoverySpeed = incidentRecoverySpeed/2 #increase the speed at which incidents are dealt with
+                                    incidentRecoverySpeed = incidentRecoverySpeed*2 #increase the speed at which incidents are dealt with
                                 elif effect1 == "5IR":
                                     global incidentRisk
                                     incidentRisk = 15 #reduce risk of an incident occuring by 50%
@@ -1024,7 +1045,7 @@ def buildTrack(returnButton):
                         money = money + 700 #You will not get a full refund for destroying track
                         updateMoney()
                     #condition if the selected quare has no track in it already.
-                    elif trackLayout[storeCoordy-5][storeCoordx-1] == "0":
+                    elif trackLayout[storeCoordy-5][storeCoordx-1] == "0" and money >= 800:
                         trackLayout[storeCoordy-5][storeCoordx-1] = "1"
                         print(trackLayout) #DEBUG
                         money = money - 800 #costs 800 to build track
@@ -1111,20 +1132,20 @@ def buildPoints(returnButton):
                 print(storeCoordx) # DEBUG
                 if event.type == pygame.MOUSEBUTTONUP and event.button == 1:#checks for a left click
                     #condition if the square has a track in it already
-                    if trackLayout[storeCoordy-5][storeCoordx-1] == "1" or trackLayout[storeCoordy-5][storeCoordx-1] == "3":
+                    if money >= 1000 and (trackLayout[storeCoordy-5][storeCoordx-1] == "1" or trackLayout[storeCoordy-5][storeCoordx-1] == "3"):
                         trackLayout[storeCoordy-5][storeCoordx-1] = "2"
                         print(trackLayout) #DEBUG
-                        money = money + 900 #You will not get a full refund for destroying track
+                        money = money - 1000 #You will not get a full refund for destroying track
                         updateMoney()
                     #condition if the selected quare has a set of points in it already
                     elif trackLayout[storeCoordy-5][storeCoordx-1] == "2":
                         trackLayout[storeCoordy-5][storeCoordx-1] = "1"
                         print(trackLayout) #DEBUG
-                        money = money - 1000 #costs 1000 to build points
+                        money = money + 900 #costs 1000 to build points
                         updateMoney()
                 elif event.type == pygame.MOUSEBUTTONUP and event.button == 3: #checks for a right click
                     #condition if the square has a track in it already
-                    if trackLayout[storeCoordy-5][storeCoordx-1] == "1" or trackLayout[storeCoordy-5][storeCoordx-1] == "2":
+                    if money >= 1000 and (trackLayout[storeCoordy-5][storeCoordx-1] == "1" or trackLayout[storeCoordy-5][storeCoordx-1] == "2"):
                         trackLayout[storeCoordy-5][storeCoordx-1] = "3"
                         print(trackLayout) # DEBUG
                         money = money - 1000
@@ -1186,61 +1207,71 @@ def buildEntry(returnButton):
     if entryTutorialRequired:
         pygame.draw.rect(screen, black, [400, 400, 1000, 100])
         write("Now you can buy an entry point. Trains will enter your station from these", clockTextFont, white, 50, 400)
+        write("One entry point has already been bought on the left.", clockTextFont, white, 0, 450)
+        write("Buy another from the right.", clockTextFont, white, 0, 500)
         pygame.display.update()
     #need to chec whether the cursor is in the buildable area.
     while notFinished:
         for event in pygame.event.get():
             if entryButton1.buttonCoords.collidepoint((pygame.mouse.get_pos())):
                 entryButton1.changeButtonColour(menuScreenColour)
-                if event.type == pygame.MOUSEBUTTONUP:
+                if event.type == pygame.MOUSEBUTTONUP and money > 2500 and entryButton1.getState() == "0":
                     entryButton1.setState()
                     money = money - 2500
+                    numberEntry += 1
                     updateMoney()
             elif entryButton2.buttonCoords.collidepoint((pygame.mouse.get_pos())) and entryButton5.getState() == "1":
                 entryButton2.changeButtonColour(menuScreenColour)
-                if event.type == pygame.MOUSEBUTTONUP:
+                if event.type == pygame.MOUSEBUTTONUP and money > 2500 and entryButton2.getState() == "0":
                     entryButton2.setState()
                     money = money - 2500
+                    numberEntry += 1
                     updateMoney()
             elif entryButton3.buttonCoords.collidepoint((pygame.mouse.get_pos())) and entryButton6.getState() == "1":
                 entryButton3.changeButtonColour(menuScreenColour)
-                if event.type == pygame.MOUSEBUTTONUP:
+                if event.type == pygame.MOUSEBUTTONUP and money > 2500 and entryButton3.getState() == "0":
                     entryButton3.setState()
                     money = money - 2500
+                    numberEntry += 1
                     updateMoney()
             elif entryButton4.buttonCoords.collidepoint((pygame.mouse.get_pos())) and entryButton7.getState() == "1":
                 entryButton4.changeButtonColour(menuScreenColour)
-                if event.type == pygame.MOUSEBUTTONUP:
+                if event.type == pygame.MOUSEBUTTONUP and money > 2500 and entryButton4.getState() == "0":
                     entryButton4.setState()
                     money = money - 2500
+                    numberEntry += 1
                     updateMoney()
             elif entryButton5.buttonCoords.collidepoint((pygame.mouse.get_pos())) and entryButton1.getState() == "1":
                 entryButton5.changeButtonColour(menuScreenColour)
-                if event.type == pygame.MOUSEBUTTONUP:
+                if event.type == pygame.MOUSEBUTTONUP and money > 2500 and entryButton5.getState() == "0":
                     entryButton5.setState()
                     money = money - 2500
+                    numberEntry += 1
                     updateMoney()
                     if entryTutorialRequired:
-                        pygame.draw.rect(screen, black, [00, 400, 1240, 100])
+                        pygame.draw.rect(screen, black, [00, 400, 1240, 200])
                         write("Well done. Now press the return button", clockTextFont, white, 400, 400)
                         pygame.display.update()
             elif entryButton6.buttonCoords.collidepoint((pygame.mouse.get_pos())) and entryButton2.getState() == "1":
                 entryButton6.changeButtonColour(menuScreenColour)
-                if event.type == pygame.MOUSEBUTTONUP:
+                if event.type == pygame.MOUSEBUTTONUP and money > 2500 and entryButton6.getState() == "0":
                     entryButton6.setState()
                     money = money - 2500
+                    numberEntry += 1
                     updateMoney()
             elif entryButton7.buttonCoords.collidepoint((pygame.mouse.get_pos())) and entryButton3.getState() == "1":
                 entryButton7.changeButtonColour(menuScreenColour)
-                if event.type == pygame.MOUSEBUTTONUP:
+                if event.type == pygame.MOUSEBUTTONUP and money > 2500 and entryButton7.getState() == "0":
                     entryButton7.setState()
                     money = money - 2500
+                    numberEntry += 1
                     updateMoney()
             elif entryButton8.buttonCoords.collidepoint((pygame.mouse.get_pos())) and entryButton4.getState() == "1":
                 entryButton8.changeButtonColour(menuScreenColour)
-                if event.type == pygame.MOUSEBUTTONUP:
+                if event.type == pygame.MOUSEBUTTONUP and money > 2500 and entryButton8.getState() == "0":
                     entryButton8.setState()
                     money = money - 2500
+                    numberEntry += 1
                     updateMoney()
                 #check for whether the return button was hovered over/clicked
             elif returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
@@ -1249,7 +1280,6 @@ def buildEntry(returnButton):
                     with open("saveData/entryPoints.txt", "w", newline="") as file:
                         writer = csv.writer(file)
                         writer.writerows(entryLayout)
-                        numberEntry += 1
                     pygame.draw.rect(screen, menuScreenColour, [300, 620, 500, 100])
                     shop()
             elif event.type == pygame.QUIT:
@@ -1377,20 +1407,20 @@ def purchaseSignal(returnButton):
                 print(storeCoordx) # DEBUG
                 if event.type == pygame.MOUSEBUTTONUP and event.button == 1:#checks for a left click
                     #condition if the square has a signal in it already
-                    if trackLayout[storeCoordy-5][storeCoordx-1] == "1" or trackLayout[storeCoordy-5][storeCoordx-1] == "6":
+                    if money >= 700 and (trackLayout[storeCoordy-5][storeCoordx-1] == "1" or trackLayout[storeCoordy-5][storeCoordx-1] == "6"):
                         trackLayout[storeCoordy-5][storeCoordx-1] = "5"
                         print(trackLayout) #DEBUG
-                        money = money + 600 #You will not get a full refund for destroying signal
+                        money = money - 700 #You will not get a full refund for destroying signal
                         updateMoney()
                     #condition if the selected quare has a signal in it already
                     elif trackLayout[storeCoordy-5][storeCoordx-1] == "5":
                         trackLayout[storeCoordy-5][storeCoordx-1] = "1"
                         print(trackLayout) #DEBUG
-                        money = money - 700 #costs 700 to build signal
+                        money = money + 600 #costs 700 to build signal
                         updateMoney()
                 elif event.type == pygame.MOUSEBUTTONUP and event.button == 3: #checks for a right click
                     #condition if the square has a signal in it already
-                    if trackLayout[storeCoordy-5][storeCoordx-1] == "1" or trackLayout[storeCoordy-5][storeCoordx-1] == "5":
+                    if money >= 700 and (trackLayout[storeCoordy-5][storeCoordx-1] == "1" or trackLayout[storeCoordy-5][storeCoordx-1] == "5"):
                         trackLayout[storeCoordy-5][storeCoordx-1] = "6"
                         print(trackLayout) # DEBUG
                         money = money - 700
@@ -1439,6 +1469,7 @@ def contracts(returnButton):
     if numberContractsUnlocked > 15:
         tube.drawButton()
         SEHS.drawButton()
+    write("Unlock Contracts in Research and Development", clockTextFont, white, 300, 500)
     write("Next contract costs £" + str(int(1000 + (numberContractsUnlocked * 250))), clockTextFont, white, 435, 550)
     pygame.draw.rect(screen, menuScreenColour, [0, 620, 1000, 100])
     pygame.display.update()#update screens.
@@ -1774,7 +1805,7 @@ def timetableScreen(returnButton):
                         remainingTrains = remainingTrains + 1
                 storeCoordx, storeCoordy = int((position[0]/16)), int((position[1]/42) - 3)# stores the coordinates of the mouse against the .txt grid ()
                 #will tell the user how many trains they have left
-                pygame.draw.rect(screen, black, [50, 540, 100, 60])
+                pygame.draw.rect(screen, black, [50, 540, 00, 1280])
                 write(str(remainingTrains) + " trains remaining", clockFont, white, 50, 540)
 
             if returnButton.buttonCoords.collidepoint((pygame.mouse.get_pos())):
@@ -1828,7 +1859,7 @@ class train:
         global money
         global incidentTutorial
 
-        if self.train[0] == 1280 or self.train[0] == -40:
+        if self.train[0] >= 1280 or self.train[0] <= -40:
             self.finished = True
             if self.visitedPlat:
                 global rewardTrain
@@ -1845,7 +1876,9 @@ class train:
             pygame.draw.rect(screen, red, self.train)
             if incidentTutorial:
                 write("If a train has an incident, it will turn red.", clockTextFont, white, 0, 400)
-                write("Simply hover over it until it briefly turns yellow and it will be cleared eventually", clockTextFont, white, 0, 500)
+                write("Simply hover over it until it briefly turns yellow and it will be", clockTextFont, white, 0, 450)
+                write("cleared eventually. To delete this message, go to another screen and come back.", clockTextFont, white, 0, 500)
+                incidentTutorial = False
             pygame.display.update()
             if self.recovering:
                 self.timeRecovery = self.timeRecovery / (2*incidentRecoverySpeed)
@@ -1854,7 +1887,10 @@ class train:
                 pygame.draw.rect(screen, gold, self.train)
                 self.recovering = True
             if self.timeRecovery <= 1:
-                self.destroyTrain()
+                if trackLayout[(self.train[1]//40)-5][(self.train[0]//40)-1] == "0":
+                    pygame.draw.rect(screen, black, self.train)
+                else:
+                    self.destroyTrain()
                 self.finished = True
             self.incident = True
         
@@ -2217,5 +2253,6 @@ platformTutorial = False
 timetableTutorial = False
 sendOffTutorial = False
 incidentTutorial = False
+multiplier = 1
 
 gameLoop()
